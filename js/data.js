@@ -142,9 +142,10 @@ window.SITE = {
   heroImage: "",
 
   // THEME 2 HOME: Bhagwan Neminath ki murti ki photo, jo bhamandal ke andar dikhti hai.
-  // Photo ko images/ folder mein "neminath.png" naam se daalo (jab tak photo nahi hai, ek sunehri placeholder dikhta hai).
-  // Best: transparent background wali PNG, lagbhag 900 x 1100 pixel.
-  murti: "images/neminath.png",
+  // Photo ko images/ folder mein daalo aur uska naam yahan likho. Hum "neminath.webp" use karte hain (halki file, jaldi khulti hai,
+  // quality wahi). "neminath.png" bhi folder mein rakhi hai (backup). Jab tak photo load nahi hoti tab tak wahan kuch nahi dikhta.
+  // Best: transparent background wali WEBP ya PNG, lagbhag 900 x 1100 pixel.
+  murti: "images/neminath.webp",
   // Namokar mantra (home ke hero ke niche chalta hai). Badalna ho to yahan likho.
   mantraLines: [
     "णमो अरिहंताणं", "णमो सिद्धाणं", "णमो आयरियाणं", "णमो उवज्झायाणं", "णमो लोए सव्वसाहूणं",
@@ -987,25 +988,56 @@ window.TIMELINE = [
   { year: "2026", title: { hi: "SAMPLE: क्षमावाणी और नई योजनाएं", en: "SAMPLE: Kshamavani and new yojanayen" }, text: { hi: "SAMPLE: संत शाला और नई प्रतिमाओं के लिए योजनाएं शुरू।", en: "SAMPLE: Yojanayen for the sant shala and new murtis began." }, photo: "" }
 ];
 
-/* ---------- 9ख-2. Nearby mandirs and tirths (Visit > Nearby page) ----------
-   Ek hi page par do group: mandirs (aas-paas ke mandir) aur tirths (aas-paas ke tirth kshetra).
-   NAYA JODNE KE LIYE: koi ek poori { ... }, copy karke usi group (mandirs ya tirths) mein paste karo. HATANE KE LIYE: poori { ... }, delete.
-   CHHUPANE KE LIYE: usme  hidden: true,  likho.
-   name {hi,en}, distance {hi,en} (jaise "5 km"), address {hi,en}, text {hi,en} (chhota vivaran, chahe to),
-   phone: "9876543210"  (kai number ho to comma se: "98..., 97...")
-   photo: "images/nearby/naam.jpg"  ya  photos: ["images/nearby/a.jpg", "images/nearby/b.jpg"]  (photo pehle chhoti karke images/nearby/ mein daalo)
-   hidePhoto: true,  photo chhupane ke liye.
-   mapLink: "https://maps.app.goo.gl/..."  (ya mapQuery: "mandir ka naam, shehar")  "Nakshe mein dekhein" button ke liye.
-   NOTE: neeche ki entries SAMPLE hain. Asli naam, pata, number likho. */
-window.NEARBY = {
-  mandirs: [
-    { name: { hi: "SAMPLE: पास का जैन मंदिर", en: "SAMPLE: Nearby Jain Mandir" }, distance: { hi: "SAMPLE: 3 किमी", en: "SAMPLE: 3 km" }, address: { hi: "SAMPLE: यहाँ मंदिर का पता लिखें", en: "SAMPLE: Write the mandir address here" }, phone: "", photos: [], mapLink: "" },
-    { name: { hi: "SAMPLE: दूसरा जैन मंदिर", en: "SAMPLE: Another Jain Mandir" }, distance: { hi: "SAMPLE: 8 किमी", en: "SAMPLE: 8 km" }, address: { hi: "SAMPLE: यहाँ मंदिर का पता लिखें", en: "SAMPLE: Write the mandir address here" }, phone: "", photos: [], mapLink: "" }
-  ],
-  tirths: [
-    { name: { hi: "SAMPLE: पास का तीर्थ क्षेत्र", en: "SAMPLE: Nearby Tirth Kshetra" }, distance: { hi: "SAMPLE: 40 किमी", en: "SAMPLE: 40 km" }, address: { hi: "SAMPLE: यहाँ तीर्थ का पता लिखें", en: "SAMPLE: Write the tirth address here" }, phone: "", photos: [], mapLink: "" }
-  ]
-};
+/* ---------- 9ख-2. Nearby (Visit > Nearby page): mandirs, tirths, tourist places ... ----------
+   Page par har GROUP ek alag button (tab) hota hai. Button dabane par sirf usi group ke cards dikhte hain.
+   Neeche 3 group hain: mandirs, tirths, tourist.  Naya group (jaise "Restaurants") chahiye to ek poora group { ... }, copy karo.
+   Group:  id (angrezi, chhota, space nahi), icon (ek emoji), title {hi,en} (button ka naam, chhota rakho), intro {hi,en} (upar ki line, khali chhod sakte ho),
+           hidden: true,  poora group (button) chhupane ke liye,   items: [ cards ]
+   Card:   name {hi,en}, distance {hi,en} (jaise "5 km"), address {hi,en}, text {hi,en} (chhota vivaran),
+           phone: "9876543210"  (kai number: "98..., 97..."),
+           mapLink: "https://maps.app.goo.gl/..."  ya  mapQuery: "naam, shehar"   ("Nakshe mein dekhein" button),
+           photo: "images/nearby/naam.jpg"  ya  photos: ["images/nearby/a.jpg", "images/nearby/b.jpg"]
+           hidePhoto: true,   PHOTO CHHUPI HUI HAI. Photo dikhani ho to ye  hidePhoto: true,  wali line MITA do.
+           hidden: true,   poora card chhupane ke liye.
+   NAYA CARD: koi ek poora card { ... }, copy karke usi group ki items list mein paste karo. HATANE ke liye poori { ... }, delete karo.
+   Har group mein 3 khali card (hidden: true) taiyaar hain: "hidden: true," mita do to dikhne lagenge.
+   NOTE: sab entries SAMPLE hain. Asli naam, pata, number likho. */
+window.NEARBY = [
+  {
+    id: "mandirs", icon: "🛕", title: { hi: "आस-पास के मंदिर", en: "Nearby Mandirs" }, intro: { hi: "", en: "" },
+    items: [
+      { name: { hi: "SAMPLE: पास का जैन मंदिर", en: "SAMPLE: Nearby Jain Mandir" }, distance: { hi: "SAMPLE: 3 किमी", en: "SAMPLE: 3 km" }, address: { hi: "SAMPLE: यहाँ मंदिर का पता लिखें", en: "SAMPLE: Write the mandir address here" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { name: { hi: "SAMPLE: दूसरा जैन मंदिर", en: "SAMPLE: Another Jain Mandir" }, distance: { hi: "SAMPLE: 8 किमी", en: "SAMPLE: 8 km" }, address: { hi: "SAMPLE: यहाँ मंदिर का पता लिखें", en: "SAMPLE: Write the mandir address here" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नया मंदिर", en: "New mandir" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नया मंदिर", en: "New mandir" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नया मंदिर", en: "New mandir" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
+    ]
+  },
+  {
+    id: "tirths", icon: "🙏", title: { hi: "आस-पास के तीर्थ क्षेत्र", en: "Nearby Tirth Kshetras" }, intro: { hi: "", en: "" },
+    items: [
+      { name: { hi: "SAMPLE: पास का तीर्थ क्षेत्र", en: "SAMPLE: Nearby Tirth Kshetra" }, distance: { hi: "SAMPLE: 40 किमी", en: "SAMPLE: 40 km" }, address: { hi: "SAMPLE: यहाँ तीर्थ का पता लिखें", en: "SAMPLE: Write the tirth address here" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नया तीर्थ क्षेत्र", en: "New tirth kshetra" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नया तीर्थ क्षेत्र", en: "New tirth kshetra" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नया तीर्थ क्षेत्र", en: "New tirth kshetra" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
+    ]
+  },
+  {
+    id: "tourist", icon: "🏞️", title: { hi: "घूमने की जगहें", en: "Tourist Places" }, intro: { hi: "", en: "" },
+    items: [
+      { name: { hi: "SAMPLE: घूमने की जगह", en: "SAMPLE: Tourist place" }, distance: { hi: "SAMPLE: 15 किमी", en: "SAMPLE: 15 km" }, address: { hi: "SAMPLE: यहाँ पता लिखें", en: "SAMPLE: Write the address here" }, text: { hi: "SAMPLE: जगह के बारे में एक-दो लाइन।", en: "SAMPLE: One or two lines about the place." }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
+      { hidden: true, name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
+    ]
+  },
+  {
+    hidden: true, id: "extra", icon: "⭐", title: { hi: "और जगहें", en: "More places" }, intro: { hi: "", en: "" },   // spare group: "hidden: true," mita do to ye button dikhega
+    items: [
+      { name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
+    ]
+  }
+];
 
 /* ---------- 9ग. Mandir niyam (Visit page > Mandir niyam / Mandir rules) ----------
    intro: upar ki ek line.  list: har niyam ek { hi, en } line; naya niyam jodne ke liye ek line copy karo, hatane ke liye line delete karo. */
@@ -1033,7 +1065,7 @@ window.SUVIDHA = [
   {
     id: "bhojanshala", pinned: true, icon: "🍽️", color: "orange",
     title: { hi: "भोजनशाला", en: "Bhojanshala" },
-    short: { hi: "मंदिर में शुद्ध भोजन की व्यवस्था है। कूपन राशि ₹100।", en: "Pure, shuddh bhojan is available at the mandir. Coupon: ₹100." },
+    short: { hi: "मंदिर में शुद्ध भोजन की व्यवस्था है। कूपन राशि ₹100 है।", en: "Pure, shuddh bhojan is available at the mandir. Coupon: ₹100." },
     paragraphs: [
       { hi: "मंदिर में शुद्ध भोजन की व्यवस्था है।", en: "Shuddh (pure) bhojan is arranged at the mandir." }
     ],
