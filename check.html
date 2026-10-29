@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Site check</title>
+<style>
+  :root { --ink:#12203a; --line:#dce1e9; --text:#1b2433; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 system-ui, "Segoe UI", "Noto Sans", "Noto Sans Devanagari", sans-serif; color: var(--text); background: #fafaf8; }
+  main { max-width: 820px; margin: 0 auto; padding: 20px; }
+  h1 { font-size: 1.6rem; margin: .2em 0; color: var(--ink); }
+  #summary { font-weight: 700; font-size: 1.15rem; padding: 14px 18px; border-radius: 12px; margin: 16px 0; }
+  .s-ok { background: #dcf1e5; color: #1f7a4d; } .s-warn { background: #fff4e0; color: #8a3b00; } .s-bad { background: #fde4e4; color: #9b1c1c; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; margin: 8px 0; display: flex; gap: 12px; }
+  li b.i { flex: none; width: 1.4em; text-align: center; }
+  li.ok b.i { color: #1f7a4d; } li.warn b.i { color: #b25b00; } li.bad b.i { color: #b42318; }
+  code { background: #eef1f6; padding: 1px 6px; border-radius: 6px; }
+  .hint { color: #566175; font-size: .95rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Site check</h1>
+  <p class="hint">Yeh page <code>js/data.js</code> ko jaanchta hai aur saaf bhasha mein batata hai ki kahan galti hai. Site khaali dikhe ya kuch na dikhe, to pehle yahi kholein.</p>
+  <div id="summary" class="s-warn">Jaanch chal rahi hai…</div>
+  <ul id="out"></ul>
+</main>
+<script>
+(function () {
+  var out = document.getElementById("out"), counts = { ok: 0, warn: 0, bad: 0 };
+  function add(level, msg) {
+    counts[level]++;
+    var li = document.createElement("li"); li.className = level;
+    li.innerHTML = '<b class="i">' + (level === "ok" ? "✔" : level === "warn" ? "!" : "✖") + "</b><span>" + msg + "</span>";
+    out.appendChild(li);
+  }
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+  function finish() {
+    var s = document.getElementById("summary");
+    if (counts.bad) { s.className = "s-bad"; s.textContent = "✖ " + counts.bad + " galti mili. Niche dekhein."; }
+    else if (counts.warn) { s.className = "s-warn"; s.textContent = "Koi galti nahi, par " + counts.warn + " baat par dhyan dein."; }
+    else { s.className = "s-ok"; s.textContent = "✔ Sab theek hai."; }
+  }
+  function validDate(s) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(s))) return false;
+    var d = new Date(s + "T00:00:00Z"); return !isNaN(d) && d.toISOString().slice(0, 10) === s;
+  }
+  function ytKind(s) {
+    s = String(s).trim();
+    if (/^UC[\w-]{22}$/.test(s)) return "channel";
+    if (/[?&]list=[\w-]+/.test(s) && !/[?&]v=/.test(s)) return "playlist";
+    if (/(?:[?&]v=|youtu\.be\/|embed\/|shorts\/|live\/)[\w-]{11}/.test(s) || /^[\w-]{11}$/.test(s)) return "video";
+    if (/^(PL|UU|OL|FL|RD)[\w-]+$/.test(s)) return "playlist";
+    return "";
+  }
+  function exists(url) {
+    return fetch(url, { method: "HEAD", cache: "no-store" }).then(function (r) { return r.ok; }).catch(function () { return false; });
+  }
+  function join(folder, name) { return String(folder || "").replace(/\/+$/, "") + "/" + name; }
+
+  fetch("js/data.js?" + Date.now(), { cache: "no-store" }).then(function (r) {
+    if (!r.ok) throw new Error(r.status); return r.text();
+  }).then(function (text) {
+    /* 1. read each section by itself, so a mistake is found with its line number */
+    var re = /^window\.([A-Z_]+)\s*=/gm, marks = [], m;
+    while ((m = re.exec(text))) marks.push({ name: m[1], idx: m.index });
+    if (!marks.length) { add("bad", "<code>js/data.js</code> mein koi jaankari nahi mili. File khaali ya galat ho sakti hai."); finish(); return; }
+    var failed = 0;
+    marks.forEach(function (mk, i) {
+      var end = i + 1 < marks.length ? marks[i + 1].idx : text.length;
+      var chunk = text.slice(mk.idx, end), startLine = text.slice(0, mk.idx).split("\n").length;
+      var err = null;
+      var prev = window.onerror;
+      window.onerror = function (msg, src, line) { err = { msg: msg, line: line }; return true; };
+      var s = document.createElement("script"); s.text = chunk; document.head.appendChild(s); s.remove();
+      window.onerror = prev;
+      if (err) {
+        failed++;
+        add("bad", "<b>" + mk.name + "</b> wale hisse mein galti hai, lagbhag line <b>" + (err.line ? startLine + err.line - 1 : startLine) + "</b> ke paas (<code>js/data.js</code>).<br><span class='hint'>Aksar yeh hota hai: do items ke beech comma chhoot gaya, koi quote (\") band nahi hua, ya } ] adhura reh gaya. Us line ko pichhli line se milakar dekhein. Samajh na aaye to GitHub mein file ki History se pichhla theek version wapas le aayein.<br>Computer ka sandesh: " + esc(err.msg) + "</span>");
+      }
+    });
+    if (failed) { add("warn", "Jab tak yeh galti theek nahi hoti, baaki jaanch poori nahi ho sakti."); finish(); return; }
+    add("ok", "<code>js/data.js</code> ki likhawat theek hai (" + marks.length + " hisse padhe).");
+
+    var checks = [];
+    var S = window.SITE || {};
+    if (!S.name || !S.name.hi || !S.name.en) add("bad", "Mandir ka naam (<b>SITE.name</b>) Hindi aur English dono mein chahiye.");
+
+    /* 2. dates */
+    function dateList(name, list, keys) {
+      (list || []).forEach(function (x, i) {
+        keys.forEach(function (k) {
+          if (x[k] != null && x[k] !== "" && !validDate(x[k])) add("bad", "<b>" + name + " #" + (i + 1) + "</b>: tarikh <b>" + esc(x[k]) + "</b> galat hai. Aise likhein: <code>2026-11-15</code> (saal-mahina-din).");
+        });
+        if (keys[0] && (x[keys[0]] == null || x[keys[0]] === "")) add("bad", "<b>" + name + " #" + (i + 1) + "</b>: tarikh likhi nahi hai.");
+      });
+    }
+    var G = window.GALLERY || {};
+    dateList("ANNOUNCEMENTS", window.ANNOUNCEMENTS, ["date"]);
+    dateList("EVENTS", window.EVENTS, ["date", "endDate"]);
+    dateList("CALENDAR", window.CALENDAR, ["date"]);
+    dateList("PUNYARJAK", window.PUNYARJAK, ["date"]);
+    dateList("DRAVYA", window.DRAVYA, ["date"]);
+    dateList("GALLERY photos", G.photos, ["date"]);
+    dateList("GALLERY videos", G.videos, ["date"]);
+
+    /* 3. only one language filled */
+    var oneLang = [];
+    (function walk(o, path) {
+      if (!o || typeof o !== "object") return;
+      var keys = Object.keys(o);
+      if (keys.length === 2 && "hi" in o && "en" in o && typeof o.hi === "string" && typeof o.en === "string") {
+        if (!!o.hi.trim() !== !!o.en.trim()) oneLang.push(path + (o.hi.trim() ? " (English khali)" : " (Hindi khali)"));
+        return;
+      }
+      keys.forEach(function (k) { walk(o[k], path ? path + "." + k : k); });
+    })({ SITE: S, YOJANA: window.YOJANA, ANNOUNCEMENTS: window.ANNOUNCEMENTS, EVENTS: window.EVENTS, CALENDAR: window.CALENDAR, GALLERY: G, TEAM: window.TEAM, ABOUT: window.ABOUT, HOWTO: window.HOWTO, DAAN: window.DAAN, RECURRING: window.RECURRING, TRUST: window.TRUST, BANNER: window.BANNER }, "");
+    if (oneLang.length) add("warn", "Yahan sirf ek bhasha bhari hai (doosri bhasha wale ko woh hi dikhega): <br><span class='hint'>" + oneLang.slice(0, 12).map(esc).join("<br>") + (oneLang.length > 12 ? "<br>… aur " + (oneLang.length - 12) + " jagah" : "") + "</span>");
+    else add("ok", "Jahan Hindi aur English dono chahiye, dono bhari hain.");
+
+    /* 4. SAMPLE text still there */
+    var sampleBy = {};
+    marks.forEach(function (mk, i) {
+      var end = i + 1 < marks.length ? marks[i + 1].idx : text.length;
+      var n = (text.slice(mk.idx, end).match(/SAMPLE/g) || []).length;
+      if (n) sampleBy[mk.name] = n;
+    });
+    var sk = Object.keys(sampleBy);
+    if (sk.length) add("warn", "Site public karne se pehle <b>SAMPLE</b> wala text badlein ya hatayein: " + sk.map(function (k) { return k + " (" + sampleBy[k] + ")"; }).join(", ") + ". Tip: <code>js/data.js</code> mein SAMPLE khojein.");
+    else add("ok", "SAMPLE wala koi text nahi bacha.");
+
+    /* 5. timings, links, map */
+    var T = S.timings || {};
+    ["open", "abhishek", "aarti", "close"].forEach(function (k) {
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(T[k] || "")) add("bad", "Samay <b>timings." + k + "</b> galat hai. Aise likhein: <code>06:30</code> ya <code>19:30</code>.");
+    });
+    var L = window.LINKS || S.social || {}, setL = [], badL = [];
+    Object.keys(L).forEach(function (k) { if (L[k]) { (/^https?:\/\//.test(L[k]) ? setL : badL).push(k); } });
+    if (badL.length) add("bad", "Social link <b>" + badL.join(", ") + "</b> <code>https://</code> se shuru hona chahiye.");
+    add(setL.length ? "ok" : "warn", setL.length ? "Social links lage hain: " + setL.join(", ") + "." : "Abhi koi social link nahi lagaya. <code>js/data.js</code> mein sabse upar <b>LINKS</b> mein daalein.");
+    if (S.mapEmbed) add(/^https:\/\/www\.google\.com\/maps\/embed/.test(S.mapEmbed) ? "ok" : "bad", /^https:\/\/www\.google\.com\/maps\/embed/.test(S.mapEmbed) ? "Google Map lagaya hua hai." : "<b>mapEmbed</b> <code>https://www.google.com/maps/embed</code> se shuru hona chahiye. Google Maps ke Embed code ka sirf <code>src=\"...\"</code> wala link daalein.");
+    else if (S.mapQuery) add("ok", "Map jagah ke naam/coordinates se dikhega.");
+    else add("warn", "Map abhi nahi laga hai (<b>mapEmbed</b> ya <b>mapQuery</b> bharein).");
+    if (!S.phone && !S.whatsapp && !S.email) add("warn", "Phone, WhatsApp aur email teeno khali hain.");
+
+    /* 6. gallery */
+    var ids = {};
+    ["photos", "videos"].forEach(function (kind) {
+      (G[kind] || []).forEach(function (a, i) {
+        var label = "<b>GALLERY " + kind + " #" + (i + 1) + (a.id ? " (" + esc(a.id) + ")" : "") + "</b>";
+        if (!a.id) add("bad", label + ": <b>id</b> likhna zaroori hai (chhote English akshar, bina space).");
+        else if (ids[kind + a.id]) add("bad", label + ": yeh <b>id</b> do baar aayi hai. Har album ki alag id rakhein.");
+        else if (!/^[a-z0-9-]+$/.test(a.id)) add("warn", label + ": id mein sirf chhote English akshar, ank aur - rakhein.");
+        ids[kind + a.id] = 1;
+        if (a.hidden) return;
+        if (kind === "photos") {
+          var files = (a.files || []).map(function (f) { return typeof f === "string" ? f : f.file; }).filter(Boolean);
+          if (!files.length && !a.folder && !(a.photos || []).length) add("warn", label + ": na <b>folder</b> hai, na <b>files</b>. Album khaali dikhega.");
+          files.forEach(function (f) {
+            if (/\s|[A-Z]/.test(f)) add("warn", label + ": file ka naam <b>" + esc(f) + "</b> mein space ya bada akshar hai. Chhote akshar aur bina space ka naam rakhein.");
+            checks.push(exists(join(a.folder, f)).then(function (ok) {
+              if (!ok) add("bad", label + ": photo <b>" + esc(join(a.folder, f)) + "</b> GitHub par nahi mili. Naam aur folder dobara dekhein.");
+            }));
+          });
+        } else {
+          (a.items || []).forEach(function (v, j) {
+            if (v.youtube && !ytKind(v.youtube)) add("bad", label + " video " + (j + 1) + ": YouTube link <b>" + esc(v.youtube) + "</b> samajh nahi aaya. Poora link paste karein.");
+            if (v.file) checks.push(exists(join(a.folder, v.file)).then(function (ok) {
+              if (!ok) add("bad", label + ": video file <b>" + esc(join(a.folder, v.file)) + "</b> nahi mili.");
+            }));
+            if (!v.youtube && !v.file) add("bad", label + " video " + (j + 1) + ": <b>youtube</b> ya <b>file</b> likhna zaroori hai.");
+          });
+          if (!(a.items || []).length && !a.folder) add("warn", label + ": abhi koi video nahi hai.");
+        }
+      });
+    });
+    if (!(G.photos || []).length) add("warn", "Photo ka koi album nahi hai.");
+
+    /* 7. folders read automatically */
+    var gi = S.github && S.github.user && S.github.repo ? S.github : (function () {
+      var mt = location.hostname.match(/^([^.]+)\.github\.io$/i); if (!mt) return null;
+      var seg = location.pathname.split("/").filter(Boolean)[0];
+      return { user: mt[1], repo: seg && !/\.html?$/i.test(seg) ? seg : mt[1] + ".github.io" };
+    })();
+    ["photos", "videos"].forEach(function (kind) {
+      (G[kind] || []).filter(function (a) { return !a.hidden && a.folder && (a.auto === true || (!(a.files || a.items || []).length && a.auto !== false)); }).forEach(function (a) {
+        if (!gi) { add("warn", "<b>" + esc(a.id) + "</b> album folder se apne aap photo padhta hai. Yeh jaanch sirf live GitHub site par hoti hai."); return; }
+        checks.push(fetch("https://api.github.com/repos/" + gi.user + "/" + gi.repo + "/contents/" + a.folder.replace(/^\/+|\/+$/g, "")).then(function (r) {
+          if (!r.ok) throw new Error(r.status); return r.json();
+        }).then(function (list) {
+          var n = list.filter(function (x) { return x.type === "file"; }).length;
+          add(n ? "ok" : "warn", "<b>" + esc(a.id) + "</b>: folder <code>" + esc(a.folder) + "</code> mein " + n + " file mili" + (n ? "." : ". Folder khaali hai."));
+        }).catch(function () {
+          add("bad", "<b>" + esc(a.id) + "</b>: folder <code>" + esc(a.folder) + "</code> GitHub par nahi mila (ya <b>github</b> ka user/repo galat hai). Folder ka naam dekhein.");
+        }));
+      });
+    });
+
+    Promise.all(checks).then(finish);
+  }).catch(function (e) {
+    add("bad", "<code>js/data.js</code> khul nahi payi (" + esc(e.message || e) + "). Agar yeh page apne computer par seedha khola hai, to live site ke address par kholein.");
+    finish();
+  });
+})();
+</script>
+</body>
+</html>

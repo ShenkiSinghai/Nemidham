@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Gallery helper</title>
+<style>
+  :root { --ink:#12203a; --gold:#b7821f; --line:#dce1e9; --mist:#eef1f6; --text:#1b2433; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 system-ui, "Segoe UI", "Noto Sans", "Noto Sans Devanagari", sans-serif; color: var(--text); background: #fafaf8; }
+  main { max-width: 820px; margin: 0 auto; padding: 20px; }
+  h1 { font-size: 1.6rem; margin: .2em 0; color: var(--ink); }
+  h2 { font-size: 1.25rem; margin: 0 0 .5em; color: var(--ink); }
+  section { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 20px; margin: 18px 0; }
+  label { display: block; font-weight: 600; margin: 14px 0 4px; }
+  small, .hint { color: #566175; font-weight: 400; }
+  input[type=text], input[type=date], textarea { width: 100%; padding: 10px 12px; font: inherit; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; }
+  textarea { min-height: 110px; }
+  textarea.out { min-height: 220px; font-family: ui-monospace, Consolas, monospace; font-size: .9rem; background: var(--mist); }
+  button { font: inherit; font-weight: 700; padding: 11px 20px; border-radius: 999px; border: 0; background: var(--gold); color: var(--ink); cursor: pointer; margin-top: 12px; }
+  button.line { background: #fff; border: 1.5px solid var(--ink); }
+  .row { display: grid; gap: 12px; }
+  @media (min-width: 640px) { .row.two { grid-template-columns: 1fr 1fr; } }
+  .warn { color: #8a3b00; background: #fff4e0; border: 1px solid #ecd9a6; border-radius: 10px; padding: 8px 12px; margin: 8px 0; }
+  .ok { color: #1f7a4d; }
+  ol { padding-left: 1.2em; } li { margin-bottom: .4em; }
+  code { background: var(--mist); padding: 1px 6px; border-radius: 6px; }
+  .radio label { font-weight: 400; margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Gallery helper</h1>
+  <p>Yeh page aapke liye <code>js/data.js</code> mein paste karne wali lines bana deta hai. Isme kuch upload nahi hota, aur yeh site ke menu mein nahi dikhta. Apne laptop ya phone par is page ko kholein.</p>
+
+  <section id="photo">
+    <h2>1. Photo album banayein</h2>
+    <ol>
+      <li>GitHub par <code>images/gallery/</code> mein naya folder banakar usme photo upload karein (jaise <code>images/gallery/diwali-2026/</code>).</li>
+      <li>Neeche jaankari bharein aur photo chunein.</li>
+      <li>Niklee hui lines copy karein aur <code>js/data.js</code> mein <code>photos: [</code> ke turant baad paste karein.</li>
+    </ol>
+    <div class="row two">
+      <div><label for="p-title-hi">Album ka naam (Hindi)</label><input type="text" id="p-title-hi" placeholder="दिवाली उत्सव"></div>
+      <div><label for="p-title-en">Album ka naam (English)</label><input type="text" id="p-title-en" placeholder="Diwali Utsav"></div>
+      <div><label for="p-id">Chhota naam (English chhote akshar, bina space) <small class="hint">jaise diwali-2026</small></label><input type="text" id="p-id" placeholder="diwali-2026"></div>
+      <div><label for="p-date">Tarikh</label><input type="date" id="p-date"></div>
+    </div>
+    <label for="p-folder">Folder <small class="hint">jahan photo upload ki</small></label>
+    <input type="text" id="p-folder" placeholder="images/gallery/diwali-2026">
+    <div class="radio">
+      <label><input type="radio" name="p-mode" value="list" checked> Photo ke naam likhwana (hamesha chalta hai)</label>
+      <label><input type="radio" name="p-mode" value="auto"> Folder ki saari photo site khud dikhaye (naam likhne ki zaroorat nahi)</label>
+    </div>
+    <div id="p-filebox">
+      <label for="p-files">Photo chunein <small class="hint">sirf naam liye jayenge, kuch upload nahi hoga</small></label>
+      <input type="file" id="p-files" accept="image/*" multiple>
+    </div>
+    <div id="p-warn"></div>
+    <button type="button" id="p-make">Lines banayein</button>
+    <label for="p-out">Yeh copy karein</label>
+    <textarea class="out" id="p-out" readonly></textarea>
+    <button type="button" class="line" data-copy="p-out">Copy karein</button>
+  </section>
+
+  <section id="video">
+    <h2>2. Video album banayein</h2>
+    <ol>
+      <li>Video YouTube par daalein, aur uska link yahan paste karein. Video isi site par chalega.</li>
+      <li>Lines copy karke <code>js/data.js</code> mein <code>videos: [</code> ke turant baad paste karein.</li>
+    </ol>
+    <div class="row two">
+      <div><label for="v-title-hi">Album ka naam (Hindi)</label><input type="text" id="v-title-hi" placeholder="आरती के वीडियो"></div>
+      <div><label for="v-title-en">Album ka naam (English)</label><input type="text" id="v-title-en" placeholder="Aarti videos"></div>
+      <div><label for="v-id">Chhota naam (English chhote akshar, bina space)</label><input type="text" id="v-id" placeholder="aarti-videos"></div>
+      <div><label for="v-date">Tarikh</label><input type="date" id="v-date"></div>
+    </div>
+    <label for="v-links">YouTube link <small class="hint">har line mein ek. Chahein to link ke baad <code>|</code> lagakar naam likhein: <code>https://youtu.be/abc | शाम की आरती</code>. Playlist ka link ya channel ID (UC se shuru) bhi chalega.</small></label>
+    <textarea id="v-links" placeholder="https://youtu.be/xxxxxxxxxxx | शाम की आरती&#10;https://www.youtube.com/playlist?list=PLxxxxxxxx"></textarea>
+    <label for="v-files">Chhoti video file <small class="hint">(vaikalpik, lagbhag 25 MB tak. Pehle GitHub par folder mein upload karein) sirf naam liye jayenge</small></label>
+    <input type="file" id="v-files" accept="video/*" multiple>
+    <label for="v-folder">Video file ka folder <small class="hint">sirf file chunne par zaroori</small></label>
+    <input type="text" id="v-folder" placeholder="images/gallery/videos">
+    <div id="v-warn"></div>
+    <button type="button" id="v-make">Lines banayein</button>
+    <label for="v-out">Yeh copy karein</label>
+    <textarea class="out" id="v-out" readonly></textarea>
+    <button type="button" class="line" data-copy="v-out">Copy karein</button>
+  </section>
+</main>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function q(s) { return JSON.stringify(String(s)); }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function warn(box, list) { box.innerHTML = list.map(function (w) { return '<div class="warn">' + w + "</div>"; }).join(""); }
+  $("p-date").value = today(); $("v-date").value = today();
+
+  $("p-title-en").addEventListener("input", function () {
+    if (!$("p-id").dataset.touched) { $("p-id").value = slug(this.value); }
+    if (!$("p-folder").dataset.touched) { $("p-folder").value = $("p-id").value ? "images/gallery/" + $("p-id").value : ""; }
+  });
+  $("p-id").addEventListener("input", function () {
+    this.dataset.touched = "1";
+    if (!$("p-folder").dataset.touched) { $("p-folder").value = this.value ? "images/gallery/" + this.value : ""; }
+  });
+  $("p-folder").addEventListener("input", function () { this.dataset.touched = "1"; });
+  $("v-title-en").addEventListener("input", function () { if (!$("v-id").dataset.touched) $("v-id").value = slug(this.value); });
+  $("v-id").addEventListener("input", function () { this.dataset.touched = "1"; });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="p-mode"]'), function (r) {
+    r.addEventListener("change", function () { $("p-filebox").style.display = r.value === "auto" && r.checked ? "none" : ""; });
+  });
+
+  function fileWarnings(names) {
+    var w = [];
+    var bad = names.filter(function (n) { return /\s/.test(n) || /[A-Z]/.test(n) || /[^\x00-\x7F]/.test(n); });
+    if (bad.length) w.push("Is naam mein space, bada akshar ya Hindi akshar hai: <b>" + bad.slice(0, 5).join(", ") + (bad.length > 5 ? " ..." : "") + "</b>. GitHub par upload karne se pehle naam chhote English akshar aur bina space ke kar lein (jaise <code>aarti-1.jpg</code>), warna photo na dikhne ka khatra hai.");
+    return w;
+  }
+
+  $("p-make").addEventListener("click", function () {
+    var id = $("p-id").value.trim(), folder = $("p-folder").value.trim().replace(/^\/+|\/+$/g, "");
+    var mode = document.querySelector('input[name="p-mode"]:checked').value;
+    var names = Array.prototype.map.call($("p-files").files, function (f) { return f.name; }).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+    var w = [];
+    if (!id) w.push("Chhota naam likhein.");
+    if (!folder) w.push("Folder likhein.");
+    if (mode === "list" && !names.length) w.push("Photo chunein, ya 'folder ki saari photo site khud dikhaye' wala vikalp chunein.");
+    if (mode === "list") w = w.concat(fileWarnings(names));
+    warn($("p-warn"), w);
+    if (!id || !folder || (mode === "list" && !names.length)) { $("p-out").value = ""; return; }
+    var out = "    {\n      id: " + q(id) + ", date: " + q($("p-date").value || today()) + ",\n" +
+      "      title: { hi: " + q($("p-title-hi").value.trim()) + ", en: " + q($("p-title-en").value.trim()) + " },\n" +
+      "      description: { hi: \"\", en: \"\" },\n      folder: " + q(folder) + ",\n";
+    if (mode === "auto") out += "      auto: true\n    },\n";
+    else out += "      files: [\n" + names.map(function (n) { return "        " + q(n); }).join(",\n") + "\n      ]\n    },\n";
+    $("p-out").value = out;
+  });
+
+  function ytKind(s) {
+    s = s.trim();
+    if (/^UC[\w-]{22}$/.test(s)) return "channel";
+    if (/[?&]list=[\w-]+/.test(s) && !/[?&]v=/.test(s)) return "playlist";
+    if (/(?:[?&]v=|youtu\.be\/|embed\/|shorts\/|live\/)[\w-]{11}/.test(s) || /^[\w-]{11}$/.test(s)) return "video";
+    if (/^(PL|UU|OL|FL|RD)[\w-]+$/.test(s)) return "playlist";
+    return "";
+  }
+
+  $("v-make").addEventListener("click", function () {
+    var id = $("v-id").value.trim(), w = [], items = [];
+    $("v-links").value.split(/\r?\n/).forEach(function (line, i) {
+      line = line.trim(); if (!line) return;
+      var parts = line.split("|"), link = parts[0].trim(), name = (parts[1] || "").trim();
+      if (!ytKind(link)) { w.push("Line " + (i + 1) + " ka link samajh nahi aaya: <b>" + link.replace(/</g, "&lt;") + "</b>. Poora YouTube link paste karein."); return; }
+      items.push("        { youtube: " + q(link) + ", title: { hi: " + q(name) + ", en: " + q(name) + " } }");
+    });
+    var files = Array.prototype.map.call($("v-files").files, function (f) { return f.name; }).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+    var folder = $("v-folder").value.trim().replace(/^\/+|\/+$/g, "");
+    if (files.length && !folder) w.push("Video file ke liye folder likhein.");
+    if (files.length) w = w.concat(fileWarnings(files));
+    if (files.length && folder) files.forEach(function (n) { items.push("        { file: " + q(n) + ", title: { hi: \"\", en: \"\" } }"); });
+    if (!id) w.push("Chhota naam likhein.");
+    if (!items.length) w.push("Kam se kam ek YouTube link ya video file chahiye.");
+    warn($("v-warn"), w);
+    if (!id || !items.length) { $("v-out").value = ""; return; }
+    $("v-out").value = "    {\n      id: " + q(id) + ", date: " + q($("v-date").value || today()) + ",\n" +
+      "      title: { hi: " + q($("v-title-hi").value.trim()) + ", en: " + q($("v-title-en").value.trim()) + " },\n" +
+      "      description: { hi: \"\", en: \"\" },\n" + (files.length && folder ? "      folder: " + q(folder) + ",\n" : "") +
+      "      items: [\n" + items.join(",\n") + "\n      ]\n    },\n";
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
+    b.addEventListener("click", function () {
+      var ta = $(b.getAttribute("data-copy"));
+      if (!ta.value) return;
+      ta.select();
+      var done = function () { var t = b.textContent; b.textContent = "Copy ho gaya"; setTimeout(function () { b.textContent = t; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, function () { document.execCommand("copy"); done(); });
+      else { document.execCommand("copy"); done(); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
