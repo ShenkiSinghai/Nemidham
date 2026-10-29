@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jain symbol">
+<circle cx="32" cy="32" r="32" fill="#12203a"/>
+<g transform="translate(0,3)" fill="#e3b658" stroke="none">
+<path d="M19 8 C22 17 42 17 45 8 C40 13 24 13 19 8 Z"/>
+<circle cx="32" cy="4.6" r="1.9"/>
+<circle cx="26" cy="21" r="1.8"/><circle cx="32" cy="21" r="1.8"/><circle cx="38" cy="21" r="1.8"/>
+<circle cx="26.5" cy="34" r="1.5"/><circle cx="37.5" cy="34" r="1.5"/><circle cx="26.5" cy="46" r="1.5"/><circle cx="37.5" cy="46" r="1.5"/>
+</g>
+<g transform="translate(0,3)" fill="none" stroke="#e3b658" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<path d="M32 28 V52 M20 40 H44 M32 28 H40 M44 40 V48 M32 52 H24 M20 40 V32"/>
+</g>
+</svg>
