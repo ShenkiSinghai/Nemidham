@@ -1,0 +1,507 @@
+/* THEME 2 — Nemidham (inspired by the look of nilkanthdham.org: midnight purple + temple gold + ivory,
+   Cinzel / Cormorant / Tiro Devanagari fonts, slow rotating mandala, floating petals, gold pill buttons).
+   This file sits on top of style.css. To get Theme 1 back, remove the line that loads theme2.css from the HTML pages.
+   Colours are in :root just below; change them once and the whole site follows. */
+
+:root {
+  --midnight: #0C0816; --midnight-blue: #1A1330; --midnight-soft: #2A1F48;
+  --saffron: #C4541F; --saffron-deep: #8B3A14; --sindoor: #9B1B1B;
+  --gold-l: #E8D5A0; --gold-d: #6E5426;
+  --ivory: #F6EDD8; --ivory-warm: #FAF4E4; --cream: #FCF9F2;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+
+  --ink: #0C0816; --ink-2: #8B3A14;
+  --gold: #C9A961; --gold-soft: #E8D5A0; --gold-ink: #6E5426;
+  --btn-gold: #C9A961; --btn-gold-hover: #E8D5A0;
+  --paper: #FCF9F2; --mist: #F6EDD8; --line: #E7DABB;
+  --text: #2f2018; --muted: #5d4733; --ok: #1f7a4d;
+  --surface: #FFFDF8; --surface-2: #FFFDF8;
+  --shadow: rgba(43, 24, 16, .16); --shadow-soft: rgba(43, 24, 16, .07);
+  --ink-text: #2B1810; --sel-bg: #8B3A14; --sel-fg: #FAF4E4;
+  --card-bg: linear-gradient(180deg, #FFFDF8 0%, #FAF4E4 100%);
+  --card-bd: rgba(201, 169, 97, .38);
+  --display: "Cinzel", "Tiro Devanagari Hindi", "Noto Serif Devanagari", Georgia, serif;
+  --serif: "Cormorant Garamond", "Noto Serif Devanagari", "Tiro Devanagari Hindi", Georgia, serif;
+  --wrap: 1180px;
+}
+:root[data-theme="dark"] {
+  --paper: #0C0816; --surface: #1A1330; --surface-2: #1A1330; --mist: #130D24; --line: #3a2d5c;
+  --text: #EDE3CF; --muted: #B5A78F; --ink-2: #E8D5A0; --gold-ink: #E8D5A0; --ink-text: #FAF4E4;
+  --shadow: rgba(0, 0, 0, .55); --shadow-soft: rgba(0, 0, 0, .3);
+  --sel-bg: #C9A961; --sel-fg: #2B1810;
+  --card-bg: linear-gradient(180deg, #1c1534 0%, #150f29 100%);
+  --card-bd: rgba(232, 213, 160, .22);
+}
+
+/* ---------- Base type ---------- */
+body { font-family: var(--serif); font-size: 1.16rem; font-weight: 500; line-height: 1.7; background: var(--paper); color: var(--text); }
+html[lang="hi"] body { font-size: 1.04rem; line-height: 1.8; font-weight: 400; }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 500; color: var(--ink-text); letter-spacing: .02em; }
+html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3, html[lang="hi"] h4 { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; letter-spacing: 0; font-weight: 400; }
+h3 { font-size: 1.15rem; }
+a { color: var(--ink-2); }
+a:hover { color: var(--gold-ink); }
+::selection { background: var(--gold); color: #2B1810; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.rows dt, .rows dd, .meta, .fine, .status, .tbl, .timeline, input, select, textarea, .tag, .chip { font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans", "Noto Sans Devanagari", Roboto, Arial, sans-serif; }
+.rows dd, .rows dt { font-size: .95rem; }
+
+/* ---------- Top gold strip ---------- */
+.topbar { background: linear-gradient(90deg, #E8D5A0, #C9A961 50%, #E8D5A0); color: #2B1810; font-size: .92rem; }
+.topbar a, .topbar-x { color: #2B1810; }
+
+/* ---------- Header ---------- */
+#site-top { position: sticky; top: 0; z-index: 70; }
+body[data-page="home"] #site-top { position: fixed; left: 0; right: 0; }
+header.site {
+  --hdr-fg: #FAF4E4; --hdr-bd: rgba(232, 213, 160, .42);
+  --dd-bg: rgba(20, 13, 38, .97); --dd-bd: rgba(232, 213, 160, .28); --dd-fg: #F3EAD3; --dd-fg-hover: #FFFFFF; --dd-hover: rgba(201, 169, 97, .22); --dd-cur: #E8D5A0; --dd-muted: #BDAE92;
+  background: var(--midnight); border-bottom: 1px solid rgba(232, 213, 160, .14); backdrop-filter: none;
+  transition: background .5s var(--ease), box-shadow .5s var(--ease), border-color .5s var(--ease);
+}
+body[data-page="home"] header.site { background: linear-gradient(rgba(12, 8, 22, .66), rgba(12, 8, 22, 0)); border-bottom: 0; }
+body[data-page] header.site.scrolled { background: rgba(246, 237, 216, .94); backdrop-filter: blur(14px) saturate(1.1); box-shadow: 0 10px 30px -12px rgba(43, 24, 16, .35); border-bottom: 1px solid rgba(201, 169, 97, .35); --hdr-fg: #2B1810; --hdr-bd: #6E5426; --dd-bg: rgba(250, 244, 228, .98); --dd-bd: rgba(143, 112, 51, .4); --dd-fg: #2B1810; --dd-fg-hover: #1a0f08; --dd-hover: rgba(201, 169, 97, .3); --dd-cur: #6E5426; --dd-muted: #6b5640; }
+:root[data-theme="dark"] body[data-page] header.site.scrolled { background: rgba(12, 8, 22, .92); box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .7); --hdr-fg: #FAF4E4; --hdr-bd: rgba(232, 213, 160, .42); --dd-bg: rgba(20, 13, 38, .97); --dd-bd: rgba(232, 213, 160, .28); --dd-fg: #F3EAD3; --dd-fg-hover: #FFFFFF; --dd-hover: rgba(201, 169, 97, .22); --dd-cur: #E8D5A0; --dd-muted: #BDAE92; }
+header.site .wrap { max-width: 1600px; }
+/* same size as Theme 1: logo 102px (76px on phones); the size never changes while scrolling, so nothing jumps */
+.bar { min-height: 122px; padding: 10px clamp(14px, 2.4vw, 32px); gap: 14px; }
+@media (max-width: 480px) { .bar { min-height: 96px; } }
+.brand { color: var(--hdr-fg); gap: 14px; }
+.mark { width: 102px; height: 102px; }
+@media (max-width: 480px) { .mark { width: 76px; height: 76px; } }
+.brand-text { max-width: 330px; }
+.brand-text strong { font-family: var(--display); font-size: clamp(.9rem, 1.3vw, 1.08rem); letter-spacing: .08em; text-transform: uppercase; font-weight: 600; color: var(--hdr-fg); line-height: 1.25; transition: color .4s; }
+html[lang="hi"] .brand-text strong { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .01em; text-transform: none; font-size: clamp(1rem, 1.5vw, 1.2rem); font-weight: 400; }
+.brand-text small { display: block; color: var(--gold-l); font-size: .86rem; letter-spacing: .04em; margin-top: 2px; transition: color .4s; }
+header.site.scrolled .brand-text small { color: var(--gold-ink); }
+:root[data-theme="dark"] header.site.scrolled .brand-text small { color: var(--gold-l); }
+@media (max-width: 480px) { .brand-text strong { font-size: .84rem; letter-spacing: .04em; } }
+
+/* language + appearance buttons: gold-edged glass pills */
+.lang, .appearance-btn { background: rgba(12, 8, 22, .22); border: 1px solid var(--hdr-bd); color: var(--hdr-fg); font-family: var(--display); letter-spacing: .12em; backdrop-filter: blur(8px); }
+header.site.scrolled .lang, header.site.scrolled .appearance-btn { background: rgba(43, 24, 16, .05); }
+.lang:hover, .appearance-btn:hover { background: var(--gold); border-color: var(--gold); color: #2B1810; }
+.appearance-btn svg line { stroke: currentColor; }
+.appearance-menu { background: var(--surface); color: var(--text); border: 1px solid var(--card-bd); border-radius: 16px; }
+.am-opt { font-family: var(--display); letter-spacing: .08em; font-size: .78rem; }
+.am-opt[aria-pressed="true"] { background: linear-gradient(135deg, #EBDAA8, #D2B26A 50%, #B8934A); color: #2B1810; border-color: var(--gold); }
+.nav-toggle { border: 1px solid var(--hdr-bd); border-radius: 999px; width: 44px; height: 44px; background: rgba(12, 8, 22, .25); backdrop-filter: blur(8px); }
+.nav-toggle i, .nav-toggle i::before, .nav-toggle i::after { background: var(--hdr-fg); }
+
+/* menu: phone / compact — dark panel */
+nav#nav { background: #120c22; border-bottom: 1px solid rgba(232, 213, 160, .2); }
+nav a, nav .sub-toggle, nav .soon-item { font-family: var(--display); font-size: .82rem; letter-spacing: .18em; text-transform: uppercase; color: #FAF4E4; border-bottom: 1px solid rgba(232, 213, 160, .14); font-weight: 500; }
+html[lang="hi"] nav a, html[lang="hi"] nav .sub-toggle, html[lang="hi"] nav .soon-item { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .02em; text-transform: none; font-size: 1rem; }
+nav a:hover, nav .sub-toggle:hover { background: rgba(201, 169, 97, .14); color: var(--gold-l); }
+nav a[aria-current="page"], nav li.current > .sub-toggle { color: var(--gold-l); font-weight: 600; }
+nav .soon-item { color: #b8a98f; }
+nav .soon-item small { background: rgba(232, 213, 160, .14); color: var(--gold-l); }
+.sub { border-left: 1px solid rgba(232, 213, 160, .25); margin-left: 6px; }
+
+/* menu: wide screens — transparent bar, gold underline that grows from the centre */
+@media (min-width: 1180px) {
+  header.site:not(.compact) nav#nav { background: none; border: 0; }
+  header.site:not(.compact) nav a, header.site:not(.compact) nav .sub-toggle, header.site:not(.compact) nav .soon-item {
+    color: var(--hdr-fg); font-size: .72rem; letter-spacing: .11em; padding: 8px 9px; border-radius: 0; background: none; position: relative; border: 0;
+  }
+  html[lang="hi"] header.site:not(.compact) nav a, html[lang="hi"] header.site:not(.compact) nav .sub-toggle { font-size: .98rem; letter-spacing: .02em; }
+  header.site:not(.compact) nav#nav > ul > li > a::after, header.site:not(.compact) nav#nav > ul > li > .sub-toggle::after {
+    content: ""; position: absolute; left: 9px; right: 9px; bottom: 2px; height: 1px; background: var(--gold); transform: scaleX(0); transition: transform .4s var(--ease);
+  }
+  header.site:not(.compact) nav#nav > ul > li > a:hover::after, header.site:not(.compact) nav#nav > ul > li > .sub-toggle:hover::after,
+  header.site:not(.compact) nav li.has-sub:hover > .sub-toggle::after, header.site:not(.compact) nav li.current > .sub-toggle::after,
+  header.site:not(.compact) nav#nav > ul > li > a[aria-current="page"]::after { transform: scaleX(1); }
+  header.site:not(.compact) nav a:hover, header.site:not(.compact) nav .sub-toggle:hover { background: none; transform: none; color: var(--hdr-fg); }
+  header.site:not(.compact) nav a[aria-current="page"], header.site:not(.compact) nav li.current > .sub-toggle { background: none; color: var(--hdr-fg); font-weight: 600; }
+  header.site:not(.compact) nav#nav > ul { gap: 2px; }
+  header.site:not(.compact) .caret { width: 6px; height: 6px; margin: -3px 0 0 8px; opacity: .7; }
+  /* dropdown: same family as the bar — dark glass while the bar is dark, ivory glass once the bar turns ivory */
+  header.site:not(.compact) .sub { background: var(--dd-bg); border: 1px solid var(--dd-bd); border-radius: 16px; box-shadow: 0 22px 44px -14px rgba(12, 8, 22, .55); margin-left: 0; backdrop-filter: blur(14px); }
+  header.site:not(.compact) .sub a, header.site:not(.compact) .sub .soon-item { color: var(--dd-fg); font-size: .76rem; padding: 11px 14px; border-radius: 10px; letter-spacing: .14em; }
+  html[lang="hi"] header.site:not(.compact) .sub a { font-size: 1rem; letter-spacing: .01em; }
+  header.site:not(.compact) .sub a:hover, header.site:not(.compact) .sub a:focus-visible { background: var(--dd-hover); box-shadow: inset 4px 0 0 var(--gold); color: var(--dd-fg-hover); font-weight: 700; transform: none; padding-left: 16px; }
+  header.site:not(.compact) .sub a[aria-current="page"] { color: var(--dd-cur); background: none; }
+  header.site:not(.compact) .sub .soon-item { color: var(--dd-muted); }
+  header.site:not(.compact) .sub .soon-item small { background: rgba(201, 169, 97, .2); color: var(--dd-fg); }
+}
+
+/* ---------- Buttons: Cinzel caps pills, gold gradient ---------- */
+.btn { font-family: var(--display); font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; font-weight: 500; padding: .95rem 1.7rem; border-radius: 999px; border: 1px solid transparent; transition: transform .45s var(--ease), box-shadow .45s var(--ease), background .3s, color .3s, border-color .3s; display: inline-flex; align-items: center; gap: .6rem; line-height: 1.3; }
+html[lang="hi"] .btn { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .03em; text-transform: none; font-size: 1rem; }
+.btn-primary, .btn-line, .btn-gold { background: linear-gradient(135deg, #EBDAA8 0%, #D2B26A 52%, #B8934A 100%); color: #2B1810; border-color: transparent; box-shadow: 0 10px 30px -10px rgba(201, 169, 97, .55), inset 0 1px 0 rgba(255, 255, 255, .4); }
+.btn-primary:hover, .btn-line:hover, .btn-gold:hover { background: linear-gradient(135deg, #F1E3B5 0%, #D7B96D 50%, #9d7b38 100%); color: #2B1810; transform: translateY(-2px); box-shadow: 0 18px 40px -10px rgba(201, 169, 97, .7), inset 0 1px 0 rgba(255, 255, 255, .5); border-color: transparent; }
+.btn-ghost { background: rgba(12, 8, 22, .25); color: #FAF4E4; border: 1px solid rgba(233, 213, 160, .45); backdrop-filter: blur(8px); box-shadow: none; }
+.btn-ghost:hover { background: rgba(233, 213, 160, .12); border-color: var(--gold-l); color: #FAF4E4; transform: translateY(-2px); }
+.btn .arrow { display: inline-block; transition: transform .4s var(--ease); }
+.btn:hover .arrow { transform: translateX(4px); }
+.call-btn { background: linear-gradient(135deg, #EBDAA8 0%, #D2B26A 52%, #B8934A 100%) !important; color: #2B1810 !important; box-shadow: 0 8px 22px -10px rgba(201, 169, 97, .6); }
+.call-btn:hover { filter: brightness(1.06); color: #2B1810 !important; }
+.copy { font-family: var(--display); letter-spacing: .08em; font-size: .7rem; }
+
+/* ---------- Hero (Home) ---------- */
+.hero2 { position: relative; min-height: 100vh; display: flex; flex-direction: column; align-items: center; overflow: hidden; color: #FAF4E4; isolation: isolate;
+  background: radial-gradient(ellipse at 50% 18%, #3A2868 0%, #1B1438 38%, #0C0816 100%); }
+.h2-bg { position: absolute; inset: 0; z-index: -3; overflow: hidden; }
+.h2-mandala { position: absolute; top: 46%; left: 50%; width: max(130vw, 1100px); aspect-ratio: 1; transform: translate(-50%, -50%); opacity: .13; background: url("../images/mandala.svg") center / contain no-repeat; animation: h2spin 140s linear infinite; }
+@keyframes h2spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.h2-bham-a, .h2-bham-b, .h2-orbit { animation-name: h2spin2; }
+@keyframes h2spin2 { to { transform: rotate(360deg); } }
+.hero2::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background-image: radial-gradient(2px 2px at 12% 22%, rgba(232, 213, 160, .8), transparent), radial-gradient(1.5px 1.5px at 78% 14%, rgba(232, 213, 160, .7), transparent), radial-gradient(2px 2px at 30% 72%, rgba(232, 213, 160, .6), transparent), radial-gradient(1.5px 1.5px at 66% 58%, rgba(232, 213, 160, .8), transparent), radial-gradient(2px 2px at 88% 76%, rgba(232, 213, 160, .6), transparent), radial-gradient(1.5px 1.5px at 6% 52%, rgba(232, 213, 160, .7), transparent), radial-gradient(1.5px 1.5px at 48% 9%, rgba(232, 213, 160, .7), transparent), radial-gradient(2px 2px at 94% 38%, rgba(232, 213, 160, .6), transparent);
+  animation: h2star 12s ease-in-out infinite alternate; opacity: .8; }
+@keyframes h2star { from { transform: translateY(0); opacity: .5; } to { transform: translateY(-10px); opacity: .95; } }
+.hero2::after { content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); width: min(1200px, 100%); height: 36vh; z-index: -1; pointer-events: none; background: radial-gradient(at center bottom, rgba(255, 180, 90, .28) 0%, transparent 62%); }
+.h2-petals { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.h2-inner { position: relative; z-index: 3; text-align: center; width: 100%; max-width: 1100px; padding: 11rem 1.25rem 2rem; margin: 0 auto; flex: 1 0 auto; }
+.h2-invoc { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; font-size: clamp(1rem, 1.5vw, 1.25rem); color: var(--gold-l); letter-spacing: .08em; margin: 0 0 1.4rem; opacity: .9; }
+
+.h2-murti { --s: clamp(250px, 40vh, 450px); position: relative; width: var(--s); height: var(--s); margin: 0 auto 1.4rem; }
+.h2-glow { position: absolute; inset: -22%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 210, 130, .42), rgba(255, 175, 80, .16) 55%, transparent 100%); animation: h2aura 9s ease-in-out infinite; z-index: 0; }
+@keyframes h2aura { 0%, 100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+.h2-bham { position: absolute; inset: -6%; z-index: 1; filter: drop-shadow(0 0 14px rgba(232, 213, 160, .35)); }
+.h2-bham-a, .h2-bham-b { position: absolute; inset: 0; background-position: center; background-size: contain; background-repeat: no-repeat; animation-timing-function: linear; animation-iteration-count: infinite; }
+.h2-bham-a { background-image: url("../images/bhamandal-rays.svg"); animation-duration: 120s; }
+.h2-bham-b { background-image: url("../images/bhamandal-petals.svg"); animation-duration: 80s; animation-direction: reverse; opacity: .95; }
+.h2-orbit { position: absolute; inset: 0; animation-duration: 70s; animation-timing-function: linear; animation-iteration-count: infinite; }
+.h2-lot { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; transform: rotate(var(--a)) translateY(calc(var(--s) * -.545)); filter: drop-shadow(0 0 8px rgba(255, 200, 150, .5)); }
+.h2-lot svg { width: 100%; height: 100%; }
+.h2-ph, .h2-img { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); z-index: 2; }
+.h2-ph { height: 68%; width: auto; filter: drop-shadow(0 22px 40px rgba(0, 0, 0, .5)) drop-shadow(0 0 28px rgba(255, 200, 120, .35)); }
+.h2-img { height: 74%; bottom: 8%; width: auto; max-width: 84%; object-fit: contain; filter: drop-shadow(0 18px 26px rgba(0, 0, 0, .45)); }
+.h2-img:not([src]) { display: none; }
+.h2-murti.ok .h2-ph { display: none; }
+
+.hero2 h1 { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; font-weight: 400; color: #FAF4E4; font-size: clamp(1.7rem, 4.2vw, 3.3rem); line-height: 1.25; letter-spacing: .01em; margin: 0 0 .2rem; text-shadow: 0 4px 30px rgba(0, 0, 0, .5); }
+html[lang="en"] .hero2 h1 { font-family: var(--display); font-size: clamp(1.4rem, 3.4vw, 2.6rem); letter-spacing: .06em; text-transform: uppercase; }
+.h2-place { font-family: var(--display); letter-spacing: .42em; text-transform: uppercase; color: var(--gold-l); font-size: clamp(1.05rem, 2vw, 1.4rem); font-weight: 600; margin: .5rem 0 .9rem; padding-left: .42em; text-shadow: 0 2px 18px rgba(0, 0, 0, .55); }
+html[lang="hi"] .h2-place { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .04em; font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 400; text-transform: none; padding-left: 0; }
+.h2-lead { max-width: 52ch; margin: 0 auto 1.6rem; color: #F1E8D2; font-size: 1.2rem; font-style: italic; font-family: var(--serif); }
+html[lang="hi"] .h2-lead { font-size: 1.1rem; font-style: normal; }
+.h2-ctas { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 2rem; }
+
+/* open-now glass strip */
+.hero2 .panel { background: rgba(12, 8, 22, .46); backdrop-filter: blur(12px); border: 1px solid rgba(232, 213, 160, .28); border-radius: 22px; color: #FAF4E4; max-width: 780px; margin: 0 auto; padding: 16px 22px 12px; text-align: left; box-shadow: 0 24px 50px -24px rgba(0, 0, 0, .7); }
+.hero2 .status { color: #FAF4E4; font-family: var(--display); font-size: .95rem; letter-spacing: .08em; }
+html[lang="hi"] .hero2 .status { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: 0; font-size: 1.1rem; }
+.hero2 .status-sub, .hero2 .panel-note { color: #cdbfa4; }
+.hero2 .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; border: 0; margin: 4px 0 0; }
+.hero2 .timeline li { display: flex; flex-direction: column; gap: 2px; padding: 8px 4px 0; border-top: 2px solid rgba(232, 213, 160, .22); color: #cdbfa4; font-size: .8rem; }
+.hero2 .timeline li::before { display: none; }
+.hero2 .timeline li.done { opacity: .6; }
+.hero2 .timeline li.next { color: #FAF4E4; border-top-color: var(--gold); font-weight: 600; }
+.hero2 .timeline time { font-size: 1rem; color: var(--gold-l); font-weight: 600; }
+@media (max-width: 560px) { .hero2 .timeline { grid-template-columns: repeat(2, 1fr); } }
+.dot { background: #9aa3b2; }
+.status.is-open .dot { background: #5fd19a; }
+.dot.dot-saptahik { background: #C4541F; }
+.dot.dot-masik { background: #6C4BB5; }
+:root[data-theme="dark"] .dot.dot-masik { background: #A68BE8; }
+:root[data-theme="dark"] .dot.dot-saptahik { background: #F08A55; }
+
+/* Namokar mantra marquee, under the murti */
+.mantra-strip { position: relative; z-index: 4; width: 100%; overflow: hidden; padding: 1.05rem 0; background: rgba(12, 8, 22, .55); border-top: 1px solid rgba(232, 213, 160, .16); border-bottom: 1px solid rgba(232, 213, 160, .16); box-shadow: inset 0 -18px 36px rgba(8, 5, 16, .35); }
+.mantra-strip::before, .mantra-strip::after { content: ""; position: absolute; top: 0; bottom: 0; width: clamp(50px, 12vw, 180px); z-index: 2; pointer-events: none; }
+.mantra-strip::before { left: 0; background: linear-gradient(90deg, #0b0714, transparent); }
+.mantra-strip::after { right: 0; background: linear-gradient(-90deg, #0b0714, transparent); }
+.mantra-track { display: flex; width: max-content; align-items: center; gap: clamp(1.6rem, 4vw, 3rem); animation: h2marq 80s linear infinite; will-change: transform; }
+.mantra-track span { white-space: nowrap; font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; font-size: clamp(1.05rem, 1.8vw, 1.5rem); color: var(--gold-l); letter-spacing: .04em; }
+.mantra-track i { color: var(--gold); font-style: normal; opacity: .8; font-size: 1rem; }
+@keyframes h2marq { to { transform: translateX(-25%); } }
+
+/* ---------- Page heads (inner pages) ---------- */
+.page-head { background: radial-gradient(ellipse at 70% 0%, #3A2868 0%, #1B1438 45%, #0C0816 100%); color: #FAF4E4; padding: 3.2rem 0 3rem; position: relative; overflow: hidden; }
+.page-head::before { content: ""; position: absolute; width: 640px; height: 640px; right: -160px; top: -250px; border-radius: 0; background: url("../images/mandala.svg") center / contain no-repeat; opacity: .16; animation: h2spin3 160s linear infinite; }
+@keyframes h2spin3 { to { transform: rotate(360deg); } }
+.page-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, #C9A961, transparent); }
+.page-head h1 { color: #FAF4E4; font-size: clamp(1.8rem, 4.4vw, 3rem); }
+.page-head p { color: #dccfb4; font-size: 1.12rem; }
+html[lang="hi"] .page-head p { font-size: 1rem; }
+
+/* ---------- Sections ---------- */
+.section { position: relative; padding: 4.2rem 0; }
+.section.alt { background: var(--mist); }
+.section.alt::before, .section.alt::after { content: ""; position: absolute; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: .6; }
+.section.alt::before { top: 0; } .section.alt::after { bottom: 0; }
+/* section titles: centred, with a faint mandala behind and a small gold ornament under (like nilkanthdham.org) */
+.section-head { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 30px 0 4px; margin-bottom: 30px; isolation: isolate; }
+.section-head::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(440px, 92vw); aspect-ratio: 1; transform: translate(-50%, -50%); background: url("../images/mandala.svg") center / contain no-repeat; opacity: .13; z-index: -1; pointer-events: none; }
+:root[data-theme="dark"] .section-head::before { opacity: .11; }
+.section-head h2 { font-size: clamp(1.7rem, 3.6vw, 2.7rem); margin: 0; text-align: center; }
+.section-head h2::after { content: "❖"; display: block; width: auto; height: auto; margin: .35rem auto 0; background: none; color: var(--gold); font-size: .8rem; letter-spacing: 0; line-height: 1; }
+.section-head h2::before { content: ""; display: block; width: 120px; height: 1px; margin: 0 auto .7rem; background: linear-gradient(90deg, transparent, var(--gold), transparent); order: -1; }
+.section-head .more { margin-top: 6px; }
+.more { font-family: var(--display); font-size: .74rem; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; color: var(--gold-ink); }
+html[lang="hi"] .more { font-family: "Tiro Devanagari Hindi", serif; font-size: 1rem; letter-spacing: .02em; text-transform: none; }
+.more:hover { color: var(--saffron-deep); }
+:root[data-theme="dark"] .more:hover { color: var(--gold-l); }
+.home-hint { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: -8px 0 22px; padding: 12px 18px; border-radius: 14px; border: 1px dashed var(--card-bd); background: color-mix(in srgb, var(--gold) 10%, var(--surface)); font-size: 1rem; }
+html[lang="hi"] .home-hint { font-size: .95rem; }
+.home-hint a { font-weight: 700; white-space: nowrap; }
+.empty { border-color: var(--card-bd); background: var(--surface); }
+
+/* ---------- Cards: ivory, gold hairline, lift + gold top line on hover ---------- */
+.card, .notice, .event, .yojana, .album, .person { background: var(--card-bg); border: 1px solid var(--card-bd); border-radius: 18px; box-shadow: 0 10px 30px -18px var(--shadow); position: relative; overflow: hidden; }
+.card::before, .yojana::before, .album::before, .person::before, .event::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); transform: scaleX(0); transition: transform .5s var(--ease); z-index: 1; }
+.card:hover::before, .yojana:hover::before, .album:hover::before, .person:hover::before, .event:hover::before { transform: scaleX(1); }
+.card:hover, .notice:hover, .event:not(.past):hover, .yojana:hover, .album:hover, .person:hover, .card:focus-within, .yojana:focus-within, .album:focus-within, .person:focus-within, .notice:focus-within, .event:not(.past):focus-within {
+  transform: translateY(-6px); border-color: var(--gold); box-shadow: 0 26px 50px -22px var(--shadow);
+}
+.act-sec::before { content: none !important; }
+.notice { border-left: 4px solid var(--gold); }
+.event .date { background: linear-gradient(160deg, #1A1330, #0C0816); border: 1px solid rgba(201, 169, 97, .5); color: #FAF4E4; border-radius: 12px; }
+.event .date b { font-family: var(--display); font-weight: 500; }
+.event .date span { color: var(--gold-l); font-family: var(--display); letter-spacing: .12em; text-transform: uppercase; font-size: .72rem; }
+.tag, .event .tag, .card .tag { background: color-mix(in srgb, var(--gold) 20%, var(--surface)); color: var(--gold-ink); letter-spacing: .02em; }
+.chip-active { background: color-mix(in srgb, var(--gold) 22%, var(--surface)); color: var(--gold-ink); }
+.reveal { opacity: 0; translate: 0 34px; transition-duration: 1s; transition-timing-function: var(--ease); }
+
+/* tabs / filters */
+.tab, .pf, .vtab { font-family: var(--display); font-size: .74rem; letter-spacing: .16em; text-transform: uppercase; background: var(--surface); border: 1px solid var(--card-bd); color: var(--text); border-radius: 999px; padding: 10px 20px; cursor: pointer; transition: all .35s var(--ease); }
+html[lang="hi"] .tab, html[lang="hi"] .pf, html[lang="hi"] .vtab { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .02em; text-transform: none; font-size: 1rem; }
+.tab:hover, .pf:hover, .vtab:hover { border-color: var(--gold); transform: translateY(-2px); }
+.tab[aria-pressed="true"], .pf[aria-pressed="true"], .vtab[aria-selected="true"] { background: linear-gradient(135deg, #EBDAA8 0%, #D2B26A 52%, #B8934A 100%); color: #2B1810; border-color: transparent; box-shadow: 0 10px 24px -12px rgba(201, 169, 97, .7); }
+.tbl-wrap { border-color: var(--card-bd); border-radius: 16px; }
+.tbl th { background: color-mix(in srgb, var(--gold) 16%, var(--surface)); font-family: var(--display); font-weight: 500; letter-spacing: .06em; }
+
+/* gallery + slideshow */
+.album .thumb { transition: transform .8s var(--ease); }
+.album:hover .thumb { transform: scale(1.05); }
+.ss-card { border-radius: 16px; box-shadow: 0 14px 30px -18px var(--shadow); }
+.ss-card img { transition: transform .9s var(--ease), filter .5s; }
+.ss-card:hover img { transform: scale(1.06); filter: brightness(1.05); }
+.ss-card .ss-cap { background: linear-gradient(to top, rgba(12, 8, 22, .88), transparent); letter-spacing: .04em; }
+.ss-nav { border-color: var(--card-bd); background: var(--surface); color: var(--gold-ink); }
+.ss-nav:hover { background: var(--gold); border-color: var(--gold); color: #2B1810; }
+
+/* ---------- Visit tabs ---------- */
+.vtabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.vpanel { animation: vfade .6s var(--ease) both; }
+@keyframes vfade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.vpanel .mapwrap { margin-bottom: 26px; }
+.vpanel .cards { margin-bottom: 0; }
+.dress { padding-left: 74px; min-height: 84px; display: flex; align-items: center; }
+.dress p { margin: 0; }
+.dress-n { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); color: var(--gold-ink); border: 1px solid var(--gold); background: color-mix(in srgb, var(--gold) 16%, var(--surface)); }
+
+/* ---------- Daily karyakram ---------- */
+.daily-grid { display: grid; gap: 28px; align-items: start; }
+@media (min-width: 900px) { .daily-grid { grid-template-columns: 380px 1fr; gap: 40px; } .dcal { position: sticky; top: 112px; } }
+.dcal { padding: 20px; }
+.dcal-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-family: var(--display); letter-spacing: .06em; }
+html[lang="hi"] .dcal-h { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: 0; }
+.dnav { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-bd); background: var(--surface); color: var(--gold-ink); font-size: 1.3rem; cursor: pointer; line-height: 1; transition: all .3s; }
+.dnav:hover { background: var(--gold); color: #2B1810; border-color: var(--gold); }
+.dgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.dw { text-align: center; font-size: .74rem; color: var(--muted); padding: 4px 0 8px; font-family: system-ui, "Noto Sans Devanagari", sans-serif; text-transform: uppercase; letter-spacing: .06em; }
+.dc { aspect-ratio: 1; border: 1px solid transparent; background: none; border-radius: 12px; cursor: pointer; color: var(--text); font-family: system-ui, "Noto Sans Devanagari", sans-serif; font-size: .95rem; position: relative; transition: all .3s var(--ease); }
+.dc:hover { background: color-mix(in srgb, var(--gold) 18%, var(--surface)); border-color: var(--gold); }
+.dc.is-today { border-color: var(--gold); font-weight: 700; }
+.dc.is-sel { background: linear-gradient(135deg, #EBDAA8, #D2B26A 55%, #B8934A); color: #2B1810; border-color: transparent; font-weight: 700; box-shadow: 0 8px 18px -8px rgba(201, 169, 97, .8); }
+.dc i { position: absolute; left: 50%; bottom: 5px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--saffron); }
+.dc.is-sel i { background: #2B1810; }
+.empty-c { pointer-events: none; }
+.dcal-f { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; }
+.dpick input { border: 1px solid var(--card-bd); background: var(--surface); color: var(--text); border-radius: 999px; padding: 8px 14px; font-size: .92rem; }
+.dday-state { font-family: var(--display); letter-spacing: .24em; text-transform: uppercase; font-size: .72rem; color: var(--gold-ink); margin: 0 0 6px; }
+html[lang="hi"] .dday-state { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .06em; text-transform: none; font-size: .95rem; }
+.dday h2 { margin: 0 0 .5em; }
+.dh { margin: 1.6rem 0 .8rem; font-size: 1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); display: flex; align-items: center; gap: 12px; }
+html[lang="hi"] .dh { text-transform: none; letter-spacing: .02em; font-size: 1.15rem; }
+.dh::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), transparent); }
+.dsched { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; }
+.dsched::before { content: ""; position: absolute; left: 112px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(var(--gold), rgba(201, 169, 97, .15)); }
+.dsched li { display: grid; grid-template-columns: 96px 34px 1fr; gap: 12px; align-items: start; padding: 12px 0; position: relative; }
+.dsched time { text-align: right; font-family: system-ui, "Noto Sans Devanagari", sans-serif; font-size: .9rem; font-weight: 700; color: var(--gold-ink); padding-top: 6px; }
+.dic { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--gold); z-index: 1; font-size: 1rem; }
+.dsched h4 { margin: 0; font-size: 1.1rem; }
+.dsched p { margin: .15em 0 0; color: var(--muted); font-size: 1rem; }
+.dsched li.is-now .dic { background: linear-gradient(135deg, #E8D5A0, #C9A961); box-shadow: 0 0 0 6px rgba(201, 169, 97, .25); }
+.dsched li.is-now h4 { color: var(--saffron-deep); }
+:root[data-theme="dark"] .dsched li.is-now h4 { color: var(--gold-l); }
+.dspecial { border: 1px solid var(--card-bd); border-left: 4px solid var(--saffron); border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; background: var(--card-bg); }
+.dspecial.jain { border-left-color: var(--gold); }
+.dspecial h4 { margin: 4px 0 2px; font-size: 1.1rem; }
+.dspecial p { margin: .2em 0 0; }
+@media (max-width: 520px) { .dsched li { grid-template-columns: 78px 30px 1fr; gap: 8px; } .dsched::before { left: 92px; } }
+
+/* ---------- Timeline ---------- */
+.tl { list-style: none; margin: 0; padding: 0; position: relative; }
+.tl::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: linear-gradient(transparent, var(--gold) 8%, var(--gold) 92%, transparent); }
+.tl-item { position: relative; width: 50%; padding: 0 44px 38px 0; }
+.tl-item.r { margin-left: 50%; padding: 0 0 38px 44px; }
+.tl-dot { position: absolute; top: 22px; right: -7px; width: 14px; height: 14px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 6px rgba(201, 169, 97, .22); z-index: 1; }
+.tl-item.r .tl-dot { right: auto; left: -7px; }
+.tl-card { padding: 20px 22px; }
+.tl-card img { margin-top: 12px; border-radius: 12px; width: 100%; max-height: 260px; object-fit: cover; }
+.tl-year { font-family: var(--display); font-size: 1.7rem; color: var(--gold-ink); letter-spacing: .06em; display: block; margin-bottom: 2px; }
+.tl-card h3 { margin-bottom: .3em; }
+.tl-card p:last-child { margin-bottom: 0; }
+@media (max-width: 760px) {
+  .tl::before { left: 14px; }
+  .tl-item, .tl-item.r { width: 100%; margin-left: 0; padding: 0 0 28px 44px; }
+  .tl-dot, .tl-item.r .tl-dot { left: 7px; right: auto; }
+}
+
+/* ---------- Footer ---------- */
+footer.site { position: relative; overflow: hidden; background: linear-gradient(180deg, #120c22, #0C0816); color: #dccfb4; padding: 3rem 0 1.2rem; }
+footer.site::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, #C9A961, transparent); }
+footer.site::after { content: ""; position: absolute; top: -220px; left: 50%; width: 820px; height: 820px; margin-left: -410px; background: url("../images/mandala.svg") center / contain no-repeat; opacity: .07; animation: h2spin3 240s linear infinite; pointer-events: none; }
+footer.site .wrap { position: relative; z-index: 1; }
+.foot-name { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; color: #FAF4E4; font-size: 1.35rem; }
+footer.site a { color: #FAF4E4; }
+footer.site a:hover { color: var(--gold-l); }
+.foot-follow-h { font-family: var(--display); letter-spacing: .18em; color: var(--gold-l); font-size: .7rem; }
+.ficon { background: transparent; border: 1px solid rgba(233, 213, 160, .3); color: var(--gold-l); transition: all .35s var(--ease); }
+footer.site a.ficon:hover, .ficon:hover { background: var(--gold); color: #2B1810; border-color: var(--gold); transform: translateY(-2px); }
+.legal { border-top-color: rgba(233, 213, 160, .15); color: #bfb299; }
+
+/* ---------- Dark mode touches ---------- */
+:root[data-theme="dark"] .section.alt { background: #110b21; }
+:root[data-theme="dark"] .card, :root[data-theme="dark"] .event { color: var(--text); }
+
+/* ---------- Motion safety ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .h2-mandala, .h2-bham-a, .h2-bham-b, .h2-orbit, .page-head::before, footer.site::after, .mantra-track, .h2-glow, .hero2::before { animation: none !important; }
+  .h2-mandala { transform: translate(-50%, -50%); }
+}
+@media (max-width: 700px) {
+  .h2-inner { padding-top: 9.6rem; }
+  .h2-lot { width: 24px; height: 24px; margin: -12px 0 0 -12px; }
+  .section { padding: 3rem 0; }
+}
+@media print { .hero2, .h2-petals { display: none; } }
+
+/* ---------- Readability: nothing smaller than ~14px, strong colours everywhere ---------- */
+.foot-follow-h { font-size: .88rem; }
+.more, html[lang="en"] .more { font-size: .9rem; }
+.btn, html[lang="en"] .btn { font-size: .88rem; }
+.hero2 .panel-note, .panel-note { font-size: .92rem; }
+.hero2 .status-sub, .status-sub { font-size: .98rem; }
+.hero2 .timeline li { font-size: .92rem; }
+.foot-credit { font-size: .95rem; }
+.tag, .event .tag, .card .tag, .chip, .chip-active { font-size: .9rem; }
+.event .date span { font-size: .85rem; }
+.rows dt, .rows dd { font-size: 1rem; }
+.rows dd { font-weight: 600; color: var(--ink-text); }
+.rows dt { color: var(--muted); }
+.meta, .fine, .call-sm, .legal, .dw { font-size: .95rem; }
+.fine, .meta { color: var(--muted); }
+footer.site, footer.site p, footer.site address, footer.site li { font-size: 1rem; }
+footer.site .foot-addr, footer.site .foot-addr * { font-size: 1rem; color: #E7DCC3; }
+.legal, footer.site .legal * { color: #D8CCB0; }
+.yojana.compact p, .card p { color: var(--text); }
+.yojana.compact p { opacity: 1; }
+.when, .event .when { color: var(--gold-ink); font-weight: 600; }
+.yojana .chip, .chip-soon, .chip-active, .chip-done { font-weight: 600; }
+.chip-soon { color: #5d4733; }
+:root[data-theme="dark"] .chip-soon { color: #E8D5A0; }
+:root[data-contrast="high"] { --gold-ink: #3a2a0c; --ink-2: #4a1a08; --muted: #000; --text: #000; --ink-text: #000; }
+:root[data-theme="dark"][data-contrast="high"] { --gold-ink: #FFF1C8; --ink-2: #FFF1C8; --muted: #fff; --text: #fff; --ink-text: #fff; }
+[data-contrast="high"] .hero2, [data-contrast="high"] .hero2 * { text-shadow: none; }
+[data-contrast="high"] .hero2 .h2-lead, [data-contrast="high"] .page-head p { color: #fff; }
+[data-contrast="high"] .tag, [data-contrast="high"] .chip { border: 1px solid currentColor; }
+.copy { font-size: .88rem; }
+code { font-size: .92em; }
+.tab, .pf, .vtab, html[lang="en"] .tab, html[lang="en"] .pf, html[lang="en"] .vtab { font-size: .88rem; }
+.dday-state, html[lang="en"] .dday-state { font-size: .88rem; }
+.about-lead a, .page-head a { font-size: inherit; }
+
+/* ---------- Timeline events (several per year) and photos ---------- */
+.tl-ev + .tl-ev { margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--card-bd); }
+.tl-when { display: block; font-family: var(--display); font-size: .88rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); font-weight: 600; margin-bottom: 4px; }
+html[lang="hi"] .tl-when { font-family: "Tiro Devanagari Hindi", serif; letter-spacing: .02em; text-transform: none; font-size: 1rem; }
+.tl-card h3 { font-size: 1.2rem; margin: 0 0 .25em; }
+.tl-card p { margin: 0 0 .4em; }
+.pics { display: grid; gap: 8px; margin: 12px 0; grid-template-columns: repeat(2, 1fr); }
+.pics.n1 { grid-template-columns: 1fr; }
+.pics.n3, .pics.n4 { grid-template-columns: repeat(2, 1fr); }
+.pic-btn { display: block; padding: 0; border: 1px solid var(--card-bd); border-radius: 12px; overflow: hidden; background: var(--mist); cursor: zoom-in; aspect-ratio: 4 / 3; }
+.pics.n1 .pic-btn { aspect-ratio: 16 / 9; }
+.pic-btn img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s var(--ease); }
+.pic-btn:hover img, .pic-btn:focus-visible img { transform: scale(1.06); }
+.tl-card .pics img, .tl-card img { margin: 0; max-height: none; border-radius: 0; }
+.yojana.compact { padding: 0; }
+.yojana.compact > .yhead, .yojana.compact > p { margin-left: 20px; margin-right: 20px; }
+.yojana.compact > .yhead { padding-top: 18px; }
+.yojana.compact > p { padding-bottom: 18px; }
+.ycover { display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--mist); }
+.ycover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .7s var(--ease); }
+.yojana.compact:hover .ycover img { transform: scale(1.06); }
+.ypics { margin: 4px 0 14px; }
+.tl-card h3 { font-weight: 600; }
+.tag-parv { background: #E4ECFA !important; color: #1D3560 !important; }
+:root[data-theme="dark"] .tag-parv { background: #2A3A66 !important; color: #E4ECFF !important; }
+.tag-kalyanak { background: #FDF0D2 !important; color: #5E3A04 !important; }
+:root[data-theme="dark"] .tag-kalyanak { background: #4A3410 !important; color: #FFE9B8 !important; }
+dt, figcaption, .act-facts dt { font-size: .95rem; }
+code { font-size: .95rem; }
+nav .soon-item small, .sub .soon-item small { font-size: .85rem; letter-spacing: .02em; text-transform: none; }
+figcaption, .rows code, code { font-size: .98rem !important; }
+
+.h2-img { image-rendering: auto; }
+
+/* ---------- Header tiers ---------- */
+/* Home: no name in the bar while the banner shows it; it fades in once the banner name has scrolled away */
+body[data-page="home"] .brand-text { opacity: 0; visibility: hidden; transition: opacity .45s var(--ease), visibility .45s; }
+body[data-page="home"].name-in-bar .brand-text { opacity: 1; visibility: visible; }
+@media (min-width: 1180px) {
+  /* "tight": the full menu in a narrower form, so it still fits on 1280px-wide screens (1920px at 150% zoom) */
+  header.site.tight:not(.compact) nav a, header.site.tight:not(.compact) nav .sub-toggle { font-size: .71rem; letter-spacing: .03em; padding: 8px 6px; }
+  html[lang="hi"] header.site.tight:not(.compact) nav a, html[lang="hi"] header.site.tight:not(.compact) nav .sub-toggle { font-size: .95rem; letter-spacing: 0; padding: 8px 8px; }
+  header.site.tight:not(.compact) nav#nav > ul > li > a::after, header.site.tight:not(.compact) nav#nav > ul > li > .sub-toggle::after { left: 7px; right: 7px; }
+  header.site.tight:not(.compact) .caret { margin-left: 5px; }
+  header.site.tight:not(.compact) .brand-text { max-width: 190px; }
+  header.site.tight:not(.compact) .brand-text strong { font-size: .8rem; letter-spacing: .03em; }
+  html[lang="hi"] header.site.tight:not(.compact) .brand-text strong { font-size: .98rem; }
+  header.site.tight:not(.compact) .brand-text small { font-size: .78rem; }
+  header.site.tight:not(.compact) .bar { gap: 10px; }
+}
+
+/* ---------- Numbers (pin code, amounts, phone / account numbers): larger, lining, easy to read ---------- */
+.num { font-family: inherit; font-size: 1.14em; font-weight: inherit; font-variant-numeric: lining-nums; letter-spacing: .01em; white-space: nowrap; }
+footer.site .num, .call-btn .num, .rows dd .num { font-size: 1.1em; }
+.call-btn, .call-sm, .call { font-size: 1.05rem; }
+.rows dd code, .rows code { font-size: 1.08rem !important; letter-spacing: .03em; font-variant-numeric: lining-nums tabular-nums; }
+.addr-card { max-width: 760px; margin: 0 auto 22px; text-align: center; }
+.addr-card p { font-size: 1.1rem; line-height: 1.75; }
+.howto-h { text-align: center; margin: 34px 0 14px; font-size: 1.35rem; }
+.tl-card .tl-when + h3 { margin-top: 2px; }
+
+/* Home: once the hero name has scrolled away, the (still see-through) bar gets a soft dark fade so the menu stays readable over the banner content */
+body[data-page="home"].name-in-bar header.site:not(.scrolled) { background: linear-gradient(rgba(12, 8, 22, .97) 0%, rgba(12, 8, 22, .94) 62%, rgba(12, 8, 22, 0) 100%); }
+body[data-page="home"] header.site { transition: background-color .35s var(--ease); }
+
+/* Links on Home sections are underlined so it is clear they can be clicked */
+body[data-page="home"] .section-head .more, body[data-page="home"] .section a:not(.btn):not(.pic-btn):not(.album):not(.ss-card) { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+body[data-page="home"] .yojana a, body[data-page="home"] .notice a, body[data-page="home"] .event a { text-decoration: underline; text-underline-offset: 3px; }
+/* Nearby page */
+.nb-group + .nb-group { margin-top: 48px; }
+.nb-h { text-align: center; margin: 0 0 22px; }
+.nb-card { display: flex; flex-direction: column; gap: 6px; }
+.nb-card .pics { margin: 0 0 8px; }
+.nb-row { margin: 0; font-size: 1rem; }
+.nb-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; align-items: center; }
+
+/* ---------- Home timings: step line with dots (done = filled, next = glowing + "Next" tag, later = hollow) ---------- */
+.hero2 .timeline { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 14px 0 0; }
+.hero2 .timeline li { position: relative; display: flex; flex-direction: column; gap: 3px; padding: 26px 8px 0 0; border-top: 0; opacity: 1; color: #CDBFA4; }
+.hero2 .timeline li::before { display: block; content: ""; position: absolute; top: 7px; left: 0; right: 0; width: auto; height: 2px; margin: 0; border: 0; border-radius: 0; background: rgba(232, 213, 160, .28); }
+.hero2 .timeline li.done::before { background: rgba(232, 213, 160, .75); }
+.hero2 .timeline li:last-child::before { right: 50%; }
+.hero2 .timeline li::after { content: ""; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; background: #1B1230; border: 2px solid rgba(232, 213, 160, .6); }
+.hero2 .timeline li.done::after { background: var(--gold); border-color: var(--gold); opacity: .75; }
+.hero2 .timeline li.done { color: #B9AC92; }
+.hero2 .timeline li.next { color: #FAF4E4; font-weight: 600; }
+.hero2 .timeline li.next::after { background: var(--gold-l); border-color: #FFF3CC; box-shadow: 0 0 0 5px rgba(232, 213, 160, .25), 0 0 14px rgba(232, 213, 160, .55); animation: tm-pulse 2.4s ease-in-out infinite; }
+.hero2 .timeline li.next::before { background: linear-gradient(90deg, rgba(232, 213, 160, .75), rgba(232, 213, 160, .28)); }
+@keyframes tm-pulse { 50% { box-shadow: 0 0 0 8px rgba(232, 213, 160, .12), 0 0 18px rgba(232, 213, 160, .7); } }
+@media (prefers-reduced-motion: reduce) { .hero2 .timeline li.next::after { animation: none; } }
+@media (max-width: 560px) {
+  .hero2 .timeline { grid-template-columns: 1fr; padding-left: 4px; }
+  .hero2 .timeline li { flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 0 8px 30px; }
+  .hero2 .timeline li::before { top: 0; bottom: 0; left: 7px; right: auto; width: 2px; height: auto; margin: 0; }
+  .hero2 .timeline li:first-child::before { top: 50%; }
+  .hero2 .timeline li:last-child::before { right: auto; bottom: 50%; }
+  .hero2 .timeline li::after { top: 50%; margin-top: -8px; }
+}
+.hero2 .timeline li.next > span::after { content: attr(data-nx); display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: var(--gold); color: #2B1810; font-size: .72rem; font-weight: 700; letter-spacing: .04em; vertical-align: middle; }
