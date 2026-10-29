@@ -513,10 +513,11 @@
     var sc = document.getElementById("hero-scroll-t"); if (sc) sc.textContent = t("hero.scroll");
     /* Bhagwan ki murti: the photo from SITE.murti. The golden placeholder stays until the picture really loads. */
     var fig = document.getElementById("hero-murti"), img = document.getElementById("hero-murti-img");
-    if (fig && img && S.murti && !img.getAttribute("src")) {
+    if (fig && img && S.murti) {
       img.onload = function () { fig.classList.add("ok"); };
-      img.onerror = function () { fig.classList.remove("ok"); img.removeAttribute("src"); };
-      img.src = S.murti;
+      img.onerror = function () { fig.classList.remove("ok"); fig.classList.add("fail"); img.removeAttribute("src"); };
+      if (img.getAttribute("src") !== S.murti) img.src = S.murti;
+      if (img.complete && img.naturalWidth) fig.classList.add("ok");
     }
     /* Namokar mantra marquee: the line is written twice so the loop never shows a gap. */
     var tr = document.getElementById("mantra-track");
@@ -1511,14 +1512,38 @@
     return '<article class="card nb-card">' + picsHtml(x.hidePhoto ? [] : photoList(x), "nbpics", L(x.name)) +
       "<h3>" + esc(L(x.name)) + "</h3>" + (L(x.text) ? "<p>" + esc(L(x.text)) + "</p>" : "") + rows + (acts ? '<div class="nb-acts">' + acts + "</div>" : "") + "</article>";
   }
+  /* data.js: window.NEARBY is a list of groups; every visible group becomes a tab. Old format { mandirs: [], tirths: [] } still works. */
+  function nearbyGroups() {
+    var N = window.NEARBY;
+    if (N && !Array.isArray(N)) {
+      N = [{ id: "mandirs", title: { hi: t("nb.mandirs"), en: t("nb.mandirs") }, items: N.mandirs }, { id: "tirths", title: { hi: t("nb.tirths"), en: t("nb.tirths") }, items: N.tirths }];
+    }
+    return vis(N);
+  }
+  var nearbyBound = false;
+  function nearbyFromHash(gs) {
+    var h = ""; try { h = decodeURIComponent((location.hash || "").replace("#", "")); } catch (e) {}
+    return gs.some(function (g) { return g.id === h; }) ? h : gs[0].id;
+  }
   function renderNearby() {
-    var N = window.NEARBY || {}, out = "";
-    [["mandirs", "nb.mandirs"], ["tirths", "nb.tirths"]].forEach(function (g) {
-      var list = vis(N[g[0]]);
-      out += '<section class="nb-group" id="' + g[0] + '"><h2 class="nb-h">' + esc(t(g[1])) + "</h2>" +
-        (list.length ? '<div class="cards three">' + list.map(nearbyCard).join("") + "</div>" : '<p class="empty">' + esc(t("nb.none")) + "</p>") + "</section>";
-    });
-    put("nearby", out);
+    var host = document.getElementById("nearby"); if (!host) return;
+    var gs = nearbyGroups();
+    if (!gs.length) { host.innerHTML = '<p class="empty">' + esc(t("nb.none")) + "</p>"; return; }
+    host.innerHTML = '<div class="vtabs" role="tablist" aria-label="' + esc(t("p.nearby.h1")) + '">' +
+      gs.map(function (g) { return '<button class="vtab" type="button" role="tab" data-n="' + esc(g.id) + '" aria-selected="false">' + (g.icon ? '<span aria-hidden="true">' + esc(g.icon) + "</span> " : "") + esc(L(g.title)) + "</button>"; }).join("") + "</div>" +
+      gs.map(function (g) {
+        var list = vis(g.items);
+        return '<div class="vpanel nb-group" role="tabpanel" data-n="' + esc(g.id) + '" hidden>' + (L(g.intro) ? '<p class="measure">' + esc(L(g.intro)) + "</p>" : "") +
+          (list.length ? '<div class="cards three">' + list.map(nearbyCard).join("") + "</div>" : '<p class="empty">' + esc(t("nb.none")) + "</p>") + "</div>";
+      }).join("");
+    function show(which, push) {
+      $$(".vtab", host).forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-n") === which ? "true" : "false"); });
+      $$(".vpanel", host).forEach(function (pn) { pn.hidden = pn.getAttribute("data-n") !== which; });
+      if (push) { try { history.replaceState(null, "", "#" + which); } catch (e) { location.hash = which; } }
+    }
+    $$(".vtab", host).forEach(function (b) { b.addEventListener("click", function () { show(b.getAttribute("data-n"), true); }); });
+    show(nearbyFromHash(gs), false);
+    if (!nearbyBound) { nearbyBound = true; window.addEventListener("hashchange", function () { var g2 = nearbyGroups(); if (g2.length && document.getElementById("nearby")) { var w = nearbyFromHash(g2); $$("#nearby .vtab").forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-n") === w ? "true" : "false"); }); $$("#nearby .vpanel").forEach(function (pn) { pn.hidden = pn.getAttribute("data-n") !== w; }); } }); }
   }
 
   /* ---------- home: connect ----------
