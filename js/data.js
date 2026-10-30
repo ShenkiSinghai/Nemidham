@@ -783,14 +783,14 @@ window.CALENDAR = [
 window.GALLERY = {
   photos: [
     {
-      id: "bhumipujan", date: "2026-05-08",
+      id: "bhumipujan", date: "2026-04-13",
       title: { hi: "भूमि पूजन", en: "Bhumi Pujan" },
       description: { hi: "", en: "" },
       folder: "images/gallery/Bhumi Pujan",
     },
      {
       id: "vedi-pratishtha", date: "2026-05-09",
-      title: { hi: "वेदी प्रतिष्ठा", en: "Vedi Pratishtha" },
+      title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" },
       description: { hi: "", en: "" },
       folder: "images/gallery/vedi-pratishtha",
       // SAMPLE photos below, just so you can see the slideshow working. Delete this files
@@ -890,9 +890,27 @@ window.ABOUT = [
         en: "Shri 1008 Neminath Digambar Jain Mandir, Nemidham is a Jain mandir dedicated to Bhagwan Neminath."
       },
       {
+        hi: "पुणे की पावन धरा पर बसे जैन परिवारों के मन में एक ही संकल्प था— अपना जमीन से घर हो जहां अपने निवास के समीप एक जिनालय हो, जहाँ भक्ति की धारा अविरल बहती रहे। इसी पवित्र विचार ने जैन श्रावक संघ के अंतर्गत एक स्वरूप लिया। मंदिर निर्माण का यह स्वप्न मात्र एक विचार से शुरू होकर, श्रद्धा और समर्पण की एक अद्भुत यात्रा बन गया।",
+        en: "The Jain families living on the holy land of Pune shared one wish: a Jinalaya close to their homes, where the stream of devotion keeps flowing. This pure thought took shape under the Jain Shravak Sangh. The dream of building the mandir began as a single idea and became a wonderful journey of faith and dedication."
+      },
+      {
+        hi: "इस भव्य मंदिर की नींव और निर्माण की यात्रा 1 जुलाई 2024 को प्रारंभ हुई थी। श्रावकों के अटूट सहयोग और गुरुओं के मार्गदर्शन से, लगभग दो वर्षों के प्रयास के बाद 13 अप्रैल 2026 को भूमि पूजन हुआ और 9 मई 2026 को वेदी प्रतिष्ठा संपन्न हुई।",
+        en: "The journey of laying the foundation and building this grand mandir began on 1 July 2024. With the unfailing support of the shravaks and the guidance of the gurus, after about two years of effort, the Bhumi Pujan was held on 13 April 2026 and the Vedi Pratishtha was completed on 9 May 2026."
+      },
+      {
+        hi: "मूलनायक भगवान की घोषणा मुनि श्री वीर सागर जी, और वेदी प्रतिष्ठा मुनि श्री अजित सागर जी महाराज के मंगल सानिध्य में संपन्न हुई।",
+        en: "The Mulnayak Bhagwan was announced by Muni Shri Veer Sagar Ji, and the Vedi Pratishtha was completed in the auspicious presence of Muni Shri Ajit Sagar Ji Maharaj."
+      },
+      {
         hi: "मंदिर बना हुआ है और अभी धार्मिक कार्य के लिए 3 साल के लिए दान की गई भूमि पर है। मंदिर की अपनी भूमि के लिए भूमि दान लिया जा रहा है और विकास जारी है।",
         en: "The mandir is built and, for now, stands on land given for religious use for 3 years. Bhumi daan is being accepted for the mandir's own land, and development is going on."
       }
+    ],
+    list: [
+      { hi: "मंगल सान्निध्य: मुनि श्री 108 अजित सागर जी, मुनि श्री 108 नीराग सागर जी, और ऐलक श्री 105 विवेकानंद सागर जी महाराज", en: "Mangal Sannidhya: Muni Shri 108 Ajit Sagar Ji, Muni Shri 108 Neerag Sagar Ji and Aelak Shri 105 Vivekanand Sagar Ji Maharaj" },
+      { hi: "प्रतिष्ठाचार्य: भाई प्रदीप भैया 'सुयश'", en: "Pratishthacharya: Bhai Pradeep Bhaiya 'Suyash'" },
+      { hi: "सूर्यमंत्र प्रदाता: निर्यापक मुनिपुंगव श्री 108 सुधासागर जी महाराज", en: "Surya Mantra Pradata: Niryapak Munipungav Shri 108 Sudhasagar Ji Maharaj" },
+      { hi: "मंगल आशीर्वाद: निर्यापक मुनि श्री 108 वीर सागर जी महाराज", en: "Mangal Ashirvad: Niryapak Muni Shri 108 Veer Sagar Ji Maharaj" }
     ]
   },
   {
@@ -906,6 +924,16 @@ window.ABOUT = [
       {
         hi: "उनकी करुणा के लिए उन्हें याद किया जाता है। परंपरा के अनुसार, विवाह के भोज के लिए इकट्ठे पशुओं को देखकर उन्होंने संसार त्याग दिया और दीक्षा ली। जैन परंपरा मानती है कि उन्होंने गिरनार में मोक्ष प्राप्त किया।",
         en: "He is remembered for his deep compassion. According to tradition, when he saw the animals gathered for his wedding feast, he turned away from worldly life and took diksha. Jain tradition holds that he attained moksha at Girnar."
+      }
+    ]
+  },
+  {
+    id: "vision",
+    title: { hi: "हमारी दृष्टि (Vision)", en: "Our vision" },
+    paragraphs: [
+      {
+        hi: "जैन श्रावक संघ द्वारा संचालित यह मंदिर आगामी पीढ़ियों के लिए संस्कार, संस्कृति और धर्म का केंद्र बनेगा। हमारा उद्देश्य यहाँ आने वाले हर श्रद्धालु को शांति, ध्यान और भगवान के दर्शन से आत्मिक संतोष प्रदान करना है।",
+        en: "Run by the Jain Shravak Sangh, this mandir will become a centre of values, culture and dharma for the coming generations. Our aim is to give every devotee who comes here peace, meditation and spiritual contentment through the darshan of Bhagwan."
       }
     ]
   }
