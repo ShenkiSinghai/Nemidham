@@ -710,3 +710,18 @@ body[data-page="home"] .section { overflow: hidden; }
   .bmtbl td.open { grid-column: 1 / -1; }
   .bmtbl tr.same { padding-top: 0; }
 }
+
+/* Shantidhara compact table: saptahik rows grouped by weekday */
+.shtbl tr.first:not(:first-child) td { border-top: 1px solid var(--line); }
+.shtbl tr.same td, .shtbl tr.k-saptahik:not(.first) td { border-top: 0; padding-top: 0; }
+.shtbl .dd { white-space: normal; }
+.bh-toggle.btn { padding: 8px 18px; }
+.dctl.is-all .msel { opacity: .5; }
+@media (max-width: 560px) {
+  .shtbl tr.k-saptahik:not(.first) { grid-template-areas: "date amt" "name name"; padding-top: 0; }
+  .shtbl tr.k-saptahik:not(.first).same { grid-template-areas: "name amt"; }
+  .shtbl tr.k-saptahik:not(.first).same .dn { margin-top: 0; }
+  .shtbl td { border: 0 !important; }
+  .shtbl td:empty { display: none; }
+  .dctl .bh-toggle { width: 100%; }
+}
