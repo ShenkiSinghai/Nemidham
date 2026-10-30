@@ -752,3 +752,12 @@ html[lang="en"] .dnote { font-family: var(--serif); font-size: .95rem; }
 }
 .mselect { font-weight: 500; }
 html[lang="en"] .mselect { font-family: var(--serif); font-size: 1.08rem; }
+
+/* Daan page, English: the card lines (contact line, UPI and bank rows) use the same serif and weight as the English body text */
+html[lang="en"] #daan .fine, html[lang="en"] #daan .rows dt, html[lang="en"] #daan .rows dd, html[lang="en"] #daan .call-btn { font-family: var(--serif); font-weight: 500; }
+html[lang="en"] #daan .fine { font-size: 1.04rem; }
+html[lang="en"] #daan .rows dt, html[lang="en"] #daan .rows dd { font-size: 1.08rem; }
+html[lang="en"] #daan .rows dt { color: var(--muted); }
+#daan .coderow code { font-weight: 500; }
+.amt { margin: 10px 0 12px; }
+html[lang="en"] .amt { font-size: 1.04rem; line-height: 1.5; }
