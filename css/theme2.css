@@ -611,3 +611,44 @@ body[data-page="home"] .section { overflow: hidden; }
 /* UPI ID: never cut off, wrap if the card is narrow */
 .card-upi .coderow code { white-space: normal; overflow-wrap: anywhere; word-break: break-all; overflow: visible; flex: 0 1 auto; }
 .card-upi .coderow dd { flex-wrap: wrap; }
+
+/* ---------- Daan lists: month buttons, Shantidhara / Dravya table, Bhaktamar month chooser ---------- */
+.mtabs .pf, .bh-chips .pf { flex-direction: column; gap: 2px; align-items: center; line-height: 1.25; }
+.mtabs .pf small { font-size: .74rem; opacity: .85; text-transform: none; letter-spacing: 0; font-family: system-ui, "Noto Sans", "Noto Sans Devanagari", sans-serif; }
+.kfilter { margin-bottom: 10px; }
+.bh-chips .pf { flex-direction: row; padding: 7px 14px; min-width: 3.4em; justify-content: center; }
+.dtbl th, .dtbl td { text-align: left; padding: 10px 14px; vertical-align: top; }
+.dtbl .dd { white-space: nowrap; font-weight: 600; }
+.dtbl .dy { color: var(--muted); white-space: nowrap; }
+.dtbl .dm { font-weight: 700; white-space: nowrap; }
+.dtbl .dn { font-weight: 600; }
+.dnote { display: block; font-weight: 400; color: var(--muted); font-size: .86rem; margin-top: 2px; }
+.dtbl .pd-in { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.amt { margin: 10px 0 0; padding: 8px 12px; border-radius: 12px; background: color-mix(in srgb, var(--gold) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent); font-size: .94rem; }
+.d-shot { margin-top: 12px; }
+.bh-card { max-width: 640px; margin-bottom: 12px; }
+.bh-card h3 { margin: 0 0 6px; }
+.bh-date { margin: 0 0 12px; color: var(--muted); }
+.bh-date b { color: var(--text); }
+.bh-fams { border-top: 1px solid var(--line); }
+.bh-fh, .bfam { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.bh-fh { font-size: .8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.bfam:last-child { border-bottom: 0; }
+.bfn { font-weight: 600; min-width: 0; }
+.bfa { font-weight: 700; white-space: nowrap; }
+.bh-fams .open, .btbl .open { color: var(--muted); font-style: italic; display: block; padding: 8px 0; }
+.btbl .bfam { padding: 3px 0; border: 0; }
+.bh-toggle { margin-top: 4px; }
+.bh-all { margin-top: 14px; }
+@media (max-width: 560px) {
+  .mtabs { gap: 6px; }
+  .mtabs .pf { padding: 7px 10px; font-size: .86rem; flex: 1 1 0; min-width: 0; }
+  .dtbl thead { display: none; }
+  .dtbl, .dtbl tbody { display: block; min-width: 0; }
+  .dtbl tr { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "date amt" "day kind" "name name"; gap: 2px 14px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .dtbl tr:last-child { border-bottom: 0; }
+  .dtbl td { padding: 0; border: 0; }
+  .dtbl .dd { grid-area: date; } .dtbl .dm { grid-area: amt; text-align: right; } .dtbl .dy { grid-area: day; font-size: .88rem; }
+  .dtbl .dk { grid-area: kind; text-align: right; color: var(--muted); font-size: .86rem; }
+  .dtbl .dn { grid-area: name; margin-top: 4px; }
+}
