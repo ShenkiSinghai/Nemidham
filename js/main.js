@@ -809,7 +809,14 @@
   /* ---------- karyakram + calendar ---------- */
   /* Bhaktamar month card: month name badge, then each date with its punyarjak families */
   function bhCard(e, past) {
-    var today = todayISO(), ymd = new Date(e.ym + "-01T00:00:00");
+    var today = todayISO();
+    if (e.groups.length === 1) {   /* only one date in the month: a normal-looking karyakram card */
+      var g = e.groups[0], meta = [fullDate(g.date), L(e.time), L(e.place)].filter(Boolean).map(esc).join(", ");
+      return '<article class="event' + (past ? " past" : "") + '">' + dateBadge(g.date) + "<div>" + '<span class="tag">' + esc(L(e.type)) + "</span><h3>" + esc(L(e.title)) + '</h3><p class="meta">' + meta + "</p><p>" +
+        esc(t("bh.fam")) + ": " + esc(L(g.names)) + "</p></div></article>";
+    }
+    /* more than one date: month-name badge, then every date with its families */
+    var ymd = new Date(e.ym + "-01T00:00:00");
     var days = e.groups.map(function (g) {
       return '<p class="bh-dline' + (g.date < today ? " done" : "") + '"><b>' + esc(fullDate(g.date)) + "</b>" + (L(e.time) ? ", " + esc(L(e.time)) : "") + "<br>" + esc(t("bh.fam")) + ": " + esc(L(g.names)) + "</p>";
     }).join("");
@@ -1555,15 +1562,17 @@
         var all = sel.value === "all", ymSel = all ? cur : sel.value;
         one.hidden = all; allBox.hidden = !all;
         if (!all) {
-          var gs = bhGroups(bres.rows, ymSel), body = "";
+          var gs = bhGroups(bres.rows, ymSel), trs = "";
           if (!gs.length) {
-            body = '<p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" + esc(dLabel(bhEff({ ym: ymSel, date: "" }))) + '</b></p><div class="bh-fams"><span class="open">' + esc(ymSel < cur ? "-" : t("d.bh_open")) + "</span></div>";
+            trs = '<tr><td class="bd">' + esc(dLabel(bhEff({ ym: ymSel, date: "" }))) + '</td><td class="open" colspan="2">' + esc(ymSel < cur ? "-" : t("d.bh_open")) + "</td></tr>";
           } else {
-            body = gs.map(function (g) {
-              return '<p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" + esc(dLabel(g.date)) + '</b></p><div class="bh-fams"><div class="bh-fh"><span>' + esc(t("d.bh_name")) + "</span><span>" + esc(t("d.col_amount")) + "</span></div>" + fam(g.es) + "</div>";
-            }).join("");
+            gs.forEach(function (g) {
+              g.es.forEach(function (e, i) {
+                trs += '<tr class="' + (i ? "same" : "first") + '"><td class="bd">' + (i ? "" : esc(dLabel(g.date))) + '</td><td class="bn">' + esc(L(e.name)) + noteHtml(e.note) + '</td><td class="dm">' + esc(fmtAmt(e.rashi) || "-") + "</td></tr>";
+              });
+            });
           }
-          one.innerHTML = '<div class="card bh-card"><h3>' + esc(mName(ymSel) + " " + yr) + "</h3>" + body + "</div>";
+          one.innerHTML = '<div class="bh-month"><h3>' + esc(mName(ymSel) + " " + yr) + '</h3><div class="tbl-wrap"><table class="tbl dtbl bmtbl"><thead><tr><th scope="col">' + esc(t("d.bh_date")) + '</th><th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" + trs + "</tbody></table></div></div>";
         } else {
           var rows = "";
           for (var m = 0; m < 12; m++) {
