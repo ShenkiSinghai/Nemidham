@@ -246,7 +246,8 @@
         if (/^\s*<(!doctype|html)/i.test(txt)) { add("bad", "<b>" + nm + "</b>: link se web page aa raha hai, CSV nahi. Publish to web mein format <b>CSV</b> chunein."); return; }
         var lines = txt.split(/\r?\n/).filter(function (x) { return x.trim(); });
         var head = (lines[0] || "").toLowerCase().replace(/\s+/g, "_");
-        var need = (k === "bhaktamar" || k === "dravya") ? ["month"] : ["date"];
+        var need = (k === "bhaktamar" || k === "dravya") ? ["month"] : (k === "saptahik" ? [] : ["date"]);
+        if (k === "saptahik" && !/(^|,)(din|day|weekday|vaar|var|date)(,|$)/.test(head)) need = ["din (ya date)"];
         var miss = need.filter(function (c) { return head.indexOf(c) < 0; });
         if (!/name/.test(head)) miss.push("name_hi / name_en");
         if (miss.length) { add("bad", "<b>" + nm + "</b>: pehli row (header) mein yeh column nahi mile: " + miss.join(", ") + ". Template ki pehli row na badlein."); return; }
