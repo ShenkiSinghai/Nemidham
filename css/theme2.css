@@ -591,14 +591,23 @@ body[data-page="home"] [data-home="cta"] .section-head::before { transform: tran
 main { overflow-x: clip; }
 body[data-page="home"] .section { overflow: hidden; }
 
-/* Phones: rows with a Copy button (UPI id, account number, IFSC) show the label on top and the value + Copy below, all left-aligned */
-@media (max-width: 560px) {
-  .rows > .coderow { flex-direction: column; align-items: flex-start; gap: 6px; }
-  .rows > .coderow dd { justify-content: flex-start; text-align: left; width: 100%; flex-wrap: wrap; }
-  .rows .coderow code { overflow-wrap: anywhere; word-break: break-all; min-width: 0; }
+/* Rows with a Copy button (account number, IFSC): one line when there is room (label left, value + Copy right);
+   when the card is narrow, label on top and value (left) + Copy (right) on the line below */
+.rows { container-type: inline-size; }
+.rows > .coderow { flex-wrap: nowrap !important; }
+.rows > .coderow dt { text-align: left; }
+.rows > .coderow code { flex: 0 1 auto; }
+@container (max-width: 400px) {
+  .rows > .coderow { flex-wrap: wrap !important; align-items: flex-start !important; }
+  .rows > .coderow dt { flex: 0 0 100%; }
+  .rows > .coderow dd { flex: 1 1 100%; justify-content: space-between; text-align: left; }
+  .rows > .coderow code { overflow-x: auto; }
 }
 /* Phones, English: visitor count and "Website by ..." on separate lines (no stray divider line) */
 @media (max-width: 680px) {
   html[lang="en"] .foot-sub { flex-direction: column; align-items: flex-start; gap: 4px; }
   html[lang="en"] .foot-count + .foot-credit { margin-left: 0; padding-left: 0; border-left: 0; }
 }
+/* UPI ID: never cut off, wrap if the card is narrow */
+.card-upi .coderow code { white-space: normal; overflow-wrap: anywhere; word-break: break-all; overflow: visible; flex: 0 1 auto; }
+.card-upi .coderow dd { flex-wrap: wrap; }
