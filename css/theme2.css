@@ -741,3 +741,14 @@ html[lang="en"] .bfam { font-size: 1.04rem; }
   .dtbl td, .bmtbl td, .btbl td { font-size: .92rem; }
   html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td { font-size: 1rem; }
 }
+
+/* English mode: Daan tables use the same serif body font and weight as the rest of the English pages */
+html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td, html[lang="en"] .bfam, html[lang="en"] .bfn, html[lang="en"] .bfa { font-family: var(--serif); font-size: 1.1rem; font-weight: 500; line-height: 1.45; }
+html[lang="en"] .dtbl .dy, html[lang="en"] .dtbl .dk, html[lang="en"] .dtbl .dk .pd-in { font-size: 1.04rem; }
+html[lang="en"] .dtbl .dm, html[lang="en"] .bmtbl .dm, html[lang="en"] .bfa { font-weight: 500; }
+html[lang="en"] .dnote { font-family: var(--serif); font-size: .95rem; }
+@media (max-width: 560px) {
+  html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td, html[lang="en"] .bfam, html[lang="en"] .bfn, html[lang="en"] .bfa { font-size: 1.04rem; }
+}
+.mselect { font-weight: 500; }
+html[lang="en"] .mselect { font-family: var(--serif); font-size: 1.08rem; }
