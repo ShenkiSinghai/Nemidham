@@ -735,6 +735,24 @@ window.MANDIR_NIYAM = {
 
 ---
 
+### 5.30 Google में दिखना और WhatsApp का शेयर फ़ोटो (SEO)
+
+**ये क्या है?** जब कोई वेबसाइट का लिंक WhatsApp/Facebook पर भेजता है तो एक फ़ोटो + नाम + छोटा विवरण दिखता है। ये `images/og-share.jpg` से आता है। Google के लिए `sitemap.xml` (सारे पेजों की सूची) और `robots.txt` बनी हैं।
+
+**शेयर वाला फ़ोटो बदलना:** नया फ़ोटो 1200x630 साइज़ का बनाओ, नाम `og-share.jpg` रखो और `images` फ़ोल्डर में पुराने की जगह डाल दो। बस इतना ही।
+**ध्यान दो:** WhatsApp पुराना फ़ोटो कुछ दिन याद रखता है। जल्दी बदलवाना हो तो Facebook का "Sharing Debugger" (developers.facebook.com/tools/debug) में लिंक डालकर "Scrape Again" दबाओ।
+
+**हर पेज का टाइटल/विवरण बदलना:** उस पेज की `.html` फ़ाइल खोलो, ऊपर `<title>` और `description` वाली लाइनें हैं, सिर्फ़ उनका लिखा हुआ बदलो।
+
+**अगर वेबसाइट का पता (लिंक) बदले** (जैसे अपना डोमेन लिया): सारी `.html` फ़ाइलों, `sitemap.xml` और `robots.txt` में `https://shenkisinghai.github.io/Nemidham/` ढूँढकर नए पते से बदल दो (Find & Replace से एक बार में हो जाता है)।
+
+**Google Search Console में जोड़ना (ये आपको खुद करना है, एक बार):**
+1. search.google.com/search-console खोलो और अपने Gmail से लॉगिन करो।
+2. "Add property" में **URL prefix** चुनो और `https://shenkisinghai.github.io/Nemidham/` डालो।
+3. Verify के लिए "HTML tag" तरीका चुनो। एक `<meta name="google-site-verification" ...>` लाइन मिलेगी, वो मुझे भेज दो, मैं `index.html` में डाल दूँगा। (या खुद `<head>` में डाल दो।)
+4. फिर Verify दबाओ। बाईं तरफ़ "Sitemaps" में `sitemap.xml` लिखकर Submit करो।
+5. Google को पेज दिखाने में कुछ दिन से 2 हफ़्ते लग सकते हैं। ये सामान्य है।
+
 ## 6. छुपाने / चालू करने (Hide / Enable) की सूची
 
 | क्या छुपाना या चालू करना है | कैसे |

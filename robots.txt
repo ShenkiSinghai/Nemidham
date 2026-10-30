@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /check.html
+Disallow: /gallery-helper.html
+
+Sitemap: https://shenkisinghai.github.io/Nemidham/sitemap.xml
