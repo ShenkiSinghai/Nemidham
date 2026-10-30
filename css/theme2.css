@@ -687,3 +687,26 @@ body[data-page="home"] .section { overflow: hidden; }
 .bh-dline.done b { color: var(--muted); }
 .bh-card .bh-date { margin-top: 14px; }
 .bh-card h3 + .bh-date { margin-top: 0; }
+
+/* Bhaktamar: one month, compact full-width table */
+.bh-month h3 { margin: 0 0 8px; }
+.bmtbl th, .bmtbl td { padding: 9px 14px; vertical-align: top; text-align: left; }
+.bmtbl .bd { white-space: nowrap; font-weight: 600; }
+.bmtbl .bn { font-weight: 600; }
+.bmtbl .dm { font-weight: 700; white-space: nowrap; }
+.bmtbl td.open { color: var(--muted); font-style: italic; }
+.bmtbl tr.same td { border-top: 0; padding-top: 0; }
+.bmtbl tr.first:not(:first-child) td { border-top: 1px solid var(--line); }
+@media (max-width: 560px) {
+  .bmtbl thead { display: none; }
+  .bmtbl, .bmtbl tbody { display: block; min-width: 0; }
+  .bmtbl tr { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "date date" "name amt"; gap: 2px 14px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .bmtbl tr:last-child { border-bottom: 0; }
+  .bmtbl td { padding: 0; border: 0 !important; }
+  .bmtbl .bd { grid-area: date; }
+  .bmtbl .bd:empty { display: none; }
+  .bmtbl .bn { grid-area: name; font-weight: 600; }
+  .bmtbl .dm { grid-area: amt; text-align: right; }
+  .bmtbl td.open { grid-column: 1 / -1; }
+  .bmtbl tr.same { padding-top: 0; }
+}
