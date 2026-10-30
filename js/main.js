@@ -537,6 +537,45 @@
       tr.innerHTML = once + once + once + once;
     }
     startPetals();
+    setupMantraAudio();
+  }
+
+  /* Namokar mantra audio on the Home page. ON by default; a small button lets a visitor switch it off (remembered on that device).
+     Browsers do not allow sound before the visitor touches the page, so it starts at the first tap / click / key press. */
+  var audioState = null;
+  function setupMantraAudio() {
+    var A = S.audio;
+    if (!A || !A.enabled || !A.file || audioState) return;
+    var off = false; try { off = localStorage.getItem("nemi-audio") === "off"; } catch (e) {}
+    var au = new Audio(); au.loop = true; au.preload = "none"; au.volume = A.volume > 0 && A.volume <= 1 ? A.volume : 0.6;
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "audio-btn"; btn.hidden = true;
+    audioState = { au: au, btn: btn };
+    function label() {
+      var playing = !au.paused;
+      btn.setAttribute("aria-pressed", playing ? "true" : "false");
+      btn.innerHTML = '<span aria-hidden="true">' + (playing ? "🔊" : "🔇") + "</span><b>" + esc(t(playing ? "audio.stop" : "audio.play")) + "</b>";
+    }
+    function start() { var p = au.play(); if (p && p.then) p.then(label, function () { label(); armFirstTouch(); }); }
+    var armed = false;
+    function armFirstTouch() {
+      if (armed || off) return; armed = true;
+      var evs = ["pointerdown", "click", "keydown", "touchend"];
+      function go() { evs.forEach(function (e) { document.removeEventListener(e, go, true); }); armed = false; if (!off && au.paused) start(); }
+      evs.forEach(function (e) { document.addEventListener(e, go, true); });
+    }
+    btn.addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      if (au.paused) { off = false; try { localStorage.removeItem("nemi-audio"); } catch (e) {} start(); }
+      else { off = true; au.pause(); try { localStorage.setItem("nemi-audio", "off"); } catch (e) {} label(); }
+    });
+    au.addEventListener("pause", label); au.addEventListener("play", label);
+    /* the button shows only if the audio file really exists */
+    fetch(A.file, { method: "HEAD", cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw 0;
+      au.src = A.file; document.body.appendChild(btn); btn.hidden = false; label();
+      if (!off) { start(); armFirstTouch(); }
+    }).catch(function () {});
   }
 
   /* Floating petals and small lotus flowers in the Home hero (drawn on a canvas). They drift down slowly,
@@ -810,14 +849,18 @@
   }
   function renderKaryakram() {
     var host = document.getElementById("events"); if (!host) return;
-    var sp = splitByDate(vis(window.EVENTS).filter(function (e) { return recentEnough(e, "endDate"); }), "endDate");
     host.innerHTML = '<p><a class="more" href="calendar.html">' + esc(t("nav.calendar")) + '</a></p>' + tabsHtml() + '<div id="events-list" aria-live="polite"></div>';
-    var list = $("#events-list", host);
-    wireTabs(host, function (which) {
+    var list = $("#events-list", host), auto = [], which0 = "upcoming";
+    function paint(which) {
+      which0 = which;
+      var sp = splitByDate(vis(window.EVENTS).concat(auto).filter(function (e) { return recentEnough(e, "endDate"); }), "endDate");
       var items = which === "past" ? sp.past : sp.up;
       list.innerHTML = items.length ? '<div class="events">' + items.map(function (e) { return eventCard(e, which === "past"); }).join("") + "</div>"
         : '<p class="empty">' + esc(t(which === "past" ? "empty.past" : "empty.events")) + "</p>";
-    });
+    }
+    wireTabs(host, paint);
+    /* Bhaktamar path months from the Daan Sheet also appear here as karyakram (see README) */
+    bhaktamarEvents().then(function (evs) { if (evs.length) { auto = evs; paint(which0); } });
   }
   function calCard(c, past) {
     var type = c.type || "other";
@@ -1262,104 +1305,161 @@
     return y + "-" + pad2(m + 1);
   }
   function mName(ym, style) { return new Date(ym + "-01T00:00:00").toLocaleDateString(loc(), { month: style || "long" }); }
-  /* one list: kind = "saptahik" | "masik" | "dravya". Sheet link (SHEETS) if given, else the list written in data.js. */
+  /* month written in a Sheet cell: a number (1-12), English (jan, Jan, january, janu...), Hindi (जनवरी...), or with the year ("Nov 2026", "2026-11", "11/2026") */
+  var MON_EN = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+  var MON_HI = [["जनवरी"], ["फरवरी"], ["मार्च"], ["अप्रैल", "अप्रेल"], ["मई"], ["जून"], ["जुलाई"], ["अगस्त"], ["सितंबर", "सितम्बर"], ["अक्टूबर", "अक्तूबर"], ["नवंबर", "नवम्बर"], ["दिसंबर", "दिसम्बर"]];
+  function hiNorm(s) { return String(s).replace(/[़]/g, "").replace(/ं/g, "ं"); }
+  function monthNum(v) {
+    v = String(v == null ? "" : v).trim().toLowerCase().replace(/[.,]/g, ""); var i, n;
+    if (!v) return 0;
+    if (/^\d{1,2}$/.test(v)) { n = +v; return n >= 1 && n <= 12 ? n : 0; }
+    if (/^[a-z]+$/.test(v) && v.length >= 3) {
+      for (i = 0; i < 12; i++) if (MON_EN[i].slice(0, 3) === v.slice(0, 3)) return i + 1;
+      return 0;
+    }
+    var h = hiNorm(v);
+    for (i = 0; i < 12; i++) for (var k = 0; k < MON_HI[i].length; k++) {
+      var w = hiNorm(MON_HI[i][k]);
+      if (h === w || (h.length >= 3 && w.indexOf(h) === 0)) return i + 1;
+    }
+    return 0;
+  }
+  /* year-month ("YYYY-MM") of a Sheet row from its month / year columns (or its date). No year written: the year that fits the window, else this year. */
+  function rowYM(r, windowYMs) {
+    var mc = String(r.month || r.mahina || "").trim(), yc = String(r.year || r.saal || "").trim(), mt, y = 0, m = 0;
+    if ((mt = mc.match(/(\d{4})/))) { y = +mt[1]; mc = mc.replace(mt[1], " ").replace(/[-\/]/g, " ").trim(); }
+    m = monthNum(mc.split(/\s+/)[0]) || monthNum(mc);
+    if (!m && (mt = String(r.month || "").match(/^\d{1,2}[-\/](\d{4})$/))) { m = +String(r.month).split(/[-\/]/)[0]; y = +mt[1]; }
+    if (!y && /^\d{4}$/.test(yc)) y = +yc;
+    if (m && y) return y + "-" + pad2(m);
+    if (m) {
+      var cy = +todayISO().slice(0, 4), c;
+      if (windowYMs) for (c = cy - 1; c <= cy + 1; c++) if (windowYMs.indexOf(c + "-" + pad2(m)) >= 0) return c + "-" + pad2(m);
+      return cy + "-" + pad2(m);
+    }
+    var d = normDate(r.date);
+    return d ? d.slice(0, 7) : "";
+  }
+  function pickLang(n, lang) { n = n || {}; return typeof n === "string" ? n : (n[lang] || n[lang === "hi" ? "en" : "hi"] || ""); }
+  /* one list: kind = "saptahik" | "masik" | "dravya". Sheet link (SHEETS) if given, else the list written in data.js.
+     Dravya daan needs only month + year; Saptahik / Masik need a full date (to show the weekday). */
   function loadDaanList(kind) {
     var url = (window.SHEETS || {})[kind];
+    var cur = todayISO().slice(0, 7), win = [addMonths(cur, -1), cur, addMonths(cur, 1)];
     if (url) {
       return sheetRows(url).then(function (rows) {
         return { ok: true, rows: rows.map(function (r) {
-          var date = normDate(r.date), name = sheetText(r, "name");
-          if (!date || (!name.hi && !name.en)) return null;
-          return { date: date, kind: kind, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
+          var name = sheetText(r, "name"), date = normDate(r.date), ym;
+          if (!name.hi && !name.en) return null;
+          if (kind === "dravya") { ym = rowYM(r, win); if (!ym) return null; }
+          else { if (!date) return null; ym = date.slice(0, 7); }
+          return { ym: ym, date: date, kind: kind, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
         }).filter(Boolean) };
       }).catch(function () { return { ok: false, rows: [] }; });
     }
     var src = kind === "dravya" ? vis(window.DRAVYA) : vis(window.PUNYARJAK).filter(function (p) { return p.kind === kind; });
-    return Promise.resolve({ ok: true, rows: src.filter(function (p) { return normDate(p.date); }).map(function (p) {
-      return { date: normDate(p.date), kind: kind, name: p.name, note: p.note, rashi: p.rashi != null ? p.rashi : p.amount };
-    }) });
+    return Promise.resolve({ ok: true, rows: src.map(function (p) {
+      var date = normDate(p.date), ym = kind === "dravya" ? (rowYM(p, win) || (p.month ? String(p.month).slice(0, 7) : "")) : (date ? date.slice(0, 7) : "");
+      return ym ? { ym: ym, date: date, kind: kind, name: p.name, note: p.note, rashi: p.rashi != null ? p.rashi : p.amount } : null;
+    }).filter(Boolean) });
   }
   function loadBhaktamar() {
     var url = (window.SHEETS || {}).bhaktamar;
-    function fromRow(r) {
-      var date = normDate(r.date), ym = "", mt;
-      if (r.month && (mt = String(r.month).match(/^(\d{4})[-\/](\d{1,2})$/))) ym = mt[1] + "-" + pad2(+mt[2]);
-      else if (r.year && r.month && /^\d{4}$/.test(r.year) && /^\d{1,2}$/.test(r.month) && +r.month >= 1 && +r.month <= 12) ym = r.year + "-" + pad2(+r.month);
-      else if (date) ym = date.slice(0, 7);
-      return { ym: ym, date: date, r: r };
-    }
+    var yr = todayISO().slice(0, 4);
     if (url) {
       return sheetRows(url).then(function (rows) {
         return { ok: true, rows: rows.map(function (r) {
-          var f = fromRow(r), name = sheetText(r, "name");
-          if (!f.ym || (!name.hi && !name.en)) return null;
-          return { ym: f.ym, date: f.date, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
+          var name = sheetText(r, "name"), ym = rowYM(r, [yr + "-01", yr + "-02", yr + "-03", yr + "-04", yr + "-05", yr + "-06", yr + "-07", yr + "-08", yr + "-09", yr + "-10", yr + "-11", yr + "-12"]);
+          if (!ym || (!name.hi && !name.en)) return null;
+          return { ym: ym, date: normDate(r.date), name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
         }).filter(Boolean) };
       }).catch(function () { return { ok: false, rows: [] }; });
     }
     return Promise.resolve({ ok: true, rows: vis(window.BHAKTAMBAR).map(function (b) {
-      var date = normDate(b.date), ym = date ? date.slice(0, 7) : String(b.month || "").slice(0, 7);
+      var date = normDate(b.date), ym = rowYM(b) || (date ? date.slice(0, 7) : "");
       return /^\d{4}-\d{2}$/.test(ym) ? { ym: ym, date: date, name: b.name, note: b.note, rashi: b.rashi != null ? b.rashi : b.amount } : null;
     }).filter(Boolean) });
   }
+  /* date of one month's Bhaktamar path: the date written in the Sheet row if any, else the 2nd Sunday */
+  function bhDate(rows, ym) {
+    var own = rows.filter(function (e) { return e.ym === ym && e.date; })[0];
+    return own ? own.date : ym + "-" + pad2(secondSunday(+ym.slice(0, 4), +ym.slice(5, 7) - 1));
+  }
+  /* Karyakram made from the Bhaktamar list: one karyakram per month that has a name, on the path's date */
+  var autoEvCache = null;
+  function bhaktamarEvents() {
+    if (S.bhaktamarKaryakram === false) return Promise.resolve([]);
+    if (!autoEvCache) autoEvCache = loadBhaktamar().then(function (res) {
+      if (!res.ok) return [];
+      var yr = todayISO().slice(0, 4), months = {};
+      res.rows.forEach(function (e) { if (e.ym.slice(0, 4) === yr) (months[e.ym] = months[e.ym] || []).push(e); });
+      return Object.keys(months).sort().map(function (ym) {
+        var es = months[ym], date = bhDate(res.rows, ym);
+        return {
+          auto: true, date: date, time: S.bhaktamarTime || "", place: { hi: "मंदिर जी", en: "Mandir ji" },
+          type: { hi: "भक्तामर पाठ", en: "Bhaktamar path" },
+          title: { hi: "मासिक भक्तामर पाठ", en: "Monthly Bhaktamar Path" },
+          text: { hi: "पुण्यार्जक परिवार: " + es.map(function (e) { return pickLang(e.name, "hi"); }).join(", "), en: "Punyarjak family: " + es.map(function (e) { return pickLang(e.name, "en"); }).join(", ") }
+        };
+      });
+    });
+    return autoEvCache;
+  }
   function noteHtml(n) { var x = L(n); return x ? '<small class="dnote">' + esc(x) + "</small>" : ""; }
-  function monthTabs() {
-    return '<div class="pfilter mtabs" role="group" aria-label="' + esc(t("d.cur")) + '">' + [[-1, "d.prev"], [0, "d.cur"], [1, "d.next"]].map(function (x) {
-      return '<button class="pf" type="button" data-o="' + x[0] + '" aria-pressed="' + (x[0] === 0 ? "true" : "false") + '">' + esc(t(x[1])) + '<small class="mt-m"></small></button>';
-    }).join("") + "</div>";
+  /* ONE month chooser: previous / this / next month, in a single dropdown */
+  function monthSelect(cls) {
+    return '<label class="msel ' + (cls || "") + '"><span class="msel-l">' + esc(t("d.month")) + '</span><select class="mselect"></select></label>';
   }
-  function fillTabNames(box) {
-    var cur = todayISO().slice(0, 7);
-    $$(".pf[data-o]", box).forEach(function (b) { var ym = addMonths(cur, +b.getAttribute("data-o")); $(".mt-m", b).textContent = mName(ym) + " " + ym.slice(0, 4); });
+  function fillMonthSelect(sel, keep) {
+    var cur = todayISO().slice(0, 7), prev = keep == null ? "0" : String(keep);
+    sel.innerHTML = [[-1, "d.prev"], [0, "d.cur"], [1, "d.next"]].map(function (x) {
+      var ym = addMonths(cur, x[0]);
+      return '<option value="' + x[0] + '"' + (String(x[0]) === prev ? " selected" : "") + ">" + esc(mName(ym) + " " + ym.slice(0, 4) + " - " + t(x[1])) + "</option>";
+    }).join("");
   }
-  /* the table used for Shantidhara and Dravya daan: same column names in both */
+  /* the table used for Shantidhara (with date, day, type) and Dravya daan (names + amount only) */
   function daanTable(rows, withKind) {
     if (!rows.length) return '<p class="empty">' + esc(t("empty.month")) + "</p>";
-    return '<div class="tbl-wrap"><table class="tbl dtbl"><thead><tr><th scope="col">' + esc(t("d.col_date")) + '</th><th scope="col">' + esc(t("d.col_day")) + "</th>" +
-      (withKind ? '<th scope="col">' + esc(t("d.col_kind")) + "</th>" : "") + '<th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" +
+    var dated = withKind;
+    return '<div class="tbl-wrap"><table class="tbl dtbl' + (dated ? "" : " nodt") + '"><thead><tr>' + (dated ? '<th scope="col">' + esc(t("d.col_date")) + '</th><th scope="col">' + esc(t("d.col_day")) + '</th><th scope="col">' + esc(t("d.col_kind")) + "</th>" : "") +
+      '<th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" +
       rows.map(function (p) {
-        var d = parseDate(p.date);
-        return '<tr class="drow' + (withKind ? " k-" + esc(p.kind) : "") + '"><td class="dd">' + esc(longDate(p.date)) + '</td><td class="dy">' + esc(d.toLocaleDateString(loc(), { weekday: "long" })) + "</td>" +
-          (withKind ? '<td class="dk"><span class="pd-in"><i class="dot dot-' + esc(p.kind) + '"></i>' + esc(t("kind." + p.kind)) + "</span></td>" : "") +
+        var d = p.date ? parseDate(p.date) : null;
+        return '<tr class="drow' + (withKind ? " k-" + esc(p.kind) : "") + '">' + (dated ? '<td class="dd">' + esc(longDate(p.date)) + '</td><td class="dy">' + esc(d.toLocaleDateString(loc(), { weekday: "long" })) + "</td>" +
+          '<td class="dk"><span class="pd-in"><i class="dot dot-' + esc(p.kind) + '"></i>' + esc(t("kind." + p.kind)) + "</span></td>" : "") +
           '<td class="dn">' + esc(L(p.name)) + noteHtml(p.note) + '</td><td class="dm">' + esc(fmtAmt(p.rashi) || "-") + "</td></tr>";
       }).join("") + "</tbody></table></div>";
   }
   function daanListsHtml() {
     var loading = '<p class="empty">' + esc(t("d.list_loading")) + "</p>";
-    var h = '<section id="dravya"><h2>' + esc(t("d.dravya")) + "</h2>" + monthTabs() + '<div class="dbody">' + loading + "</div></section>" +
-      '<section id="punyarjak"><h2>' + esc(t("d.punya")) + '</h2><div class="pfilter kfilter" role="group" aria-label="' + esc(t("d.punya")) + '">' +
+    var h = '<section id="dravya"><h2>' + esc(t("d.dravya")) + '</h2><div class="dctl">' + monthSelect() + '</div><div class="dbody">' + loading + "</div></section>" +
+      '<section id="punyarjak"><h2>' + esc(t("d.punya")) + '</h2><div class="dctl"><div class="pfilter kfilter" role="group" aria-label="' + esc(t("d.punya")) + '">' +
       '<button class="pf" type="button" data-k="all" aria-pressed="true">' + esc(t("d.col_kind_all")) + "</button>" +
       '<button class="pf" type="button" data-k="saptahik" aria-pressed="false"><i class="dot dot-saptahik"></i>' + esc(t("kind.saptahik")) + "</button>" +
       '<button class="pf" type="button" data-k="masik" aria-pressed="false"><i class="dot dot-masik"></i>' + esc(t("kind.masik")) + "</button></div>" +
-      monthTabs() + '<div class="dbody">' + loading + "</div></section>";
+      monthSelect() + '</div><div class="dbody">' + loading + "</div></section>";
     if (window.BHAKTAMBAR !== undefined || (window.SHEETS || {}).bhaktamar) {
-      h += '<section id="bhaktamber"><h2>' + esc(t("d.bhaktamber", { year: todayISO().slice(0, 4) })) + '</h2><div class="pfilter bh-chips" role="group"></div>' +
-        '<div class="bh-one">' + loading + '</div><button class="btn btn-line bh-toggle" type="button" hidden></button><div class="bh-all" hidden></div></section>';
+      h += '<section id="bhaktamber"><h2>' + esc(t("d.bhaktamber", { year: todayISO().slice(0, 4) })) + '</h2><div class="dctl">' + monthSelect("bh-sel") + '</div>' +
+        '<div class="bh-one">' + loading + '</div><div class="bh-all" hidden></div></section>';
     }
     return h;
   }
   function drawDaanLists(host) {
-    var cur = todayISO().slice(0, 7), prev = addMonths(cur, -1), next = addMonths(cur, 1);
-    function inWindow(ym) { return ym === prev || ym === cur || ym === next; }
+    var cur = todayISO().slice(0, 7);
     function setupMonthList(section, getRows, withKind) {
-      var box = $(".dbody", section), state = { o: 0 };
-      fillTabNames(section);
+      var box = $(".dbody", section), sel = $(".mselect", section), state = { o: 0 };
+      fillMonthSelect(sel, 0);
       function draw() {
         var res = getRows();
         if (!res.ok) { box.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; return; }
         var ym = addMonths(cur, state.o);
-        var rows = res.rows.filter(function (p) { return p.date.slice(0, 7) === ym; }).sort(function (a, b) {
-          return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.kind === b.kind ? 0 : a.kind === "saptahik" ? -1 : 1);
+        var rows = res.rows.filter(function (p) { return p.ym === ym; }).sort(function (a, b) {
+          if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+          return a.kind === b.kind ? 0 : a.kind === "saptahik" ? -1 : 1;
         });
         box.innerHTML = (res.warn ? '<p class="note">' + esc(t("d.list_part", { name: res.warn })) + "</p>" : "") + daanTable(rows, withKind);
       }
-      $$(".mtabs .pf", section).forEach(function (b) {
-        b.addEventListener("click", function () {
-          state.o = +b.getAttribute("data-o");
-          $$(".mtabs .pf", section).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-          draw();
-        });
-      });
+      sel.addEventListener("change", function () { state.o = +sel.value; draw(); });
       return { draw: draw, state: state };
     }
     /* Dravya daan */
@@ -1385,21 +1485,15 @@
     });
     Promise.all([loadDaanList("saptahik"), loadDaanList("masik")]).then(function (a) { pres = { sap: a[0], mas: a[1] }; pctl.draw(); });
 
-    /* Bhaktamar: a month chooser for the current year (one month shown), plus "see the whole year" */
+    /* Bhaktamar: ONE dropdown: any month of the current year, or the whole year */
     var bsec = $("#bhaktamber", host);
     if (bsec) {
-      var yr = parseInt(cur.slice(0, 4), 10), sel = cur, all = false, bres = null;
-      var chips = $(".bh-chips", bsec), one = $(".bh-one", bsec), tog = $(".bh-toggle", bsec), allBox = $(".bh-all", bsec);
-      chips.innerHTML = Array.apply(null, Array(12)).map(function (x, m) {
+      var yr = parseInt(cur.slice(0, 4), 10), bres = null;
+      var sel = $(".mselect", bsec), one = $(".bh-one", bsec), allBox = $(".bh-all", bsec), ctl = $(".dctl", bsec);
+      sel.innerHTML = Array.apply(null, Array(12)).map(function (x, m) {
         var ym = yr + "-" + pad2(m + 1);
-        return '<button class="pf" type="button" data-ym="' + ym + '" aria-pressed="' + (ym === cur ? "true" : "false") + '">' + esc(mName(ym, "short")) + "</button>";
-      }).join("");
-      function monthInfo(ym) {
-        var es = bres.rows.filter(function (b) { return b.ym === ym; }), m = +ym.slice(5, 7) - 1;
-        var own = es.filter(function (e) { return e.date; })[0];
-        var date = own ? own.date : ym + "-" + pad2(secondSunday(yr, m));
-        return { es: es, date: date };
-      }
+        return '<option value="' + ym + '"' + (ym === cur ? " selected" : "") + ">" + esc(mName(ym) + " " + yr) + "</option>";
+      }).join("") + '<option value="all">' + esc(t("d.bh_all")) + "</option>";
       function fam(es, ym) {
         if (!es.length) return '<span class="open">' + esc(ym < cur ? "-" : t("d.bh_open")) + "</span>";
         return es.map(function (e) {
@@ -1407,30 +1501,24 @@
         }).join("");
       }
       function drawBh() {
-        if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; tog.hidden = true; allBox.hidden = true; chips.hidden = true; return; }
-        tog.hidden = false;
-        var inf = monthInfo(sel), d = parseDate(inf.date);
-        one.hidden = all; chips.hidden = all;
-        one.innerHTML = '<div class="card bh-card"><h3>' + esc(mName(sel) + " " + yr) + '</h3><p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" +
-          esc(d.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) + '</b></p><div class="bh-fams"><div class="bh-fh"><span>' + esc(t("d.bh_name")) + "</span><span>" + esc(t("d.col_amount")) + "</span></div>" + fam(inf.es, sel) + "</div></div>";
-        if (all) {
+        if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; allBox.hidden = true; ctl.hidden = true; return; }
+        var all = sel.value === "all", ymSel = all ? cur : sel.value;
+        one.hidden = all; allBox.hidden = !all;
+        if (!all) {
+          var es = bres.rows.filter(function (b) { return b.ym === ymSel; }), d = parseDate(bhDate(bres.rows, ymSel));
+          one.innerHTML = '<div class="card bh-card"><h3>' + esc(mName(ymSel) + " " + yr) + '</h3><p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" +
+            esc(d.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) + '</b></p><div class="bh-fams"><div class="bh-fh"><span>' + esc(t("d.bh_name")) + "</span><span>" + esc(t("d.col_amount")) + "</span></div>" + fam(es, ymSel) + "</div></div>";
+        } else {
           var rows = "";
           for (var m = 0; m < 12; m++) {
-            var ym = yr + "-" + pad2(m + 1), x = monthInfo(ym), dd = parseDate(x.date);
+            var ym = yr + "-" + pad2(m + 1), ees = bres.rows.filter(function (b) { return b.ym === ym; }), dd = parseDate(bhDate(bres.rows, ym));
             rows += '<tr class="brow' + (ym === cur ? " now" : "") + '"><td class="bm">' + esc(mName(ym)) + '</td><td class="bd">' + esc(dd.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) +
-              '</td><td class="bn' + (x.es.length ? "" : " open") + '">' + (x.es.length ? x.es.map(function (e) { return '<div class="bfam"><span class="bfn">' + esc(L(e.name)) + noteHtml(e.note) + '</span><span class="bfa">' + esc(fmtAmt(e.rashi)) + "</span></div>"; }).join("") : esc(ym < cur ? "-" : t("d.bh_open"))) + "</td></tr>";
+              '</td><td class="bn' + (ees.length ? "" : " open") + '">' + (ees.length ? ees.map(function (e) { return '<div class="bfam"><span class="bfn">' + esc(L(e.name)) + noteHtml(e.note) + '</span><span class="bfa">' + esc(fmtAmt(e.rashi)) + "</span></div>"; }).join("") : esc(ym < cur ? "-" : t("d.bh_open"))) + "</td></tr>";
           }
           allBox.innerHTML = '<div class="tbl-wrap"><table class="tbl btbl"><thead><tr><th scope="col">' + esc(t("d.bh_month")) + '</th><th scope="col">' + esc(t("d.bh_date")) + '</th><th scope="col">' + esc(t("d.bh_name")) + " / " + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
         }
-        allBox.hidden = !all;
-        tog.textContent = t(all ? "d.bh_one" : "d.bh_all");
-        $$(".pf", chips).forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-ym") === sel ? "true" : "false"); });
       }
-      chips.addEventListener("click", function (ev) {
-        var b = ev.target.closest ? ev.target.closest(".pf") : null;
-        if (b && bres) { sel = b.getAttribute("data-ym"); drawBh(); }
-      });
-      tog.addEventListener("click", function () { all = !all; drawBh(); });
+      sel.addEventListener("change", function () { if (bres) drawBh(); });
       loadBhaktamar().then(function (r) { bres = r; drawBh(); });
     }
   }
