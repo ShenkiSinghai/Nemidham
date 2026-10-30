@@ -221,6 +221,6 @@ window.UI = {
 
     "f.timings": "Daily timings", "f.pages": "Pages",
     "f.legal": "Jai Jinendra. © {year} {name}, {place}.",
-    "f.visitors": "Website visitor count", "f.by": "Website by {name}"
+    "f.visitors": "Website visitor count", "f.by": "Website by: {name}"
   }
 };
