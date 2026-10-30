@@ -120,9 +120,6 @@ window.SITE = {
   //   seconds   how many seconds between each automatic scroll. (Theme 2: 2 seconds. It stops while the visitor keeps the mouse on a photo, and starts again when the mouse moves away.)
   slideshow: { enabled: true, source: "kshamavani-2026", shuffle: false, count: "all", seconds: 2 },
 
-  // Shantidhara punyarjak table (Daan page): true shows only the current month's names.
-  // Set to false if you want last/next month's names to stay visible too.
-  punyarjakCurrentMonthOnly: true,
 
   // Order of the albums on the Gallery page (photos and videos), by each album's date:
   //   "newest"  latest album first (default).   "oldest"  oldest album first.
@@ -1169,6 +1166,7 @@ window.DAAN = {
 window.RECURRING = [
   {
     title: { hi: "मासिक द्रव्य दान", en: "Masik Dravya Daan" },
+    amount: 1122,   // fixed amount shown on the card (write a number, or "" to hide the line)
     when: { hi: "हर महीने", en: "Every month" },
     text: {
       hi: "हर महीने मंदिर के लिए किसी भी तरह की सामग्री का दान, ख़ासकर पूजा की सामग्री। आप भी इसमें जुड़ सकते हैं।",
@@ -1183,6 +1181,7 @@ window.RECURRING = [
   },
   {
     title: { hi: "साप्ताहिक शांतिधारा", en: "Saptahik Shantidhara" },
+    amount: 1022,   // fixed amount shown on the card (write a number, or "" to hide the line)
     when: { hi: "हर हफ्ते", en: "Every week" },
     text: {
       hi: "सप्ताह के किसी एक दिन (जैसे हर मंगलवार) के लिए एक या एक से अधिक श्रद्धालु अपना नाम दे सकते हैं। उस दिन हर हफ्ते उन्हीं पुण्यार्जकों के नाम से शांतिधारा होती है।",
@@ -1197,6 +1196,7 @@ window.RECURRING = [
   },
   {
     title: { hi: "मासिक शांतिधारा", en: "Masik Shantidhara" },
+    amount: 522,   // fixed amount shown on the card (write a number, or "" to hide the line)
     when: { hi: "हर महीने", en: "Every month" },
     text: {
       hi: "महीने की किसी एक तारीख के लिए एक या एक से अधिक श्रद्धालु अपना नाम दे सकते हैं। उस तारीख को हर महीने उन्हीं पुण्यार्जकों के नाम से शांतिधारा होती है।",
@@ -1211,6 +1211,7 @@ window.RECURRING = [
   },
   {
     title: { hi: "मासिक भक्तामर भक्ति", en: "Masik Bhaktamber Bhakti" },
+    amount: 1000,   // fixed amount shown on the card (write a number, or "" to hide the line)
     when: { hi: "हर महीने के दूसरे रविवार", en: "Second Sunday of every month" },
     text: {
       hi: "हर महीने कोई भी परिवार अपना नाम देकर उस महीने के भक्तामर पाठ का पुण्यार्जन कर सकता है। यह पाठ महीने के दूसरे रविवार को होता है।",
@@ -1245,6 +1246,17 @@ window.RECURRING = [
   }
 ];
 
+/* GOOGLE SHEET LINKS for the Daan page lists (names, dates, amounts).
+   Paste the "Publish to web" CSV link of each Sheet tab between the quotes (see README: Google Sheet section).
+   A link left empty "" means: that list is read from the lists written below in this file (PUNYARJAK, DRAVYA, BHAKTAMBAR).
+   Once a link is filled, the Sheet is used and the Daan page shows only the previous / this / next month by itself. */
+window.SHEETS = {
+  saptahik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=1603045792&single=true&output=csv",    // tab "Saptahik Shantidhara"
+  masik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=947962969&single=true&output=csv",       // tab "Masik Shantidhara"
+  dravya: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=2001759128&single=true&output=csv",      // tab "Dravya dan"
+  bhaktamar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=700086573&single=true&output=csv"    // tab "Bhaktamar"
+};
+
 /* Shantidhara punyarjak list. Shown on the Daan page as a calendar-style table, month by month,
    with Saptahik and Masik dates told apart by colour, and a filter to show only one kind.
    kind: "saptahik" or "masik".   date: "YYYY-MM-DD".   name: the punyarjak (plain text or { hi, en }).
@@ -1252,15 +1264,6 @@ window.RECURRING = [
    TO REMOVE: delete the line, or add  hidden: true  to it.
    If there are no rows, the table does not show. Only add a name with that person's permission. */
 window.PUNYARJAK = [
-  // --- SAMPLE rows below, just to show how the table looks. Delete all of them before you publish. ---
-  // Only the current month shows by default on the Daan page (see SITE.punyarjakCurrentMonthOnly
-  // in data.js) — the Nov/Dec rows below are there to show that older/future months stay hidden.
-  { date: "2026-10-06", kind: "saptahik", name: "SAMPLE Name One" },
-  { date: "2026-10-06", kind: "saptahik", name: "SAMPLE Name Two" },
-  { date: "2026-10-13", kind: "saptahik", name: "SAMPLE Name One" },
-  { date: "2026-10-20", kind: "masik", name: "SAMPLE Name Three" },
-  { date: "2026-11-03", kind: "saptahik", name: "SAMPLE Name One" },
-  { date: "2026-12-15", kind: "masik", name: "SAMPLE Name Four" }
 ];
 
 /* Bhaktamber path: monthly punyarjak. Shown on the Daan page as a table of ALL 12 months of the current year.
@@ -1296,7 +1299,4 @@ window.TRUST = {
 /* Masik Dravya Daan: list of donors. If there are no rows, the table does not show.
    Only add a name with the person's permission. */
 window.DRAVYA = [
-  // --- SAMPLE rows below, just to show how the table looks. Delete all of them before you publish. ---
-  { date: "2026-11-01", name: "SAMPLE Name One" },
-  { date: "2026-10-01", name: "SAMPLE Name Two" }
 ];
