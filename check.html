@@ -24,7 +24,7 @@
 <body>
 <main>
   <h1>Site check</h1>
-  <p class="hint">Yeh page <code>js/data.js</code> ko jaanchta hai aur saaf bhasha mein batata hai ki kahan galti hai. Site khaali dikhe ya kuch na dikhe, to pehle yahi kholein.</p>
+  <p class="hint">Yeh page <code>js/data.js</code>, <code>js/i18n.js</code> aur <code>js/main.js</code> ko jaanchta hai aur saaf bhasha mein batata hai ki kahan galti hai (line number ke saath), kaun si photo nahi mili, aur kya kya chhupa hua hai. Site khaali dikhe ya kuch na dikhe, to pehle yahi kholein.</p>
   <div id="summary" class="s-warn">Jaanch chal rahi hai…</div>
   <ul id="out"></ul>
 </main>
@@ -198,6 +198,74 @@
         }));
       });
     });
+
+    /* 8. same id used twice in one list */
+    [["YOJANA", window.YOJANA], ["ACTIVITIES", window.ACTIVITIES], ["SUVIDHA", window.SUVIDHA], ["NEARBY", window.NEARBY], ["ABOUT", window.ABOUT], ["TIMELINE", window.TIMELINE]].forEach(function (p) {
+      var seen = {}, dup = [];
+      (p[1] || []).forEach(function (x) { if (x && x.id) { if (seen[x.id]) dup.push(x.id); seen[x.id] = 1; } });
+      if (dup.length) add("bad", "<b>" + p[0] + "</b>: yeh <b>id</b> do baar aayi hai: " + dup.map(esc).join(", ") + ". Har dabbe ki id alag rakhein.");
+    });
+
+    /* 9. every picture written in data.js must exist on GitHub */
+    var imgs = {};
+    (function walkImg(o, path) {
+      if (!o || typeof o !== "object") return;
+      Object.keys(o).forEach(function (k) {
+        var v = o[k];
+        if (typeof v === "string" && /^images\/[^\s]+\.(jpe?g|png|webp|gif|svg)$/i.test(v)) imgs[v] = path;
+        else if (typeof v === "object") walkImg(v, path ? path + "." + k : k);
+      });
+    })({ SITE: S, YOJANA: window.YOJANA, TIMELINE: window.TIMELINE, NEARBY: window.NEARBY, ACTIVITIES: window.ACTIVITIES, SUVIDHA: window.SUVIDHA, DAAN: window.DAAN, TEAM: window.TEAM }, "");
+    (window.TEAM || []).forEach(function (g) {
+      (g.members || []).forEach(function (mm) {
+        if (mm.photo && !/^(images\/|https?:)/.test(mm.photo)) imgs["images/team/" + mm.photo] = "TEAM (" + (mm.name || "") + ")";
+      });
+    });
+    Object.keys(imgs).forEach(function (u) {
+      checks.push(exists(u).then(function (ok) {
+        if (!ok) add("bad", "Photo <b>" + esc(u) + "</b> nahi mili (data.js mein likhi hai). Photo GitHub par upload karein ya naam theek karein.");
+      }));
+    });
+
+    /* 10. hidden things: a short list so nothing is forgotten */
+    var hid = [];
+    [["YOJANA", window.YOJANA], ["ANNOUNCEMENTS", window.ANNOUNCEMENTS], ["EVENTS", window.EVENTS], ["RECURRING", window.RECURRING], ["TEAM", window.TEAM], ["TIMELINE", window.TIMELINE], ["SUVIDHA", window.SUVIDHA], ["ACTIVITIES", window.ACTIVITIES], ["NEARBY", window.NEARBY], ["HOWTO", window.HOWTO], ["CALENDAR", window.CALENDAR], ["DAILY", window.DAILY]].forEach(function (p) {
+      var n = (p[1] || []).filter(function (x) { return x && x.hidden; }).length;
+      if (n) hid.push(p[0] + " (" + n + ")");
+    });
+    add("ok", hid.length ? "Chhupi hui cheezein (<code>hidden: true</code>): " + hid.join(", ") + ". Dikhani ho to us dabbe se <code>hidden: true,</code> hata dein." : "Koi cheez <code>hidden: true</code> se chhupi nahi hai.");
+
+    /* 11. i18n.js and main.js: spelling of the code itself, and words in both languages */
+    function codeCheck(url, label) {
+      return fetch(url + "?" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.text(); }).then(function (t) {
+        var err = null, prev = window.onerror;
+        window.onerror = function (msg, src, line) { err = { msg: msg, line: line }; return true; };
+        var sc = document.createElement("script"); sc.text = "(function(){\n" + t + "\n})"; document.head.appendChild(sc); sc.remove();
+        window.onerror = prev;
+        if (err) add("bad", "<b>" + label + "</b> mein galti hai, lagbhag line <b>" + (err.line ? Math.max(1, err.line - 1) : "?") + "</b> ke paas. Aksar comma <code>,</code>, quote <code>\"</code> ya bracket chhoot gaya hota hai. Hal: GitHub mein <b>Commits</b> mein jaakar us badlaav ko <b>Revert</b> karein.");
+        else add("ok", "<code>" + label + "</code> ki likhawat theek hai.");
+        return t;
+      }).catch(function () { add("warn", "<code>" + label + "</code> padh nahi payi."); return ""; });
+    }
+    checks.push(codeCheck("js/main.js", "js/main.js"));
+    checks.push(codeCheck("js/i18n.js", "js/i18n.js").then(function (t) {
+      if (!t) return;
+      try {
+        var box = {}; new Function("window", t)(box);
+        var U = box.UI || {}, hk = Object.keys(U.hi || {}), ek = Object.keys(U.en || {}), miss = [];
+        hk.forEach(function (k) { if (!(k in U.en)) miss.push(k + " (English mein nahi)"); });
+        ek.forEach(function (k) { if (!(k in U.hi)) miss.push(k + " (Hindi mein nahi)"); });
+        var ph = [];
+        hk.forEach(function (k) {
+          if (!(k in U.en)) return;
+          var a = (String(U.hi[k]).match(/\{\w+\}/g) || []).sort().join(), b = (String(U.en[k]).match(/\{\w+\}/g) || []).sort().join();
+          if (a !== b) ph.push(k);
+        });
+        if (miss.length) add("warn", "<b>i18n.js</b>: yeh shabd sirf ek bhasha mein hain: <br><span class='hint'>" + miss.slice(0, 10).map(esc).join("<br>") + "</span>");
+        if (ph.length) add("warn", "<b>i18n.js</b>: in shabdon mein <code>{name}</code> jaise kark Hindi aur English mein alag hain: " + ph.map(esc).join(", ") + ". Dono mein ek jaise rakhein.");
+        if (!miss.length && !ph.length) add("ok", "<code>i18n.js</code> mein har shabd Hindi aur English dono mein hai.");
+      } catch (e) { /* syntax error already reported above */ }
+    }));
 
     Promise.all(checks).then(finish);
   }).catch(function (e) {
