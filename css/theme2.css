@@ -672,3 +672,18 @@ body[data-page="home"] .section { overflow: hidden; }
 .audio-btn:hover { background: rgba(60, 30, 110, .92); }
 .audio-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 @media (max-width: 560px) { .audio-btn { left: 10px; bottom: 10px; padding: 8px 13px; font-size: .84rem; } }
+
+/* Daan notes: one box with points */
+.notepts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.notepts li { display: flex; gap: 10px; align-items: flex-start; }
+.notepts .ni { flex: 0 0 1.4em; text-align: center; }
+/* Bhaktamar month card on the Karyakram page */
+.event .date.mo { display: grid; place-items: center; }
+.event .date.mo b { font-size: 1.15rem; line-height: 1.2; }
+.bh-dline { margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--line); }
+.bh-dline:first-of-type { border-top: 0; }
+.bh-dline.done { color: var(--muted); }
+.bh-dline b { color: var(--text); }
+.bh-dline.done b { color: var(--muted); }
+.bh-card .bh-date { margin-top: 14px; }
+.bh-card h3 + .bh-date { margin-top: 0; }
