@@ -312,7 +312,13 @@
         if (document.fonts.ready) document.fonts.ready.then(fitHeader);
         if (document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", fitHeader);
       }
-      window.addEventListener("load", function () { fitHeader(); setTimeout(fitHeader, 700); setTimeout(fitHeader, 2500); });
+      window.addEventListener("load", function () { fitHeader(); setTimeout(fitHeader, 700); setTimeout(fitHeader, 2500); markScrolled(); setTimeout(markScrolled, 400); setTimeout(markScrolled, 1500); });
+      /* Re-check the bar state whenever the layout settles (fonts, images, phone address bar hiding/showing, rotating): otherwise,
+         without any scroll, it could stay in a wrong "scrolled" state from an early measurement. */
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(markScrolled);
+      ["resize", "orientationchange", "pageshow", "touchend"].forEach(function (ev) { window.addEventListener(ev, function () { setTimeout(markScrolled, 60); }, { passive: true }); });
+      document.addEventListener("visibilitychange", function () { if (!document.hidden) markScrolled(); });
+      if ("ResizeObserver" in window) { var ro = new ResizeObserver(function () { markScrolled(); }); var hr = document.getElementById("hero"); if (hr) ro.observe(hr); }
       document.addEventListener("click", function (e) {
         if (!e.target.closest || !e.target.closest(".has-sub")) closeSubs();
         if (!e.target.closest || !e.target.closest(".appearance")) {
@@ -347,7 +353,11 @@
       var h = $("header.site"); if (!h) return;
       var y = window.pageYOffset || document.documentElement.scrollTop || 0;
       var want;
-      if (isHomePage()) {
+      if (isHomePage() && y < 60) {
+        /* at the very top of Home the bar is always see-through and nameless */
+        document.body.classList.remove("name-in-bar");
+        want = false;
+      } else if (isHomePage()) {
         var top = document.getElementById("site-top"), hero = document.getElementById("hero");
         var hb = top ? top.getBoundingClientRect().bottom : 120;
         var place = document.getElementById("hero-place");
