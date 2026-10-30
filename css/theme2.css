@@ -171,8 +171,7 @@ html[lang="hi"] .btn { font-family: "Tiro Devanagari Hindi", serif; letter-spaci
 .h2-img:not([src]) { display: none; }
 .h2-ph { display: none; }
 .h2-murti.fail .h2-ph { display: block; }
-.h2-img { opacity: 0; transition: opacity .55s ease; }
-.h2-murti.ok .h2-img { opacity: 1; }
+.h2-img { opacity: 1; }
 
 .hero2 h1 { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; font-weight: 400; color: #FAF4E4; font-size: clamp(1.7rem, 4.2vw, 3.3rem); line-height: 1.25; letter-spacing: .01em; margin: 0 0 .2rem; text-shadow: 0 4px 30px rgba(0, 0, 0, .5); }
 html[lang="en"] .hero2 h1 { font-family: var(--display); font-size: clamp(1.4rem, 3.4vw, 2.6rem); letter-spacing: .06em; text-transform: uppercase; }
@@ -636,14 +635,13 @@ body[data-page="home"] .section { overflow: hidden; }
 .bfam:last-child { border-bottom: 0; }
 .bfn { font-weight: 600; min-width: 0; }
 .bfa { font-weight: 700; white-space: nowrap; }
-.bh-fams .open, .btbl .open { color: var(--muted); font-style: italic; display: block; padding: 8px 0; }
+.bh-fams .open { color: var(--muted); font-style: italic; display: block; padding: 8px 0; }
+.btbl td.open { color: var(--muted); font-style: italic; }
 .btbl .bfam { padding: 3px 0; border: 0; }
 .bh-toggle { margin-top: 4px; }
 .bh-all { margin-top: 14px; }
 @media (max-width: 560px) {
-  .mtabs { gap: 6px; }
-  .mtabs .pf { padding: 7px 10px; font-size: .86rem; flex: 1 1 0; min-width: 0; }
-  .dtbl thead { display: none; }
+    .dtbl thead { display: none; }
   .dtbl, .dtbl tbody { display: block; min-width: 0; }
   .dtbl tr { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "date amt" "day kind" "name name"; gap: 2px 14px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--line); }
   .dtbl tr:last-child { border-bottom: 0; }
@@ -651,4 +649,26 @@ body[data-page="home"] .section { overflow: hidden; }
   .dtbl .dd { grid-area: date; } .dtbl .dm { grid-area: amt; text-align: right; } .dtbl .dy { grid-area: day; font-size: .88rem; }
   .dtbl .dk { grid-area: kind; text-align: right; color: var(--muted); font-size: .86rem; }
   .dtbl .dn { grid-area: name; margin-top: 4px; }
+  .dtbl.nodt tr { grid-template-columns: 1fr auto; grid-template-areas: "name amt"; }
+  .dtbl.nodt .dn { margin-top: 0; }
+  .dctl { gap: 10px; }
+  .msel { width: 100%; }
+  .mselect { width: 100%; }
 }
+
+/* ---------- Daan lists: one month dropdown (beside the Shantidhara filter) ---------- */
+.dctl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 12px; }
+.dctl .kfilter { margin-bottom: 0; }
+.dctl[hidden] { display: none; }
+.msel { display: inline-flex; align-items: center; gap: 8px; }
+.dctl .kfilter + .msel { margin-left: auto; }
+.msel-l { font-size: .85rem; font-weight: 700; color: var(--muted); }
+.mselect { font: inherit; font-weight: 600; color: var(--text); background: var(--surface); border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); border-radius: 999px; padding: 9px 38px 9px 16px; min-width: 15rem; cursor: pointer; appearance: none; -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--gold-d, #8F7033) 50%), linear-gradient(135deg, var(--gold-d, #8F7033) 50%, transparent 50%); background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%; background-size: 6px 6px; background-repeat: no-repeat; }
+.mselect:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+/* Namokar mantra on/off button (Home) */
+.audio-btn { position: fixed; left: 14px; bottom: 14px; z-index: 60; display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--gold) 70%, transparent); background: rgba(30, 14, 60, .88); color: #FAF4E4; font: inherit; font-size: .9rem; cursor: pointer; box-shadow: 0 6px 20px rgba(0, 0, 0, .3); backdrop-filter: blur(6px); }
+.audio-btn b { font-weight: 600; }
+.audio-btn:hover { background: rgba(60, 30, 110, .92); }
+.audio-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+@media (max-width: 560px) { .audio-btn { left: 10px; bottom: 10px; padding: 8px 13px; font-size: .84rem; } }
