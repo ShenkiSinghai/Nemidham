@@ -1365,20 +1365,53 @@
     return d ? d.slice(0, 7) : "";
   }
   function pickLang(n, lang) { n = n || {}; return typeof n === "string" ? n : (n[lang] || n[lang === "hi" ? "en" : "hi"] || ""); }
+  /* weekday written in a Sheet cell: Tue / tuesday / mangal / मंगलवार ... gives 0 (Sunday) to 6 (Saturday), or -1 */
+  function weekdayNum(v) {
+    v = String(v == null ? "" : v).trim().toLowerCase().replace(/[.,]/g, ""); var i;
+    if (!v) return -1;
+    if (/^[a-z]+$/.test(v) && v.length >= 3) {
+      var en = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      for (i = 0; i < 7; i++) if (en[i] === v.slice(0, 3)) return i;
+      var tr = { rav: 0, som: 1, man: 2, mang: 2, bud: 3, gur: 4, bri: 4, shu: 5, sha: 6 };
+      for (var k in tr) if (v.indexOf(k) === 0) return tr[k];
+      return -1;
+    }
+    var hi = [["रवि", "इतवार"], ["सोम"], ["मंग"], ["बुध"], ["गुरु", "बृह", "वीर"], ["शुक"], ["शनि"]];
+    for (i = 0; i < 7; i++) for (var j = 0; j < hi[i].length; j++) if (v.indexOf(hi[i][j]) === 0) return i;
+    return -1;
+  }
   /* one list: kind = "saptahik" | "masik" | "dravya". Sheet link (SHEETS) if given, else the list written in data.js.
-     Dravya daan needs only month + year; Saptahik / Masik need a full date (to show the weekday). */
+     Dravya daan: year + month only.  Masik: year + month + date (the day number).
+     Saptahik: year + month + din (weekday): the name is repeated by the website on every such weekday of that month. */
   function loadDaanList(kind) {
     var url = (window.SHEETS || {})[kind];
     var cur = todayISO().slice(0, 7), win = [addMonths(cur, -1), cur, addMonths(cur, 1)];
     if (url) {
       return sheetRows(url).then(function (rows) {
-        return { ok: true, rows: rows.map(function (r) {
-          var name = sheetText(r, "name"), date = normDate(r.date), ym;
-          if (!name.hi && !name.en) return null;
-          if (kind === "dravya") { ym = rowYM(r, win); if (!ym) return null; }
-          else { if (!date) return null; ym = date.slice(0, 7); }
-          return { ym: ym, date: date, kind: kind, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
-        }).filter(Boolean) };
+        var out = [];
+        rows.forEach(function (r) {
+          var name = sheetText(r, "name"), date, ym;
+          if (!name.hi && !name.en) return;
+          var base = { kind: kind, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
+          function add(ym2, date2) { var o = {}; for (var k in base) o[k] = base[k]; o.ym = ym2; o.date = date2; out.push(o); }
+          if (kind === "dravya") { ym = rowYM(r, win); if (ym) add(ym, ""); return; }
+          var wdv = r.din || r.day || r.weekday || r.vaar || r.var || "";
+          if (kind === "saptahik" && wdv) {
+            var wn = weekdayNum(wdv); if (wn < 0) return;
+            var mc = String(r.month || r.mahina || "").trim(), yc = String(r.year || r.saal || "").trim();
+            var yms = mc ? [rowYM(r, win)] : win.filter(function (x) { return !/^\d{4}$/.test(yc) || x.slice(0, 4) === yc; });
+            yms.forEach(function (m) {
+              if (win.indexOf(m) < 0) return;
+              var dim = new Date(+m.slice(0, 4), +m.slice(5, 7), 0).getDate();
+              for (var d = 1; d <= dim; d++) if (new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, d).getDay() === wn) add(m, m + "-" + pad2(d));
+            });
+            return;
+          }
+          ym = rowYM(r, win); if (!ym) return;
+          date = bhEntryDate(r.date, ym); if (!date) return;
+          add(date.slice(0, 7), date);
+        });
+        return { ok: true, rows: out };
       }).catch(function () { return { ok: false, rows: [] }; });
     }
     var src = kind === "dravya" ? vis(window.DRAVYA) : vis(window.PUNYARJAK).filter(function (p) { return p.kind === kind; });
