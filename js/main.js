@@ -1206,21 +1206,233 @@
     return c ? '<div class="r-contacts">' + c + "</div>" : "";
   }
   function secondSunday(y, m) { return 1 + ((7 - new Date(y, m, 1).getDay()) % 7) + 7; }
-  function bhaktamberHtml() {
-    if (window.BHAKTAMBAR === undefined) return "";
-    var B = vis(window.BHAKTAMBAR), yr = parseInt(todayISO().slice(0, 4), 10), curYm = todayISO().slice(0, 7), rows = "";
-    for (var m = 0; m < 12; m++) {
-      var ym = yr + "-" + pad2(m + 1);
-      var es = B.filter(function (b) { return String(b.month || b.date || "").slice(0, 7) === ym; });
-      var own = es.filter(function (e) { return e.date; })[0];
-      var date = own ? own.date : ym + "-" + pad2(secondSunday(yr, m));
-      var names = es.map(function (e) { return L(e.name); }).filter(Boolean).join(", ");
-      var d = new Date(date + "T00:00:00");
-      rows += '<tr class="brow' + (ym === curYm ? " now" : "") + '"><td class="bm">' + esc(d.toLocaleDateString(loc(), { month: "long" })) + '</td><td class="bd">' +
-        esc(d.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) + '</td><td class="bn' + (names ? "" : " open") + '">' + esc(names || (ym < curYm ? "-" : t("d.bh_open"))) + "</td></tr>";
+  /* ---------- Daan page lists: Shantidhara, Dravya daan, Bhaktamar (from a Google Sheet, or from data.js) ---------- */
+  function parseCSV(text) {
+    var rows = [], row = [], cur = "", q = false, i, c;
+    text = String(text || "").replace(/^﻿/, "");
+    for (i = 0; i < text.length; i++) {
+      c = text.charAt(i);
+      if (q) {
+        if (c === '"') { if (text.charAt(i + 1) === '"') { cur += '"'; i++; } else q = false; }
+        else cur += c;
+      } else if (c === '"') q = true;
+      else if (c === ",") { row.push(cur); cur = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && text.charAt(i + 1) === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+      else cur += c;
     }
-    return '<section id="bhaktamber"><h2>' + esc(t("d.bhaktamber", { year: yr })) + '</h2><div class="tbl-wrap"><table class="tbl btbl"><thead><tr><th scope="col">' + esc(t("d.bh_month")) +
-      '</th><th scope="col">' + esc(t("d.bh_date")) + '</th><th scope="col">' + esc(t("d.bh_name")) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div></section>";
+    if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+    return rows;
+  }
+  function sheetRows(url) {
+    var ctl = window.AbortController ? new AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 10000) : 0;
+    return fetch(url, ctl ? { signal: ctl.signal } : {}).then(function (r) { if (!r.ok) throw new Error("bad"); return r.text(); }).then(function (txt) {
+      clearTimeout(timer);
+      if (/^\s*<(!doctype|html)/i.test(txt)) throw new Error("not csv");
+      var all = parseCSV(txt).filter(function (r) { return r.some(function (x) { return String(x).trim() !== ""; }); });
+      if (!all.length) return [];
+      var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
+      return all.slice(1).map(function (r) {
+        var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]).trim(); });
+        return o;
+      });
+    });
+  }
+  function normDate(v) {
+    v = String(v == null ? "" : v).trim(); var y, m, d, mt;
+    if ((mt = v.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) { y = +mt[1]; m = +mt[2]; d = +mt[3]; }
+    else if ((mt = v.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/))) { d = +mt[1]; m = +mt[2]; y = +mt[3]; }
+    else return "";
+    var t = new Date(y, m - 1, d);
+    if (t.getFullYear() !== y || t.getMonth() !== m - 1 || t.getDate() !== d) return "";
+    return y + "-" + pad2(m) + "-" + pad2(d);
+  }
+  function sheetText(r, base) {
+    var hi = r[base + "_hi"] || "", en = r[base + "_en"] || "", one = r[base] || "";
+    if (!hi && !en && one) { hi = one; en = one; }
+    return { hi: hi, en: en };
+  }
+  function fmtAmt(v) {
+    if (v == null || v === "") return "";
+    var s = String(v).trim(), n = s.replace(/₹|rs\.?|inr|,|\s/gi, "");
+    return /^\d+(\.\d+)?$/.test(n) ? "₹" + Number(n).toLocaleString(loc()) : s;
+  }
+  function addMonths(ym, n) {
+    var y = +ym.slice(0, 4), m = +ym.slice(5, 7) - 1 + n;
+    y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+    return y + "-" + pad2(m + 1);
+  }
+  function mName(ym, style) { return new Date(ym + "-01T00:00:00").toLocaleDateString(loc(), { month: style || "long" }); }
+  /* one list: kind = "saptahik" | "masik" | "dravya". Sheet link (SHEETS) if given, else the list written in data.js. */
+  function loadDaanList(kind) {
+    var url = (window.SHEETS || {})[kind];
+    if (url) {
+      return sheetRows(url).then(function (rows) {
+        return { ok: true, rows: rows.map(function (r) {
+          var date = normDate(r.date), name = sheetText(r, "name");
+          if (!date || (!name.hi && !name.en)) return null;
+          return { date: date, kind: kind, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
+        }).filter(Boolean) };
+      }).catch(function () { return { ok: false, rows: [] }; });
+    }
+    var src = kind === "dravya" ? vis(window.DRAVYA) : vis(window.PUNYARJAK).filter(function (p) { return p.kind === kind; });
+    return Promise.resolve({ ok: true, rows: src.filter(function (p) { return normDate(p.date); }).map(function (p) {
+      return { date: normDate(p.date), kind: kind, name: p.name, note: p.note, rashi: p.rashi != null ? p.rashi : p.amount };
+    }) });
+  }
+  function loadBhaktamar() {
+    var url = (window.SHEETS || {}).bhaktamar;
+    function fromRow(r) {
+      var date = normDate(r.date), ym = "", mt;
+      if (r.month && (mt = String(r.month).match(/^(\d{4})[-\/](\d{1,2})$/))) ym = mt[1] + "-" + pad2(+mt[2]);
+      else if (r.year && r.month && /^\d{4}$/.test(r.year) && /^\d{1,2}$/.test(r.month) && +r.month >= 1 && +r.month <= 12) ym = r.year + "-" + pad2(+r.month);
+      else if (date) ym = date.slice(0, 7);
+      return { ym: ym, date: date, r: r };
+    }
+    if (url) {
+      return sheetRows(url).then(function (rows) {
+        return { ok: true, rows: rows.map(function (r) {
+          var f = fromRow(r), name = sheetText(r, "name");
+          if (!f.ym || (!name.hi && !name.en)) return null;
+          return { ym: f.ym, date: f.date, name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
+        }).filter(Boolean) };
+      }).catch(function () { return { ok: false, rows: [] }; });
+    }
+    return Promise.resolve({ ok: true, rows: vis(window.BHAKTAMBAR).map(function (b) {
+      var date = normDate(b.date), ym = date ? date.slice(0, 7) : String(b.month || "").slice(0, 7);
+      return /^\d{4}-\d{2}$/.test(ym) ? { ym: ym, date: date, name: b.name, note: b.note, rashi: b.rashi != null ? b.rashi : b.amount } : null;
+    }).filter(Boolean) });
+  }
+  function noteHtml(n) { var x = L(n); return x ? '<small class="dnote">' + esc(x) + "</small>" : ""; }
+  function monthTabs() {
+    return '<div class="pfilter mtabs" role="group" aria-label="' + esc(t("d.cur")) + '">' + [[-1, "d.prev"], [0, "d.cur"], [1, "d.next"]].map(function (x) {
+      return '<button class="pf" type="button" data-o="' + x[0] + '" aria-pressed="' + (x[0] === 0 ? "true" : "false") + '">' + esc(t(x[1])) + '<small class="mt-m"></small></button>';
+    }).join("") + "</div>";
+  }
+  function fillTabNames(box) {
+    var cur = todayISO().slice(0, 7);
+    $$(".pf[data-o]", box).forEach(function (b) { var ym = addMonths(cur, +b.getAttribute("data-o")); $(".mt-m", b).textContent = mName(ym) + " " + ym.slice(0, 4); });
+  }
+  /* the table used for Shantidhara and Dravya daan: same column names in both */
+  function daanTable(rows, withKind) {
+    if (!rows.length) return '<p class="empty">' + esc(t("empty.month")) + "</p>";
+    return '<div class="tbl-wrap"><table class="tbl dtbl"><thead><tr><th scope="col">' + esc(t("d.col_date")) + '</th><th scope="col">' + esc(t("d.col_day")) + "</th>" +
+      (withKind ? '<th scope="col">' + esc(t("d.col_kind")) + "</th>" : "") + '<th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" +
+      rows.map(function (p) {
+        var d = parseDate(p.date);
+        return '<tr class="drow' + (withKind ? " k-" + esc(p.kind) : "") + '"><td class="dd">' + esc(longDate(p.date)) + '</td><td class="dy">' + esc(d.toLocaleDateString(loc(), { weekday: "long" })) + "</td>" +
+          (withKind ? '<td class="dk"><span class="pd-in"><i class="dot dot-' + esc(p.kind) + '"></i>' + esc(t("kind." + p.kind)) + "</span></td>" : "") +
+          '<td class="dn">' + esc(L(p.name)) + noteHtml(p.note) + '</td><td class="dm">' + esc(fmtAmt(p.rashi) || "-") + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+  function daanListsHtml() {
+    var loading = '<p class="empty">' + esc(t("d.list_loading")) + "</p>";
+    var h = '<section id="dravya"><h2>' + esc(t("d.dravya")) + "</h2>" + monthTabs() + '<div class="dbody">' + loading + "</div></section>" +
+      '<section id="punyarjak"><h2>' + esc(t("d.punya")) + '</h2><div class="pfilter kfilter" role="group" aria-label="' + esc(t("d.punya")) + '">' +
+      '<button class="pf" type="button" data-k="all" aria-pressed="true">' + esc(t("d.col_kind_all")) + "</button>" +
+      '<button class="pf" type="button" data-k="saptahik" aria-pressed="false"><i class="dot dot-saptahik"></i>' + esc(t("kind.saptahik")) + "</button>" +
+      '<button class="pf" type="button" data-k="masik" aria-pressed="false"><i class="dot dot-masik"></i>' + esc(t("kind.masik")) + "</button></div>" +
+      monthTabs() + '<div class="dbody">' + loading + "</div></section>";
+    if (window.BHAKTAMBAR !== undefined || (window.SHEETS || {}).bhaktamar) {
+      h += '<section id="bhaktamber"><h2>' + esc(t("d.bhaktamber", { year: todayISO().slice(0, 4) })) + '</h2><div class="pfilter bh-chips" role="group"></div>' +
+        '<div class="bh-one">' + loading + '</div><button class="btn btn-line bh-toggle" type="button" hidden></button><div class="bh-all" hidden></div></section>';
+    }
+    return h;
+  }
+  function drawDaanLists(host) {
+    var cur = todayISO().slice(0, 7), prev = addMonths(cur, -1), next = addMonths(cur, 1);
+    function inWindow(ym) { return ym === prev || ym === cur || ym === next; }
+    function setupMonthList(section, getRows, withKind) {
+      var box = $(".dbody", section), state = { o: 0 };
+      fillTabNames(section);
+      function draw() {
+        var res = getRows();
+        if (!res.ok) { box.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; return; }
+        var ym = addMonths(cur, state.o);
+        var rows = res.rows.filter(function (p) { return p.date.slice(0, 7) === ym; }).sort(function (a, b) {
+          return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.kind === b.kind ? 0 : a.kind === "saptahik" ? -1 : 1);
+        });
+        box.innerHTML = (res.warn ? '<p class="note">' + esc(t("d.list_part", { name: res.warn })) + "</p>" : "") + daanTable(rows, withKind);
+      }
+      $$(".mtabs .pf", section).forEach(function (b) {
+        b.addEventListener("click", function () {
+          state.o = +b.getAttribute("data-o");
+          $$(".mtabs .pf", section).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+          draw();
+        });
+      });
+      return { draw: draw, state: state };
+    }
+    /* Dravya daan */
+    var dres = null, dsec = $("#dravya", host);
+    var dctl = setupMonthList(dsec, function () { return dres || { ok: true, rows: [] }; }, false);
+    loadDaanList("dravya").then(function (r) { dres = r; dctl.draw(); });
+    /* Shantidhara: Saptahik + Masik in one table, with the All / Saptahik / Masik filter */
+    var psec = $("#punyarjak", host), pres = null, kind = "all";
+    var pctl = setupMonthList(psec, function () {
+      if (!pres) return { ok: true, rows: [] };
+      if (!pres.sap.ok && !pres.mas.ok) return { ok: false, rows: [] };
+      var rows = [], miss = [];
+      if (kind !== "masik") { rows = rows.concat(pres.sap.rows); if (!pres.sap.ok) miss.push(t("kind.saptahik")); }
+      if (kind !== "saptahik") { rows = rows.concat(pres.mas.rows); if (!pres.mas.ok) miss.push(t("kind.masik")); }
+      return { ok: true, rows: rows, warn: miss.join(", ") };
+    }, true);
+    $$(".kfilter .pf", psec).forEach(function (b) {
+      b.addEventListener("click", function () {
+        kind = b.getAttribute("data-k");
+        $$(".kfilter .pf", psec).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        pctl.draw();
+      });
+    });
+    Promise.all([loadDaanList("saptahik"), loadDaanList("masik")]).then(function (a) { pres = { sap: a[0], mas: a[1] }; pctl.draw(); });
+
+    /* Bhaktamar: a month chooser for the current year (one month shown), plus "see the whole year" */
+    var bsec = $("#bhaktamber", host);
+    if (bsec) {
+      var yr = parseInt(cur.slice(0, 4), 10), sel = cur, all = false, bres = null;
+      var chips = $(".bh-chips", bsec), one = $(".bh-one", bsec), tog = $(".bh-toggle", bsec), allBox = $(".bh-all", bsec);
+      chips.innerHTML = Array.apply(null, Array(12)).map(function (x, m) {
+        var ym = yr + "-" + pad2(m + 1);
+        return '<button class="pf" type="button" data-ym="' + ym + '" aria-pressed="' + (ym === cur ? "true" : "false") + '">' + esc(mName(ym, "short")) + "</button>";
+      }).join("");
+      function monthInfo(ym) {
+        var es = bres.rows.filter(function (b) { return b.ym === ym; }), m = +ym.slice(5, 7) - 1;
+        var own = es.filter(function (e) { return e.date; })[0];
+        var date = own ? own.date : ym + "-" + pad2(secondSunday(yr, m));
+        return { es: es, date: date };
+      }
+      function fam(es, ym) {
+        if (!es.length) return '<span class="open">' + esc(ym < cur ? "-" : t("d.bh_open")) + "</span>";
+        return es.map(function (e) {
+          return '<div class="bfam"><span class="bfn">' + esc(L(e.name)) + noteHtml(e.note) + '</span><span class="bfa">' + esc(fmtAmt(e.rashi)) + "</span></div>";
+        }).join("");
+      }
+      function drawBh() {
+        if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; tog.hidden = true; allBox.hidden = true; chips.hidden = true; return; }
+        tog.hidden = false;
+        var inf = monthInfo(sel), d = parseDate(inf.date);
+        one.hidden = all; chips.hidden = all;
+        one.innerHTML = '<div class="card bh-card"><h3>' + esc(mName(sel) + " " + yr) + '</h3><p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" +
+          esc(d.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) + '</b></p><div class="bh-fams"><div class="bh-fh"><span>' + esc(t("d.bh_name")) + "</span><span>" + esc(t("d.col_amount")) + "</span></div>" + fam(inf.es, sel) + "</div></div>";
+        if (all) {
+          var rows = "";
+          for (var m = 0; m < 12; m++) {
+            var ym = yr + "-" + pad2(m + 1), x = monthInfo(ym), dd = parseDate(x.date);
+            rows += '<tr class="brow' + (ym === cur ? " now" : "") + '"><td class="bm">' + esc(mName(ym)) + '</td><td class="bd">' + esc(dd.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) +
+              '</td><td class="bn' + (x.es.length ? "" : " open") + '">' + (x.es.length ? x.es.map(function (e) { return '<div class="bfam"><span class="bfn">' + esc(L(e.name)) + noteHtml(e.note) + '</span><span class="bfa">' + esc(fmtAmt(e.rashi)) + "</span></div>"; }).join("") : esc(ym < cur ? "-" : t("d.bh_open"))) + "</td></tr>";
+          }
+          allBox.innerHTML = '<div class="tbl-wrap"><table class="tbl btbl"><thead><tr><th scope="col">' + esc(t("d.bh_month")) + '</th><th scope="col">' + esc(t("d.bh_date")) + '</th><th scope="col">' + esc(t("d.bh_name")) + " / " + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
+        }
+        allBox.hidden = !all;
+        tog.textContent = t(all ? "d.bh_one" : "d.bh_all");
+        $$(".pf", chips).forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-ym") === sel ? "true" : "false"); });
+      }
+      chips.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest(".pf") : null;
+        if (b && bres) { sel = b.getAttribute("data-ym"); drawBh(); }
+      });
+      tog.addEventListener("click", function () { all = !all; drawBh(); });
+      loadBhaktamar().then(function (r) { bres = r; drawBh(); });
+    }
   }
   function renderDaan() {
     var D = window.DAAN || {};
@@ -1242,7 +1454,7 @@
     }
     if (L(D.inPerson)) cards += '<div class="card"><h3>' + esc(t("d.person")) + "</h3><p>" + esc(L(D.inPerson)) + "</p></div>";
     html += '<section id="how"><h2>' + esc(t("d.how")) + '</h2><div class="cards three">' + cards + "</div>" +
-      (L(D.note) ? '<p class="note">' + esc(L(D.note)) + "</p>" : "") + "</section>";
+      (L(D.note) ? '<p class="note">' + esc(L(D.note)) + "</p>" : "") + '<p class="fine d-shot">' + esc(t("d.screenshot")) + "</p></section>";
 
     if (L(D.disclaimer)) html += '<p class="note disclaimer" role="note">' + esc(L(D.disclaimer)) + "</p>";
 
@@ -1250,6 +1462,7 @@
     if (R.length) {
       html += '<section id="regular"><h2>' + esc(t("d.regular")) + '</h2><p class="measure">' + esc(t("d.regular_p")) + '</p><div class="cards three">' + R.map(function (r) {
         return '<div class="card"><span class="tag">' + esc(L(r.when)) + "</span><h3>" + esc(L(r.title)) + "</h3><p>" + esc(L(r.text)) + "</p>" +
+          (fmtAmt(r.amount) ? '<p class="amt">' + esc(t("d.amount_line", { amt: fmtAmt(r.amount) })) + "</p>" : "") +
           (L(r.how) ? '<p class="fine">' + esc(L(r.how)) + "</p>" : "") + recContacts(r) + "</div>";
       }).join("") + "</div></section>";
     }
@@ -1264,57 +1477,11 @@
         : '<p class="empty">' + esc(t("d.trust_soon")) + "</p>") + (L(TR.note) ? '<p class="fine">' + esc(L(TR.note)) + "</p>" : "") + "</section>";
     }
 
-    var DR = vis(window.DRAVYA).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-    html += '<section id="dravya"><h2>' + esc(t("d.dravya")) + "</h2>" + (DR.length
-      ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th scope="col">' + esc(t("d.col_date")) +
-        '</th><th scope="col">' + esc(t("d.col_donor")) + "</th></tr></thead><tbody>" + DR.map(function (p) {
-          return "<tr><td>" + esc(longDate(p.date)) + "</td><td>" + esc(L(p.name)) + "</td></tr>";
-        }).join("") + "</tbody></table></div>"
-      : '<p class="empty">' + esc(t("empty.dravya")) + "</p>") + "</section>";
-
-    var P = vis(window.PUNYARJAK).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
-    html += '<section id="punyarjak"><h2>' + esc(t("d.punya")) + "</h2>" +
-      (P.length
-        ? '<div class="pfilter" role="group" aria-label="' + esc(t("d.punya")) + '">' +
-          '<button class="pf" type="button" data-k="all" aria-pressed="true">' + esc(t("d.col_kind_all")) + "</button>" +
-          '<button class="pf" type="button" data-k="saptahik" aria-pressed="false"><i class="dot dot-saptahik"></i>' + esc(t("kind.saptahik")) + "</button>" +
-          '<button class="pf" type="button" data-k="masik" aria-pressed="false"><i class="dot dot-masik"></i>' + esc(t("kind.masik")) + "</button>" +
-          '</div><div id="punya-body"></div>'
-        : '<p class="empty">' + esc(t("empty.punya")) + "</p>") + "</section>";
-    html += bhaktamberHtml();
+    html += daanListsHtml();
     html += '<p class="thanks">' + esc(t("d.thanks")) + "</p>";
     host.innerHTML = html;
 
-    if (P.length) {
-      var pbody = $("#punya-body", host);
-      function monthLabel(ym) { return new Date(ym + "-01T00:00:00").toLocaleDateString(loc(), { month: "long", year: "numeric" }); }
-      function drawPunya(kind) {
-        var rows = kind === "all" ? P : P.filter(function (p) { return p.kind === kind; });
-        if (S.punyarjakCurrentMonthOnly !== false) {
-          var curYm = todayISO().slice(0, 7);
-          rows = rows.filter(function (p) { return String(p.date).slice(0, 7) === curYm; });
-        }
-        var months = {}, order = [];
-        rows.forEach(function (p) {
-          var ym = String(p.date).slice(0, 7);
-          if (!months[ym]) { months[ym] = []; order.push(ym); }
-          months[ym].push(p);
-        });
-        pbody.innerHTML = order.length ? order.map(function (ym) {
-          return '<div class="pmonth"><h3>' + esc(monthLabel(ym)) + '</h3><div class="tbl-wrap"><table class="tbl ptbl"><tbody>' +
-            months[ym].map(function (p) {
-              return '<tr class="prow k-' + esc(p.kind) + '"><td class="pd"><span class="pd-in"><i class="dot dot-' + esc(p.kind) + '"></i>' + esc(longDate(p.date)) + '</span></td><td class="pk">' + esc(t("kind." + p.kind)) + '</td><td class="pn">' + esc(L(p.name)) + "</td></tr>";
-            }).join("") + "</tbody></table></div></div>";
-        }).join("") : '<p class="empty">' + esc(t("empty.punya")) + "</p>";
-      }
-      $$(".pf", host).forEach(function (b) {
-        b.addEventListener("click", function () {
-          $$(".pf", host).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
-          drawPunya(b.getAttribute("data-k"));
-        });
-      });
-      drawPunya("all");
-    }
+    drawDaanLists(host);
 
     $$(".copy", host).forEach(function (b) {
       b.addEventListener("click", function () {

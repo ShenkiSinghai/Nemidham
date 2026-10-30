@@ -98,6 +98,11 @@ window.UI = {
     "d.soon": "दान की जानकारी जल्द जोड़ी जाएगी। कृपया मंदिर कार्यालय से संपर्क करें।",
     "d.trust": "ट्रस्ट और 80G की जानकारी", "d.trust_soon": "ट्रस्ट और 80G की जानकारी जल्द जोड़ी जाएगी।",
     "d.thanks": "आपके दान के लिए हृदय से धन्यवाद। बहुत-बहुत अनुमोदना। जय जिनेन्द्र। 🙏",
+    "d.col_day": "दिन", "d.col_amount": "राशि", "d.prev": "पिछला महीना", "d.cur": "इस महीने", "d.next": "अगला महीना",
+    "empty.month": "इस महीने के लिए अभी कोई नाम नहीं जोड़ा गया है।", "d.list_soon": "सूची जल्द जोड़ी जाएगी।", "d.list_loading": "सूची लोड हो रही है…",
+    "d.list_part": "{name}: यह सूची अभी लोड नहीं हो सकी।", "d.bh_all": "पूरा साल देखें", "d.bh_one": "एक महीना देखें",
+    "d.amount_line": "समिति द्वारा निर्धारित राशि {amt} है। आप स्वेच्छानुसार राशि भी समर्पित कर पुण्य कार्य में सहभागी बन सकते हैं।",
+    "d.screenshot": "राशि समर्पित करने के बाद कृपया भुगतान का स्क्रीनशॉट संबंधित संपर्क व्यक्ति को साझा करें।",
     "copy": "कॉपी", "copied": "कॉपी हो गया", "copyfail": "चुनकर कॉपी करें",
 
     "v.map": "नक्शा", "v.open": "Google Maps में खोलें", "v.nomap": "नक्शा जल्द जोड़ा जाएगा।",
@@ -209,6 +214,11 @@ window.UI = {
     "d.soon": "Daan details will be added soon. Please contact the mandir office.",
     "d.trust": "Trust and 80G details", "d.trust_soon": "Trust and 80G details will be added soon.",
     "d.thanks": "Heartfelt thanks for your daan. Bahut bahut anumodna. Jai Jinendra. 🙏",
+    "d.col_day": "Day", "d.col_amount": "Amount", "d.prev": "Previous month", "d.cur": "This month", "d.next": "Next month",
+    "empty.month": "No name has been added for this month yet.", "d.list_soon": "The list will be added soon.", "d.list_loading": "Loading the list…",
+    "d.list_part": "{name}: this list could not be loaded right now.", "d.bh_all": "See the whole year", "d.bh_one": "See one month",
+    "d.amount_line": "The amount fixed by the samiti is {amt}. You may also offer any amount of your choice and share in this punya karya.",
+    "d.screenshot": "After giving the amount, please share a screenshot of the payment with the contact person concerned.",
     "copy": "Copy", "copied": "Copied", "copyfail": "Select and copy",
 
     "v.map": "Map", "v.open": "Open in Google Maps", "v.nomap": "The map will be added soon.",
