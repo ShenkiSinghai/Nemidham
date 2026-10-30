@@ -761,3 +761,10 @@ html[lang="en"] #daan .rows dt { color: var(--muted); }
 #daan .coderow code { font-weight: 500; }
 .amt { margin: 10px 0 12px; }
 html[lang="en"] .amt { font-size: 1.04rem; line-height: 1.5; }
+
+/* Bhaktamar: several punyarjak families listed one per line (numbered) */
+.bh-fl { margin: 6px 0 2px; }
+.bh-flist { margin: 0 0 4px; padding-left: 1.4em; }
+.bh-flist li { margin: 2px 0; padding-left: 2px; }
+.bh-flist li::marker { color: var(--gold, #b8934a); font-weight: 500; }
+.bh-dline > .bh-fl:first-of-type { margin-top: 4px; }

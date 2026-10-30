@@ -808,17 +808,23 @@
 
   /* ---------- karyakram + calendar ---------- */
   /* Bhaktamar month card: month name badge, then each date with its punyarjak families */
+  /* punyarjak families: one family -> one line; more than one -> a numbered list so they never look like one family */
+  function famHtml(names) {
+    var list = (names && L(names) || []).filter(Boolean);
+    if (list.length < 2) return "<p>" + esc(t("bh.fam")) + ": " + esc(list[0] || "") + "</p>";
+    return '<div class="bh-fl">' + esc(t("bh.fams")) + ':</div><ol class="bh-flist">' + list.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ol>";
+  }
   function bhCard(e, past) {
     var today = todayISO();
     if (e.groups.length === 1) {   /* only one date in the month: a normal-looking karyakram card */
       var g = e.groups[0], meta = [fullDate(g.date), L(e.time), L(e.place)].filter(Boolean).map(esc).join(", ");
-      return '<article class="event' + (past ? " past" : "") + '">' + dateBadge(g.date) + "<div>" + '<span class="tag">' + esc(L(e.type)) + "</span><h3>" + esc(L(e.title)) + '</h3><p class="meta">' + meta + "</p><p>" +
-        esc(t("bh.fam")) + ": " + esc(L(g.names)) + "</p></div></article>";
+      return '<article class="event' + (past ? " past" : "") + '">' + dateBadge(g.date) + "<div>" + '<span class="tag">' + esc(L(e.type)) + "</span><h3>" + esc(L(e.title)) + '</h3><p class="meta">' + meta + "</p>" +
+        famHtml(g.names) + "</div></article>";
     }
     /* more than one date: month-name badge, then every date with its families */
     var ymd = new Date(e.ym + "-01T00:00:00");
     var days = e.groups.map(function (g) {
-      return '<p class="bh-dline' + (g.date < today ? " done" : "") + '"><b>' + esc(fullDate(g.date)) + "</b>" + (L(e.time) ? ", " + esc(L(e.time)) : "") + "<br>" + esc(t("bh.fam")) + ": " + esc(L(g.names)) + "</p>";
+      return '<div class="bh-dline' + (g.date < today ? " done" : "") + '"><b>' + esc(fullDate(g.date)) + "</b>" + (L(e.time) ? ", " + esc(L(e.time)) : "") + famHtml(g.names) + "</div>";
     }).join("");
     return '<article class="event event-bh' + (past ? " past" : "") + '"><div class="date mo" aria-hidden="true"><b>' + esc(ymd.toLocaleDateString(loc(), { month: "short" })) + "</b></div><div>" +
       '<span class="tag">' + esc(L(e.type)) + "</span><h3>" + esc(L(e.title)) + '</h3><p class="meta">' + esc(L(e.place)) + "</p>" + days + "</div></article>";
@@ -829,7 +835,7 @@
     var meta = [when, L(e.time), L(e.place)].filter(Boolean).map(esc).join(", ");
     return '<article class="event' + (past ? " past" : "") + '">' + dateBadge(e.date) + "<div>" +
       (L(e.type) ? '<span class="tag">' + esc(L(e.type)) + "</span>" : "") +
-      "<h3>" + esc(L(e.title)) + '</h3><p class="meta">' + meta + "</p>" + (L(e.text) ? "<p>" + esc(L(e.text)) + "</p>" : "") + "</div></article>";
+      "<h3>" + esc(L(e.title)) + '</h3><p class="meta">' + meta + "</p>" + (e.fams ? famHtml(e.fams) : L(e.text) ? "<p>" + esc(L(e.text)) + "</p>" : "") + "</div></article>";
   }
   function splitByDate(list, endKey) {
     var today = todayISO();
@@ -1474,7 +1480,7 @@
       res.rows.forEach(function (e) { if (e.ym.slice(0, 4) === yr) yms[e.ym] = 1; });
       return Object.keys(yms).sort().map(function (ym) {
         var g = bhGroups(res.rows, ym).map(function (x) {
-          return { date: x.date, names: { hi: x.es.map(function (e) { return pickLang(e.name, "hi"); }).join(", "), en: x.es.map(function (e) { return pickLang(e.name, "en"); }).join(", ") } };
+          return { date: x.date, names: { hi: x.es.map(function (e) { return pickLang(e.name, "hi"); }), en: x.es.map(function (e) { return pickLang(e.name, "en"); }) } };
         });
         return { auto: true, bh: true, ym: ym, date: g[0].date, endDate: g[g.length - 1].date, groups: g, time: S.bhaktamarTime || "", place: { hi: "मंदिर जी", en: "Mandir ji" },
           type: { hi: "भक्तामर पाठ", en: "Bhaktamar path" }, title: { hi: "मासिक भक्तामर पाठ", en: "Monthly Bhaktamar Path" } };
@@ -1488,7 +1494,7 @@
     monthEvs.forEach(function (m) {
       m.groups.forEach(function (g) {
         out.push({ auto: true, date: g.date, time: m.time, place: m.place, type: m.type, title: m.title,
-          text: { hi: "पुण्यार्जक परिवार: " + g.names.hi, en: "Punyarjak family: " + g.names.en } });
+          fams: g.names });
       });
     });
     return out;
@@ -1880,7 +1886,7 @@
     }).join("") + "</ol>" : "";
     var special = evs.map(function (e) {
       var meta = [L(e.time), L(e.place)].filter(Boolean).map(esc).join(", ");
-      return '<article class="dspecial"><span class="tag">' + esc(L(e.type) || t("daily.special")) + "</span><h4>" + esc(L(e.title)) + "</h4>" + (meta ? '<p class="meta">' + meta + "</p>" : "") + (L(e.text) ? "<p>" + esc(L(e.text)) + "</p>" : "") + "</article>";
+      return '<article class="dspecial"><span class="tag">' + esc(L(e.type) || t("daily.special")) + "</span><h4>" + esc(L(e.title)) + "</h4>" + (meta ? '<p class="meta">' + meta + "</p>" : "") + (e.fams ? famHtml(e.fams) : L(e.text) ? "<p>" + esc(L(e.text)) + "</p>" : "") + "</article>";
     }).join("") + jn.map(function (c) {
       return '<article class="dspecial jain"><span class="tag tag-' + esc(c.type || "other") + '">' + esc(t("cal." + (c.type || "other"))) + "</span><h4>" + esc(L(c.title)) + "</h4>" + (L(c.note) ? "<p>" + esc(L(c.note)) + "</p>" : "") + "</article>";
     }).join("");
