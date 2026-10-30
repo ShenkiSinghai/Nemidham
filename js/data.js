@@ -998,18 +998,16 @@ window.DAILY = [
    when     (chahe to) mahina / tareekh, jaise { hi: "अगस्त", en: "August" }. Nahi chahiye to line hata do ya "" likho.
    title    heading {hi,en}.        text   vivaran {hi,en} (khali chhod sakte ho).
 
-   PHOTO:  1) photo ko  images/timeline/  folder mein daalo (folder na ho to bana lo), chhota rakho (width ~1200px, JPG, 300 KB tak).
+   PHOTO:  1) photo ko  images/timeline/  folder mein daalo (folder na ho to bana lo), chhota rakho (width ~1000px, WEBP ya JPG, 300 KB tak).
            2) entry mein likho:   photo: "images/timeline/bhumi-daan.jpg"                       (ek photo)
                           ya:     photos: ["images/timeline/a.jpg", "images/timeline/b.jpg"]   (kai photo; click par bada khulta hai)
            Photo CHHUPANE ke liye (file wahin rahe):  hidePhoto: true,
            Photo HATANE ke liye:  photo: "" ya photos: [] kar do (ya wo line delete kar do).
-   NOTE: neeche ki entries SAMPLE hain, asli saal/ghatna likho. */
+   NOTE: entries mandir ke asli safar ki hain; nayi ghatna upar bataye tareeke se jodo. */
 window.TIMELINE = [
-  { year: "2023", when: { hi: "SAMPLE: जनवरी", en: "SAMPLE: January" }, title: { hi: "SAMPLE: भूमि दान", en: "SAMPLE: Land donated" }, text: { hi: "SAMPLE: धार्मिक कार्य के लिए भूमि 3 साल के लिए दान मिली।", en: "SAMPLE: Land was given for religious use for 3 years." }, photo: "" },
-  { year: "2024", when: { hi: "SAMPLE: मार्च", en: "SAMPLE: March" }, title: { hi: "SAMPLE: मंदिर का निर्माण", en: "SAMPLE: The mandir is built" }, text: { hi: "SAMPLE: मंदिर जी का निर्माण पूरा हुआ।", en: "SAMPLE: Construction of the mandir was completed." }, photos: [] },
-  { year: "2024", when: { hi: "SAMPLE: अगस्त", en: "SAMPLE: August" }, title: { hi: "SAMPLE: पहला उत्सव", en: "SAMPLE: First festival" }, text: { hi: "SAMPLE: एक ही साल की दूसरी घटना ऐसे जुड़ती है।", en: "SAMPLE: A second event of the same year is added like this." }, photo: "" },
-  { year: "2025", title: { hi: "SAMPLE: वेदी प्रतिष्ठा", en: "SAMPLE: Vedi pratishtha" }, text: { hi: "SAMPLE: भगवान नेमिनाथ की प्रतिष्ठा हुई।", en: "SAMPLE: Bhagwan Neminath was installed." }, photo: "" },
-  { year: "2026", title: { hi: "SAMPLE: क्षमावाणी और नई योजनाएं", en: "SAMPLE: Kshamavani and new yojanayen" }, text: { hi: "SAMPLE: संत शाला और नई प्रतिमाओं के लिए योजनाएं शुरू।", en: "SAMPLE: Yojanayen for the sant shala and new murtis began." }, photo: "" }
+  { year: "2024", when: { hi: "1 जुलाई", en: "1 July" }, title: { hi: "नींव और निर्माण की शुरुआत", en: "Foundation and construction begin" }, text: { hi: "मंदिर निर्माण की यात्रा शुरू हुई।", en: "The journey of building the mandir began." }, photo: "" },
+  { year: "2026", when: { hi: "13 अप्रैल", en: "13 April" }, title: { hi: "भूमि पूजन", en: "Bhumi Pujan" }, text: { hi: "श्रावकों के साथ भूमि पूजन संपन्न हुआ।", en: "Bhumi Pujan was held with the shravaks." }, photo: "images/timeline/bhumi-pujan.webp" },
+  { year: "2026", when: { hi: "9 मई", en: "9 May" }, title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" }, text: { hi: "भव्य वेदी प्रतिष्ठा संपन्न हुई।", en: "The grand Vedi Pratishtha was completed." }, photo: "images/timeline/vedi-pratishtha.webp" }
 ];
 
 /* ---------- 9ख-2. Nearby (Visit > Nearby page): mandirs, tirths, tourist places ... ----------
