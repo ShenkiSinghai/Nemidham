@@ -725,3 +725,19 @@ body[data-page="home"] .section { overflow: hidden; }
   .shtbl td:empty { display: none; }
   .dctl .bh-toggle { width: 100%; }
 }
+
+/* Daan tables: calmer content text (smaller, regular weight) to match the rest of the theme */
+.dtbl td, .bmtbl td, .btbl td { font-size: .94rem; line-height: 1.55; font-weight: 400; color: var(--text); }
+html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td { font-size: 1.04rem; line-height: 1.5; }
+.dtbl td .num, .bmtbl td .num, .btbl td .num { font-size: 1em; }
+.dtbl .dd, .dtbl .dn, .bmtbl .bd, .bmtbl .bn, .btbl .bm, .btbl .bd, .bfn { font-weight: 500; }
+.dtbl .dm, .bmtbl .dm, .bfa { font-weight: 500; }
+.dtbl .dy, .dtbl .dk { font-size: .88rem; }
+html[lang="en"] .dtbl .dy, html[lang="en"] .dtbl .dk { font-size: .96rem; }
+.dnote { font-size: .82rem; }
+.bfam { font-size: .94rem; }
+html[lang="en"] .bfam { font-size: 1.04rem; }
+@media (max-width: 560px) {
+  .dtbl td, .bmtbl td, .btbl td { font-size: .92rem; }
+  html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td { font-size: 1rem; }
+}
