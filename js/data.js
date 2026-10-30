@@ -135,8 +135,9 @@ window.SITE = {
   //   "newest"  latest album first (default).   "oldest"  oldest album first.
   albumOrder: "newest",
 
-  // Karyakram older than this many days drop off the "Past" tab. Use -1 to keep them all.
-  karyakramPastDays: 30,
+  // Karyakram older than this drop off the "Past" tab. "year" = 365 days (366 in a leap year), counted back from today.
+  // You can also write a number of days (like 30), or -1 to keep them all.
+  karyakramPastDays: "year",
 
   // Where this site lives on GitHub. Only needed for the automatic photo list in Gallery albums.
   github: { user: "shenkisinghai", repo: "Nemidham" },

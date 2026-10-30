@@ -807,7 +807,17 @@
   }
 
   /* ---------- karyakram + calendar ---------- */
+  /* Bhaktamar month card: month name badge, then each date with its punyarjak families */
+  function bhCard(e, past) {
+    var today = todayISO(), ymd = new Date(e.ym + "-01T00:00:00");
+    var days = e.groups.map(function (g) {
+      return '<p class="bh-dline' + (g.date < today ? " done" : "") + '"><b>' + esc(fullDate(g.date)) + "</b>" + (L(e.time) ? ", " + esc(L(e.time)) : "") + "<br>" + esc(t("bh.fam")) + ": " + esc(L(g.names)) + "</p>";
+    }).join("");
+    return '<article class="event event-bh' + (past ? " past" : "") + '"><div class="date mo" aria-hidden="true"><b>' + esc(ymd.toLocaleDateString(loc(), { month: "short" })) + "</b></div><div>" +
+      '<span class="tag">' + esc(L(e.type)) + "</span><h3>" + esc(L(e.title)) + '</h3><p class="meta">' + esc(L(e.place)) + "</p>" + days + "</div></article>";
+  }
   function eventCard(e, past) {
+    if (e.bh) return bhCard(e, past);
     var when = e.endDate && e.endDate !== e.date ? rangeText(e.date, e.endDate) : fullDate(e.date);
     var meta = [when, L(e.time), L(e.place)].filter(Boolean).map(esc).join(", ");
     return '<article class="event' + (past ? " past" : "") + '">' + dateBadge(e.date) + "<div>" +
@@ -842,7 +852,8 @@
   /* Karyakram older than this many days quietly drop off the "past" list too, so it doesn't
      keep growing forever. Change the number if you'd rather keep them longer. */
   function recentEnough(e, key) {
-    var days = S.karyakramPastDays == null ? 30 : Number(S.karyakramPastDays);
+    var yy = +todayISO().slice(0, 4), yearDays = (yy % 4 === 0 && yy % 100 !== 0) || yy % 400 === 0 ? 366 : 365;
+    var days = (S.karyakramPastDays == null || S.karyakramPastDays === "year") ? yearDays : Number(S.karyakramPastDays);
     if (!(days >= 0)) return true;
     var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
     return new Date((e[key] || e.date) + "T00:00:00") >= cutoff;
@@ -1266,7 +1277,13 @@
     if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
     return rows;
   }
+  var sheetCache = {};
   function sheetRows(url) {
+    if (sheetCache[url]) return sheetCache[url];
+    var pr = sheetRows0(url); sheetCache[url] = pr; pr.catch(function () { delete sheetCache[url]; }); return pr;
+  }
+  var daanSel = { dravya: "0", punya: "0", kind: "all", bh: "" };   /* what the visitor chose; kept when only the language changes */
+  function sheetRows0(url) {
     var ctl = window.AbortController ? new AbortController() : null, timer = ctl ? setTimeout(function () { ctl.abort(); }, 10000) : 0;
     return fetch(url, ctl ? { signal: ctl.signal } : {}).then(function (r) { if (!r.ok) throw new Error("bad"); return r.text(); }).then(function (txt) {
       clearTimeout(timer);
@@ -1363,47 +1380,78 @@
       return ym ? { ym: ym, date: date, kind: kind, name: p.name, note: p.note, rashi: p.rashi != null ? p.rashi : p.amount } : null;
     }).filter(Boolean) });
   }
+  /* Bhaktamar "date" cell: a full date (2026-10-15, 15/10/2026) or just the day number (15) of the row's month. Empty = default (2nd Sunday). */
+  function bhEntryDate(v, ym) {
+    v = String(v == null ? "" : v).trim();
+    if (!v) return "";
+    if (/^\d{1,2}$/.test(v)) {
+      var d = +v, y = +ym.slice(0, 4), m = +ym.slice(5, 7) - 1;
+      return d >= 1 && new Date(y, m, d).getMonth() === m ? ym + "-" + pad2(d) : "";
+    }
+    return normDate(v);
+  }
   function loadBhaktamar() {
     var url = (window.SHEETS || {}).bhaktamar;
-    var yr = todayISO().slice(0, 4);
+    var yr = todayISO().slice(0, 4), win = [];
+    for (var i = 1; i <= 12; i++) win.push(yr + "-" + pad2(i));
+    function mk(r, name, note, rashi) {
+      var ym = rowYM(r, win); if (!ym) return null;
+      var date = bhEntryDate(r.date, ym);
+      if (date) ym = date.slice(0, 7);
+      return { ym: ym, date: date, name: name, note: note, rashi: rashi };
+    }
     if (url) {
       return sheetRows(url).then(function (rows) {
         return { ok: true, rows: rows.map(function (r) {
-          var name = sheetText(r, "name"), ym = rowYM(r, [yr + "-01", yr + "-02", yr + "-03", yr + "-04", yr + "-05", yr + "-06", yr + "-07", yr + "-08", yr + "-09", yr + "-10", yr + "-11", yr + "-12"]);
-          if (!ym || (!name.hi && !name.en)) return null;
-          return { ym: ym, date: normDate(r.date), name: name, note: sheetText(r, "note"), rashi: r.rashi || r.amount || "" };
+          var name = sheetText(r, "name");
+          if (!name.hi && !name.en) return null;
+          return mk(r, name, sheetText(r, "note"), r.rashi || r.amount || "");
         }).filter(Boolean) };
       }).catch(function () { return { ok: false, rows: [] }; });
     }
     return Promise.resolve({ ok: true, rows: vis(window.BHAKTAMBAR).map(function (b) {
-      var date = normDate(b.date), ym = rowYM(b) || (date ? date.slice(0, 7) : "");
-      return /^\d{4}-\d{2}$/.test(ym) ? { ym: ym, date: date, name: b.name, note: b.note, rashi: b.rashi != null ? b.rashi : b.amount } : null;
+      return mk({ month: b.month, year: b.year, date: b.date }, b.name, b.note, b.rashi != null ? b.rashi : b.amount);
     }).filter(Boolean) });
   }
-  /* date of one month's Bhaktamar path: the date written in the Sheet row if any, else the 2nd Sunday */
-  function bhDate(rows, ym) {
-    var own = rows.filter(function (e) { return e.ym === ym && e.date; })[0];
-    return own ? own.date : ym + "-" + pad2(secondSunday(+ym.slice(0, 4), +ym.slice(5, 7) - 1));
+  /* date of one Bhaktamar entry: its own date if written, else the 2nd Sunday of its month */
+  function bhEff(e) {
+    return e.date || e.ym + "-" + pad2(secondSunday(+e.ym.slice(0, 4), +e.ym.slice(5, 7) - 1));
   }
-  /* Karyakram made from the Bhaktamar list: one karyakram per month that has a name, on the path's date */
+  /* the entries of one month, grouped by date: [{ date, es: [entries] }] sorted by date */
+  function bhGroups(rows, ym) {
+    var map = {};
+    rows.filter(function (e) { return e.ym === ym; }).forEach(function (e) { var d = bhEff(e); (map[d] = map[d] || []).push(e); });
+    return Object.keys(map).sort().map(function (d) { return { date: d, es: map[d] }; });
+  }
+  /* Karyakram made from the Bhaktamar list: ONE card per month (listing every date of that month with its punyarjak families).
+     In the daily calendar each date gets its own entry. */
   var autoEvCache = null;
   function bhaktamarEvents() {
     if (S.bhaktamarKaryakram === false) return Promise.resolve([]);
     if (!autoEvCache) autoEvCache = loadBhaktamar().then(function (res) {
       if (!res.ok) return [];
-      var yr = todayISO().slice(0, 4), months = {};
-      res.rows.forEach(function (e) { if (e.ym.slice(0, 4) === yr) (months[e.ym] = months[e.ym] || []).push(e); });
-      return Object.keys(months).sort().map(function (ym) {
-        var es = months[ym], date = bhDate(res.rows, ym);
-        return {
-          auto: true, date: date, time: S.bhaktamarTime || "", place: { hi: "मंदिर जी", en: "Mandir ji" },
-          type: { hi: "भक्तामर पाठ", en: "Bhaktamar path" },
-          title: { hi: "मासिक भक्तामर पाठ", en: "Monthly Bhaktamar Path" },
-          text: { hi: "पुण्यार्जक परिवार: " + es.map(function (e) { return pickLang(e.name, "hi"); }).join(", "), en: "Punyarjak family: " + es.map(function (e) { return pickLang(e.name, "en"); }).join(", ") }
-        };
+      var yr = todayISO().slice(0, 4), yms = {};
+      res.rows.forEach(function (e) { if (e.ym.slice(0, 4) === yr) yms[e.ym] = 1; });
+      return Object.keys(yms).sort().map(function (ym) {
+        var g = bhGroups(res.rows, ym).map(function (x) {
+          return { date: x.date, names: { hi: x.es.map(function (e) { return pickLang(e.name, "hi"); }).join(", "), en: x.es.map(function (e) { return pickLang(e.name, "en"); }).join(", ") } };
+        });
+        return { auto: true, bh: true, ym: ym, date: g[0].date, endDate: g[g.length - 1].date, groups: g, time: S.bhaktamarTime || "", place: { hi: "मंदिर जी", en: "Mandir ji" },
+          type: { hi: "भक्तामर पाठ", en: "Bhaktamar path" }, title: { hi: "मासिक भक्तामर पाठ", en: "Monthly Bhaktamar Path" } };
       });
     });
     return autoEvCache;
+  }
+  /* one single-day entry for each date (used by the daily karyakram page and its calendar) */
+  function bhDayEvents(monthEvs) {
+    var out = [];
+    monthEvs.forEach(function (m) {
+      m.groups.forEach(function (g) {
+        out.push({ auto: true, date: g.date, time: m.time, place: m.place, type: m.type, title: m.title,
+          text: { hi: "पुण्यार्जक परिवार: " + g.names.hi, en: "Punyarjak family: " + g.names.en } });
+      });
+    });
+    return out;
   }
   function noteHtml(n) { var x = L(n); return x ? '<small class="dnote">' + esc(x) + "</small>" : ""; }
   /* ONE month chooser: previous / this / next month, in a single dropdown */
@@ -1446,9 +1494,9 @@
   }
   function drawDaanLists(host) {
     var cur = todayISO().slice(0, 7);
-    function setupMonthList(section, getRows, withKind) {
-      var box = $(".dbody", section), sel = $(".mselect", section), state = { o: 0 };
-      fillMonthSelect(sel, 0);
+    function setupMonthList(section, getRows, withKind, key) {
+      var box = $(".dbody", section), sel = $(".mselect", section), state = { o: +daanSel[key] || 0 };
+      fillMonthSelect(sel, state.o);
       function draw() {
         var res = getRows();
         if (!res.ok) { box.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; return; }
@@ -1459,15 +1507,16 @@
         });
         box.innerHTML = (res.warn ? '<p class="note">' + esc(t("d.list_part", { name: res.warn })) + "</p>" : "") + daanTable(rows, withKind);
       }
-      sel.addEventListener("change", function () { state.o = +sel.value; draw(); });
+      sel.addEventListener("change", function () { state.o = +sel.value; daanSel[key] = sel.value; draw(); });
       return { draw: draw, state: state };
     }
     /* Dravya daan */
     var dres = null, dsec = $("#dravya", host);
-    var dctl = setupMonthList(dsec, function () { return dres || { ok: true, rows: [] }; }, false);
+    var dctl = setupMonthList(dsec, function () { return dres || { ok: true, rows: [] }; }, false, "dravya");
     loadDaanList("dravya").then(function (r) { dres = r; dctl.draw(); });
     /* Shantidhara: Saptahik + Masik in one table, with the All / Saptahik / Masik filter */
-    var psec = $("#punyarjak", host), pres = null, kind = "all";
+    var psec = $("#punyarjak", host), pres = null, kind = daanSel.kind;
+    $$(".kfilter .pf", psec).forEach(function (x) { x.setAttribute("aria-pressed", x.getAttribute("data-k") === kind ? "true" : "false"); });
     var pctl = setupMonthList(psec, function () {
       if (!pres) return { ok: true, rows: [] };
       if (!pres.sap.ok && !pres.mas.ok) return { ok: false, rows: [] };
@@ -1475,10 +1524,10 @@
       if (kind !== "masik") { rows = rows.concat(pres.sap.rows); if (!pres.sap.ok) miss.push(t("kind.saptahik")); }
       if (kind !== "saptahik") { rows = rows.concat(pres.mas.rows); if (!pres.mas.ok) miss.push(t("kind.masik")); }
       return { ok: true, rows: rows, warn: miss.join(", ") };
-    }, true);
+    }, true, "punya");
     $$(".kfilter .pf", psec).forEach(function (b) {
       b.addEventListener("click", function () {
-        kind = b.getAttribute("data-k");
+        kind = daanSel.kind = b.getAttribute("data-k");
         $$(".kfilter .pf", psec).forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
         pctl.draw();
       });
@@ -1492,33 +1541,43 @@
       var sel = $(".mselect", bsec), one = $(".bh-one", bsec), allBox = $(".bh-all", bsec), ctl = $(".dctl", bsec);
       sel.innerHTML = Array.apply(null, Array(12)).map(function (x, m) {
         var ym = yr + "-" + pad2(m + 1);
-        return '<option value="' + ym + '"' + (ym === cur ? " selected" : "") + ">" + esc(mName(ym) + " " + yr) + "</option>";
+        return '<option value="' + ym + '">' + esc(mName(ym) + " " + yr) + "</option>";
       }).join("") + '<option value="all">' + esc(t("d.bh_all")) + "</option>";
-      function fam(es, ym) {
-        if (!es.length) return '<span class="open">' + esc(ym < cur ? "-" : t("d.bh_open")) + "</span>";
+      sel.value = daanSel.bh && $('option[value="' + daanSel.bh + '"]', sel) ? daanSel.bh : cur;
+      function fam(es) {
         return es.map(function (e) {
           return '<div class="bfam"><span class="bfn">' + esc(L(e.name)) + noteHtml(e.note) + '</span><span class="bfa">' + esc(fmtAmt(e.rashi)) + "</span></div>";
         }).join("");
       }
+      function dLabel(iso) { return parseDate(iso).toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" }); }
       function drawBh() {
         if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; allBox.hidden = true; ctl.hidden = true; return; }
         var all = sel.value === "all", ymSel = all ? cur : sel.value;
         one.hidden = all; allBox.hidden = !all;
         if (!all) {
-          var es = bres.rows.filter(function (b) { return b.ym === ymSel; }), d = parseDate(bhDate(bres.rows, ymSel));
-          one.innerHTML = '<div class="card bh-card"><h3>' + esc(mName(ymSel) + " " + yr) + '</h3><p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" +
-            esc(d.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) + '</b></p><div class="bh-fams"><div class="bh-fh"><span>' + esc(t("d.bh_name")) + "</span><span>" + esc(t("d.col_amount")) + "</span></div>" + fam(es, ymSel) + "</div></div>";
+          var gs = bhGroups(bres.rows, ymSel), body = "";
+          if (!gs.length) {
+            body = '<p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" + esc(dLabel(bhEff({ ym: ymSel, date: "" }))) + '</b></p><div class="bh-fams"><span class="open">' + esc(ymSel < cur ? "-" : t("d.bh_open")) + "</span></div>";
+          } else {
+            body = gs.map(function (g) {
+              return '<p class="bh-date">' + esc(t("d.bh_date")) + ": <b>" + esc(dLabel(g.date)) + '</b></p><div class="bh-fams"><div class="bh-fh"><span>' + esc(t("d.bh_name")) + "</span><span>" + esc(t("d.col_amount")) + "</span></div>" + fam(g.es) + "</div>";
+            }).join("");
+          }
+          one.innerHTML = '<div class="card bh-card"><h3>' + esc(mName(ymSel) + " " + yr) + "</h3>" + body + "</div>";
         } else {
           var rows = "";
           for (var m = 0; m < 12; m++) {
-            var ym = yr + "-" + pad2(m + 1), ees = bres.rows.filter(function (b) { return b.ym === ym; }), dd = parseDate(bhDate(bres.rows, ym));
-            rows += '<tr class="brow' + (ym === cur ? " now" : "") + '"><td class="bm">' + esc(mName(ym)) + '</td><td class="bd">' + esc(dd.toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" })) +
-              '</td><td class="bn' + (ees.length ? "" : " open") + '">' + (ees.length ? ees.map(function (e) { return '<div class="bfam"><span class="bfn">' + esc(L(e.name)) + noteHtml(e.note) + '</span><span class="bfa">' + esc(fmtAmt(e.rashi)) + "</span></div>"; }).join("") : esc(ym < cur ? "-" : t("d.bh_open"))) + "</td></tr>";
+            var ym = yr + "-" + pad2(m + 1), g2 = bhGroups(bres.rows, ym);
+            if (!g2.length) g2 = [{ date: bhEff({ ym: ym, date: "" }), es: [] }];
+            g2.forEach(function (g, gi) {
+              rows += '<tr class="brow' + (ym === cur ? " now" : "") + '"><td class="bm">' + (gi ? "" : esc(mName(ym))) + '</td><td class="bd">' + esc(dLabel(g.date)) +
+                '</td><td class="bn' + (g.es.length ? "" : " open") + '">' + (g.es.length ? fam(g.es) : esc(ym < cur ? "-" : t("d.bh_open"))) + "</td></tr>";
+            });
           }
           allBox.innerHTML = '<div class="tbl-wrap"><table class="tbl btbl"><thead><tr><th scope="col">' + esc(t("d.bh_month")) + '</th><th scope="col">' + esc(t("d.bh_date")) + '</th><th scope="col">' + esc(t("d.bh_name")) + " / " + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
         }
       }
-      sel.addEventListener("change", function () { if (bres) drawBh(); });
+      sel.addEventListener("change", function () { daanSel.bh = sel.value; if (bres) drawBh(); });
       loadBhaktamar().then(function (r) { bres = r; drawBh(); });
     }
   }
@@ -1542,9 +1601,16 @@
     }
     if (L(D.inPerson)) cards += '<div class="card"><h3>' + esc(t("d.person")) + "</h3><p>" + esc(L(D.inPerson)) + "</p></div>";
     html += '<section id="how"><h2>' + esc(t("d.how")) + '</h2><div class="cards three">' + cards + "</div>" +
-      (L(D.note) ? '<p class="note">' + esc(L(D.note)) + "</p>" : "") + '<p class="fine d-shot">' + esc(t("d.screenshot")) + "</p></section>";
+      "</section>";
 
-    if (L(D.disclaimer)) html += '<p class="note disclaimer" role="note">' + esc(L(D.disclaimer)) + "</p>";
+    /* one box of points: any extra note, the caution (with a warning sign), and the screenshot request */
+    var pts = [];
+    if (L(D.note)) pts.push(["•", L(D.note)]);
+    if (L(D.disclaimer)) pts.push(["⚠️", L(D.disclaimer)]);
+    pts.push(["•", t("d.screenshot")]);
+    html += '<div class="note disclaimer" role="note"><ul class="notepts">' + pts.map(function (x) {
+      return '<li><span class="ni" aria-hidden="true">' + x[0] + "</span><span>" + esc(x[1]) + "</span></li>";
+    }).join("") + "</ul></div>";
 
     var R = vis(window.RECURRING);
     if (R.length) {
@@ -1692,10 +1758,10 @@
   var visitBound = false;
 
   /* ---------- daily karyakram: schedule + a month calendar (any past or coming date) ---------- */
-  var dailyDay = "", dailyMonth = "";
+  var dailyDay = "", dailyMonth = "", bhDay = [], bhDayAsked = false;
   function isoOf(y, m, d) { return y + "-" + pad2(m + 1) + "-" + pad2(d); }
   function eventsOn(iso) {
-    return vis(window.EVENTS).filter(function (e) { return e.date <= iso && (e.endDate || e.date) >= iso; });
+    return vis(window.EVENTS).filter(function (e) { return e.date <= iso && (e.endDate || e.date) >= iso; }).concat(bhDay.filter(function (e) { return e.date === iso; }));
   }
   function jainOn(iso) { return vis(window.CALENDAR).filter(function (c) { return c.date === iso; }); }
   function dailyRows() {
@@ -1707,6 +1773,7 @@
   }
   function renderDaily() {
     var host = document.getElementById("daily"); if (!host) return;
+    if (!bhDayAsked) { bhDayAsked = true; bhaktamarEvents().then(function (evs) { if (evs.length) { bhDay = bhDayEvents(evs); renderDaily(); } }); }
     var today = todayISO();
     if (!dailyDay) {
       var q = ""; try { q = new URLSearchParams(location.search).get("date") || ""; } catch (e) {}
