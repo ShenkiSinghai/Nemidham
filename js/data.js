@@ -1007,7 +1007,10 @@ window.DAILY = [
 window.TIMELINE = [
   { year: "2024", when: { hi: "1 जुलाई", en: "1 July" }, title: { hi: "नींव और निर्माण की शुरुआत", en: "Foundation and construction begin" }, text: { hi: "मंदिर निर्माण की यात्रा शुरू हुई।", en: "The journey of building the mandir began." }, photo: "" },
   { year: "2026", when: { hi: "13 अप्रैल", en: "13 April" }, title: { hi: "भूमि पूजन", en: "Bhumi Pujan" }, text: { hi: "श्रावकों के साथ भूमि पूजन संपन्न हुआ।", en: "Bhumi Pujan was held with the shravaks." }, photo: "images/timeline/bhumi-pujan.webp" },
-  { year: "2026", when: { hi: "9 मई", en: "9 May" }, title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" }, text: { hi: "भव्य वेदी प्रतिष्ठा संपन्न हुई।", en: "The grand Vedi Pratishtha was completed." }, photo: "images/timeline/vedi-pratishtha.webp" }
+  { year: "2026", when: { hi: "9 मई", en: "9 May" }, title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" }, text: { hi: "भव्य वेदी प्रतिष्ठा संपन्न हुई।", en: "The grand Vedi Pratishtha was completed." }, photo: "images/timeline/vedi-pratishtha.webp" },
+  { year: "2026", when: { hi: "20 जुलाई", en: "20 July" }, title: { hi: "भगवान नेमिनाथ का मोक्ष कल्याणक", en: "Moksha Kalyanak of Bhagwan Neminath" }, text: { hi: "मंदिर जी में पहली बार निर्वाण लड्डू चढ़ाया गया।", en: "The Nirvan Laddu was offered in the mandir for the first time." }, photo: "images/timeline/moksh-kalyanak-ladoo.webp" },
+  { year: "2026", when: { hi: "16 सितंबर", en: "16 September" }, title: { hi: "पहला दसलक्षण पर्व", en: "First Dashlakshan Parv" }, text: { hi: "मंदिर जी में पहली बार दसलक्षण पर्व मनाया गया।", en: "Dashlakshan Parv was celebrated in the mandir for the first time." }, photo: "images/timeline/dashlakshan.webp" },
+  { year: "2026", when: { hi: "26 सितंबर", en: "26 September" }, title: { hi: "पहली क्षमावाणी", en: "First Kshamavani" }, text: { hi: "मंदिर जी में पहली बार क्षमावाणी मनाई गई।", en: "Kshamavani was celebrated in the mandir for the first time." }, photo: "images/timeline/kshamavani.webp" }
 ];
 
 /* ---------- 9ख-2. Nearby (Visit > Nearby page): mandirs, tirths, tourist places ... ----------
