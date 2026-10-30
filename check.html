@@ -235,6 +235,27 @@
     });
     add("ok", hid.length ? "Chhupi hui cheezein (<code>hidden: true</code>): " + hid.join(", ") + ". Dikhani ho to us dabbe se <code>hidden: true,</code> hata dein." : "Koi cheez <code>hidden: true</code> se chhupi nahi hai.");
 
+    /* 10b. Google Sheet links of the Daan page lists */
+    var SH = window.SHEETS || {}, shNames = { saptahik: "Saptahik Shantidhara", masik: "Masik Shantidhara", dravya: "Dravya dan", bhaktamar: "Bhaktamar" };
+    var shSet = Object.keys(shNames).filter(function (k) { return SH[k]; });
+    if (!shSet.length) add("ok", "Daan page ki Google Sheet abhi juri nahi hai (<code>window.SHEETS</code> khaali). Lists <code>data.js</code> se dikh rahi hain.");
+    shSet.forEach(function (k) {
+      var nm = shNames[k];
+      if (!/^https:\/\/docs\.google\.com\/.*output=csv/i.test(SH[k]) && !/^https:\/\/docs\.google\.com\/.*\/pub/i.test(SH[k])) { add("bad", "<b>" + nm + "</b>: link 'Publish to web' wala <b>CSV</b> link nahi lag raha (<code>output=csv</code> hona chahiye)."); return; }
+      checks.push(fetch(SH[k], { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.text(); }).then(function (txt) {
+        if (/^\s*<(!doctype|html)/i.test(txt)) { add("bad", "<b>" + nm + "</b>: link se web page aa raha hai, CSV nahi. Publish to web mein format <b>CSV</b> chunein."); return; }
+        var lines = txt.split(/\r?\n/).filter(function (x) { return x.trim(); });
+        var head = (lines[0] || "").toLowerCase().replace(/\s+/g, "_");
+        var need = k === "bhaktamar" ? ["month"] : ["date"];
+        var miss = need.filter(function (c) { return head.indexOf(c) < 0; });
+        if (!/name/.test(head)) miss.push("name_hi / name_en");
+        if (miss.length) { add("bad", "<b>" + nm + "</b>: pehli row (header) mein yeh column nahi mile: " + miss.join(", ") + ". Template ki pehli row na badlein."); return; }
+        add("ok", "<b>" + nm + "</b>: Sheet link chal raha hai, " + Math.max(lines.length - 1, 0) + " row mili.");
+      }).catch(function () {
+        add("bad", "<b>" + nm + "</b>: Sheet link khul nahi raha. Publish to web dobara karke naya link daalein.");
+      }));
+    });
+
     /* 11. i18n.js and main.js: spelling of the code itself, and words in both languages */
     function codeCheck(url, label) {
       return fetch(url + "?" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.text(); }).then(function (t) {
