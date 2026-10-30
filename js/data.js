@@ -793,10 +793,6 @@ window.GALLERY = {
       title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" },
       description: { hi: "", en: "" },
       folder: "images/gallery/vedi-pratishtha",
-      // SAMPLE photos below, just so you can see the slideshow working. Delete this files
-      // line (and these 5 sample-*.jpg files from images/gallery/vedi-pratishtha/) once you
-      // upload your real photos, then the site will list your folder's photos by itself.
-      files: ["sample-1.jpg", "sample-2.jpg", "sample-3.jpg", "sample-4.jpg", "sample-5.jpg"]
     },
      {
       id: "kshamavani-2026", date: "2026-09-26",
