@@ -790,7 +790,7 @@ window.MANDIR_NIYAM = {
 **Google Search Console में जोड़ना (ये आपको खुद करना है, एक बार):**
 1. search.google.com/search-console खोलो और अपने Gmail से लॉगिन करो।
 2. "Add property" में **URL prefix** चुनो और `https://shenkisinghai.github.io/Nemidham/` डालो।
-3. Verify के लिए "HTML tag" तरीका चुनो। एक `<meta name="google-site-verification" ...>` लाइन मिलेगी, वो मुझे भेज दो, मैं `index.html` में डाल दूँगा। (या खुद `<head>` में डाल दो।)
+3. Verify के लिए "HTML tag" तरीका चुनो। एक `<meta name="google-site-verification" ...>` लाइन मिलेगी, उसे `index.html` में `<head>` के अंदर (`<meta name="theme-color" ...>` की लाइन के नीचे) चिपका दो। **यह लाइन बाद में कभी मत हटाना**, हटाने पर Verification चली जाती है। (नई domain लेने पर नई property के लिए नई लाइन मिलेगी, उसे भी ऐसे ही जोड़ो।)
 4. फिर Verify दबाओ। बाईं तरफ़ "Sitemaps" में `sitemap.xml` लिखकर Submit करो।
 5. Google को पेज दिखाने में कुछ दिन से 2 हफ़्ते लग सकते हैं। ये सामान्य है।
 
