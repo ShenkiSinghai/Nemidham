@@ -122,9 +122,9 @@ window.SITE = {
 
 
   // Namokar mantra audio on the Home page. enabled: true plays it by default (a visitor can switch it off with the small button).
-  // Put the file at  audio/namokar.mp3  (any .mp3 is fine, a small file of 1-3 MB is best). If the file is missing, no button shows.
+  // Put the file at  audio/namokarmantra.mp3  (any .mp3 is fine, a small file of 1-3 MB is best). If the file is missing, no button shows.
   // The sound starts at the visitor's first tap/click (browsers do not allow sound before that). volume: 0 to 1.
-  audio: { enabled: true, file: "audio/namokar.mp3", volume: 0.6 },
+  audio: { enabled: true, file: "audio/namokarmantra.mp3", volume: 0.6 },
 
   // Bhaktamar path names written in the Google Sheet also appear on the Karyakram page by themselves.
   // Set bhaktamarKaryakram: false to stop that. bhaktamarTime is the time shown (leave "" to show no time).
