@@ -1505,18 +1505,57 @@
       return '<option value="' + x[0] + '"' + (String(x[0]) === prev ? " selected" : "") + ">" + esc(mName(ym) + " " + ym.slice(0, 4) + " - " + t(x[1])) + "</option>";
     }).join("");
   }
-  /* the table used for Shantidhara (with date, day, type) and Dravya daan (names + amount only) */
-  function daanTable(rows, withKind) {
+  /* Dravya daan table: names + amount only */
+  function daanTable(rows) {
     if (!rows.length) return '<p class="empty">' + esc(t("empty.month")) + "</p>";
-    var dated = withKind;
-    return '<div class="tbl-wrap"><table class="tbl dtbl' + (dated ? "" : " nodt") + '"><thead><tr>' + (dated ? '<th scope="col">' + esc(t("d.col_date")) + '</th><th scope="col">' + esc(t("d.col_day")) + '</th><th scope="col">' + esc(t("d.col_kind")) + "</th>" : "") +
-      '<th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" +
+    return '<div class="tbl-wrap"><table class="tbl dtbl nodt"><thead><tr><th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" +
       rows.map(function (p) {
-        var d = p.date ? parseDate(p.date) : null;
-        return '<tr class="drow' + (withKind ? " k-" + esc(p.kind) : "") + '">' + (dated ? '<td class="dd">' + esc(longDate(p.date)) + '</td><td class="dy">' + esc(d.toLocaleDateString(loc(), { weekday: "long" })) + "</td>" +
-          '<td class="dk"><span class="pd-in"><i class="dot dot-' + esc(p.kind) + '"></i>' + esc(t("kind." + p.kind)) + "</span></td>" : "") +
-          '<td class="dn">' + esc(L(p.name)) + noteHtml(p.note) + '</td><td class="dm">' + esc(fmtAmt(p.rashi) || "-") + "</td></tr>";
+        return '<tr class="drow"><td class="dn">' + esc(L(p.name)) + noteHtml(p.note) + '</td><td class="dm">' + esc(fmtAmt(p.rashi) || "-") + "</td></tr>";
       }).join("") + "</tbody></table></div>";
+  }
+  /* Shantidhara table (one month). Saptahik names are written once: the same name on every such weekday is ONE row showing the weekday
+     and all its dates of the month. Masik rows have one date each. Rows are in order of their first date. */
+  function shantiTable(rows) {
+    if (!rows.length) return '<p class="empty">' + esc(t("empty.month")) + "</p>";
+    var blocks = {}, items = [];
+    rows.forEach(function (p) {
+      if (p.kind === "masik") { items.push({ first: p.date, order: 1, masik: p }); return; }
+      var wd = parseDate(p.date).getDay(), b = blocks[wd] || (blocks[wd] = { wd: wd, groups: {}, list: [] });
+      var key = [pickLang(p.name, "hi"), pickLang(p.name, "en"), p.rashi, pickLang(p.note, "hi"), pickLang(p.note, "en")].join("|");
+      var g = b.groups[key] || (b.groups[key] = { p: p, dates: [] });
+      if (!b.list.length || b.list.indexOf(g) < 0) b.list.push(g);
+      if (g.dates.indexOf(p.date) < 0) g.dates.push(p.date);
+    });
+    Object.keys(blocks).forEach(function (k) {
+      var b = blocks[k];
+      b.list.forEach(function (g) { g.dates.sort(); });
+      b.list.sort(function (x, y) { return x.dates[0] < y.dates[0] ? -1 : x.dates[0] > y.dates[0] ? 1 : 0; });
+      items.push({ first: b.list[0].dates[0], order: 0, block: b });
+    });
+    items.sort(function (x, y) { return x.first < y.first ? -1 : x.first > y.first ? 1 : x.order - y.order; });
+    function datesText(ds) {
+      var ym = ds[0].slice(0, 7);
+      return ds.map(function (d) { return +d.slice(8, 10); }).join(", ") + " " + mName(ym) + " " + ym.slice(0, 4);
+    }
+    function kindCell(k) { return '<td class="dk"><span class="pd-in"><i class="dot dot-' + k + '"></i>' + esc(t("kind." + k)) + "</span></td>"; }
+    var body = "";
+    items.forEach(function (it) {
+      if (it.masik) {
+        var p = it.masik, d = parseDate(p.date);
+        body += '<tr class="drow k-masik first"><td class="dd">' + esc(longDate(p.date)) + '</td><td class="dy">' + esc(d.toLocaleDateString(loc(), { weekday: "long" })) + "</td>" + kindCell("masik") +
+          '<td class="dn">' + esc(L(p.name)) + noteHtml(p.note) + '</td><td class="dm">' + esc(fmtAmt(p.rashi) || "-") + "</td></tr>";
+        return;
+      }
+      var prevTxt = "";
+      it.block.list.forEach(function (g, i) {
+        var txt = datesText(g.dates), p = g.p, same = i > 0 && txt === prevTxt;
+        prevTxt = txt;
+        body += '<tr class="drow k-saptahik ' + (i === 0 ? "first" : "") + (same ? " same" : "") + '"><td class="dd">' + (same ? "" : esc(txt)) + '</td><td class="dy">' + (i === 0 ? esc(new Date(2023, 0, 1 + it.block.wd).toLocaleDateString(loc(), { weekday: "long" })) : "") + "</td>" +
+          (i === 0 ? kindCell("saptahik") : '<td class="dk"></td>') + '<td class="dn">' + esc(L(p.name)) + noteHtml(p.note) + '</td><td class="dm">' + esc(fmtAmt(p.rashi) || "-") + "</td></tr>";
+      });
+    });
+    return '<div class="tbl-wrap"><table class="tbl dtbl shtbl"><thead><tr><th scope="col">' + esc(t("d.col_date")) + '</th><th scope="col">' + esc(t("d.col_day")) + '</th><th scope="col">' + esc(t("d.col_kind")) +
+      '</th><th scope="col">' + esc(t("d.bh_name")) + '</th><th scope="col">' + esc(t("d.col_amount")) + "</th></tr></thead><tbody>" + body + "</tbody></table></div>";
   }
   function daanListsHtml() {
     var loading = '<p class="empty">' + esc(t("d.list_loading")) + "</p>";
@@ -1527,7 +1566,7 @@
       '<button class="pf" type="button" data-k="masik" aria-pressed="false"><i class="dot dot-masik"></i>' + esc(t("kind.masik")) + "</button></div>" +
       monthSelect() + '</div><div class="dbody">' + loading + "</div></section>";
     if (window.BHAKTAMBAR !== undefined || (window.SHEETS || {}).bhaktamar) {
-      h += '<section id="bhaktamber"><h2>' + esc(t("d.bhaktamber", { year: todayISO().slice(0, 4) })) + '</h2><div class="dctl">' + monthSelect("bh-sel") + '</div>' +
+      h += '<section id="bhaktamber"><h2>' + esc(t("d.bhaktamber", { year: todayISO().slice(0, 4) })) + '</h2><div class="dctl">' + monthSelect("bh-sel") + '<button class="btn btn-line bh-toggle" type="button"></button></div>' +
         '<div class="bh-one">' + loading + '</div><div class="bh-all" hidden></div></section>';
     }
     return h;
@@ -1541,11 +1580,8 @@
         var res = getRows();
         if (!res.ok) { box.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; return; }
         var ym = addMonths(cur, state.o);
-        var rows = res.rows.filter(function (p) { return p.ym === ym; }).sort(function (a, b) {
-          if (a.date !== b.date) return a.date < b.date ? -1 : 1;
-          return a.kind === b.kind ? 0 : a.kind === "saptahik" ? -1 : 1;
-        });
-        box.innerHTML = (res.warn ? '<p class="note">' + esc(t("d.list_part", { name: res.warn })) + "</p>" : "") + daanTable(rows, withKind);
+        var rows = res.rows.filter(function (p) { return p.ym === ym; });
+        box.innerHTML = (res.warn ? '<p class="note">' + esc(t("d.list_part", { name: res.warn })) + "</p>" : "") + (withKind ? shantiTable(rows) : daanTable(rows));
       }
       sel.addEventListener("change", function () { state.o = +sel.value; daanSel[key] = sel.value; draw(); });
       return { draw: draw, state: state };
@@ -1578,11 +1614,11 @@
     var bsec = $("#bhaktamber", host);
     if (bsec) {
       var yr = parseInt(cur.slice(0, 4), 10), bres = null;
-      var sel = $(".mselect", bsec), one = $(".bh-one", bsec), allBox = $(".bh-all", bsec), ctl = $(".dctl", bsec);
+      var sel = $(".mselect", bsec), one = $(".bh-one", bsec), allBox = $(".bh-all", bsec), ctl = $(".dctl", bsec), tog = $(".bh-toggle", bsec), all = !!daanSel.bhAll;
       sel.innerHTML = Array.apply(null, Array(12)).map(function (x, m) {
         var ym = yr + "-" + pad2(m + 1);
         return '<option value="' + ym + '">' + esc(mName(ym) + " " + yr) + "</option>";
-      }).join("") + '<option value="all">' + esc(t("d.bh_all")) + "</option>";
+      }).join("");
       sel.value = daanSel.bh && $('option[value="' + daanSel.bh + '"]', sel) ? daanSel.bh : cur;
       function fam(es) {
         return es.map(function (e) {
@@ -1592,8 +1628,9 @@
       function dLabel(iso) { return parseDate(iso).toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" }); }
       function drawBh() {
         if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; allBox.hidden = true; ctl.hidden = true; return; }
-        var all = sel.value === "all", ymSel = all ? cur : sel.value;
-        one.hidden = all; allBox.hidden = !all;
+        var ymSel = sel.value;
+        one.hidden = all; allBox.hidden = !all; sel.disabled = all; ctl.classList.toggle("is-all", all);
+        tog.textContent = t(all ? "d.bh_one" : "d.bh_all"); tog.setAttribute("aria-pressed", all ? "true" : "false");
         if (!all) {
           var gs = bhGroups(bres.rows, ymSel), trs = "";
           if (!gs.length) {
@@ -1620,6 +1657,8 @@
         }
       }
       sel.addEventListener("change", function () { daanSel.bh = sel.value; if (bres) drawBh(); });
+      tog.addEventListener("click", function () { all = daanSel.bhAll = !all; if (bres) drawBh(); });
+      tog.textContent = t(all ? "d.bh_one" : "d.bh_all");
       loadBhaktamar().then(function (r) { bres = r; drawBh(); });
     }
   }

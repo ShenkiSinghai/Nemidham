@@ -1222,7 +1222,7 @@ window.RECURRING = [
   },
   {
     title: { hi: "मासिक भक्तामर भक्ति", en: "Masik Bhaktamber Bhakti" },
-    amount: 1000,   // fixed amount shown on the card (write a number, or "" to hide the line)
+    amount: 522,   // fixed amount shown on the card (write a number, or "" to hide the line)
     when: { hi: "हर महीने के दूसरे रविवार", en: "Second Sunday of every month" },
     text: {
       hi: "हर महीने कोई भी परिवार अपना नाम देकर उस महीने के भक्तामर पाठ का पुण्यार्जन कर सकता है। यह पाठ महीने के दूसरे रविवार को होता है।",
