@@ -768,3 +768,18 @@ html[lang="en"] .amt { font-size: 1.04rem; line-height: 1.5; }
 .bh-flist li { margin: 2px 0; padding-left: 2px; }
 .bh-flist li::marker { color: var(--gold, #b8934a); font-weight: 500; }
 .bh-dline > .bh-fl:first-of-type { margin-top: 4px; }
+
+/* Install on phone like an app (button in footer + Home card + how-to box) */
+.install-foot { margin-top: 14px; background: transparent; border-color: rgba(233, 213, 160, .4); color: var(--gold-l); padding: .7rem 1.3rem; }
+html[lang="en"] .install-foot { font-size: .7rem; }
+.install-foot:hover { background: var(--gold); color: #2B1810; border-color: var(--gold); }
+.app-card { text-align: center; }
+.app-card p { max-width: 560px; margin-left: auto; margin-right: auto; }
+.app-acts { display: flex; flex-wrap: wrap; gap: 12px 18px; justify-content: center; align-items: center; margin-top: 6px; }
+.app-hide { background: none; border: 0; padding: 8px 4px; font: inherit; color: var(--muted); text-decoration: underline; cursor: pointer; }
+.app-guide { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 16px; background: rgba(12, 8, 22, .72); }
+.app-box { width: 100%; max-width: 440px; max-height: 88vh; overflow: auto; padding: 24px 22px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 20px 60px rgba(0, 0, 0, .4); }
+.app-box h3 { margin: 0 0 8px; }
+.app-box ol { margin: 10px 0 18px; padding-left: 1.4em; }
+.app-box li { margin: 6px 0; }
+.app-box li::marker { color: var(--gold); font-weight: 500; }
