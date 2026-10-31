@@ -476,11 +476,13 @@
     put("site-footer",
       '<footer class="site"><div class="wrap"><div class="foot-grid">' +
       '<div><p class="foot-name">' + esc(L(S.name)) + "</p><p class=\"foot-addr\">" + addr + "</p></div>" +
-      '<div class="foot-right"><ul class="foot-links">' + links + '</ul><span class="foot-follow"><span class="foot-follow-h">' + esc(t("v.follow")) + '</span><span class="foot-social">' + socialIconsHtml("ficon") + "</span></span></div></div>" +
+      '<div class="foot-right"><ul class="foot-links">' + links + '</ul><span class="foot-follow"><span class="foot-follow-h">' + esc(t("v.follow")) + '</span><span class="foot-social">' + socialIconsHtml("ficon") + "</span></span>" +
+      '<button type="button" class="btn install-btn install-foot" hidden>' + esc(t("app.btn")) + "</button></div></div>" +
       '<div class="foot-bottom"><p class="legal">' + esc(t("f.legal", { year: new Date().getFullYear(), name: L(S.name), place: L(S.place) })) + "</p>" +
       '<div class="foot-meta"><div class="foot-sub">' + counterHtml() + cred + "</div></div></div></div></footer>");
     fetchVisitorCount();
     syncFollowWidth();
+    refreshInstall();
   }
 
   /* "Follow us" row gets exactly the width of the visitor/credit row below, so left and right edges line up. */
@@ -2013,6 +2015,47 @@
       if (!off) { sec.classList.toggle("alt", k % 2 === 1); k++; }
     });
   }
+
+  /* ---------- install on the phone like an app (PWA) ---------- */
+  var installEv = null;
+  function isStandalone() { return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true; }
+  function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
+  function canOfferInstall() {
+    if (S.appInstall === false || isStandalone()) return false;
+    return !!installEv || isIOS() || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+  }
+  function refreshInstall() {
+    var on = canOfferInstall(), hideHome = false;
+    try { hideHome = localStorage.getItem("nemi-app-hide") === "1"; } catch (e) {}
+    $$(".install-foot").forEach(function (b) { b.hidden = !on; });
+    var hs = document.getElementById("home-install"); if (hs) hs.hidden = !on || hideHome;
+  }
+  function closeAppGuide() { var g = document.getElementById("app-guide"); if (g) { g.remove(); document.removeEventListener("keydown", guideKey); } }
+  function guideKey(e) { if (e.key === "Escape") closeAppGuide(); }
+  function openAppGuide() {
+    closeAppGuide();
+    var ios = isIOS(), steps = ios ? ["app.ios1", "app.ios2", "app.ios3"] : ["app.and1", "app.and2", "app.and3"];
+    var g = document.createElement("div"); g.id = "app-guide"; g.className = "app-guide";
+    g.innerHTML = '<div class="app-box" role="dialog" aria-modal="true" aria-labelledby="app-gh"><h3 id="app-gh">' + esc(t(ios ? "app.ios.h" : "app.and.h")) + "</h3><p>" + esc(t("app.p")) + "</p><ol>" +
+      steps.map(function (k) { return "<li>" + esc(t(k)) + "</li>"; }).join("") + '</ol><button type="button" class="btn btn-line app-close">' + esc(t("app.close")) + "</button></div>";
+    g.addEventListener("click", function (e) { if (e.target === g || e.target.closest(".app-close")) closeAppGuide(); });
+    document.body.appendChild(g); document.addEventListener("keydown", guideKey);
+    var cb = g.querySelector(".app-close"); if (cb) cb.focus();
+  }
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEv = e; refreshInstall(); });
+  window.addEventListener("appinstalled", function () { installEv = null; refreshInstall(); });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".install-btn, .app-hide"); if (!b) return;
+    if (b.classList.contains("app-hide")) { try { localStorage.setItem("nemi-app-hide", "1"); } catch (x) {} refreshInstall(); return; }
+    if (installEv) {
+      var ev = installEv; installEv = null;
+      ev.prompt(); if (ev.userChoice && ev.userChoice.then) ev.userChoice.then(refreshInstall, refreshInstall);
+      refreshInstall();
+    } else openAppGuide();
+  });
+  if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+  }
   function render() {
     if (timer) { clearInterval(timer); timer = null; }
     ensureTop();
@@ -2049,6 +2092,7 @@
     }
     applyHomeSections();
     setupReveal();
+    refreshInstall();
   }
   render();
 

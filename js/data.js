@@ -126,6 +126,10 @@ window.SITE = {
   // The sound starts at the visitor's first tap/click (browsers do not allow sound before that). volume: 0 to 1.
   audio: { enabled: true, file: "audio/namokarmantra.mp3", volume: 0.6 },
 
+  // "Add to phone like an app" button (footer + Home card). It shows only on phones/tablets and where the browser allows installing.
+  // Set appInstall: false to hide the button everywhere.
+  appInstall: true,
+
   // Bhaktamar path names written in the Google Sheet also appear on the Karyakram page by themselves.
   // Set bhaktamarKaryakram: false to stop that. bhaktamarTime is the time shown (leave "" to show no time).
   bhaktamarKaryakram: true,
