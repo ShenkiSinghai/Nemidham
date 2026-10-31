@@ -2111,7 +2111,7 @@
      The OneSignal script loads only when needed (button pressed, or notifications already allowed), so pages stay fast. */
   function notifyCfg() {
     var n = S.notify && typeof S.notify === "object" ? S.notify : {};
-    return { appId: String(n.appId || "").trim(), button: n.footerButton !== false, ask: n.askPopup !== false,
+    return { appId: String(n.appId || "").trim(), safariWebId: String(n.safariWebId || "").trim(), button: n.footerButton !== false, ask: n.askPopup !== false,
       askAfterDays: +n.askAfterDays > 0 ? +n.askAfterDays : 7, askDelay: n.askDelaySeconds != null && +n.askDelaySeconds >= 0 ? +n.askDelaySeconds : 8 };
   }
   function pushSupported() { return "Notification" in window && "serviceWorker" in navigator && "PushManager" in window; }
@@ -2126,7 +2126,9 @@
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(function (OneSignal) {
         var b = swBase();
-        return OneSignal.init({ appId: cfg.appId, serviceWorkerPath: b.path, serviceWorkerParam: { scope: b.scope }, allowLocalhostAsSecureOrigin: true })
+        var opts = { appId: cfg.appId, serviceWorkerPath: b.path, serviceWorkerParam: { scope: b.scope }, allowLocalhostAsSecureOrigin: true };
+        if (cfg.safariWebId) opts.safari_web_id = cfg.safariWebId;
+        return OneSignal.init(opts)
           .then(function () {
             try { OneSignal.User.setLanguage(lang === "en" ? "en" : "hi"); } catch (e) {}
             osState.ready = true; osState.on = !!(OneSignal.User.PushSubscription.optedIn && notifyPerm() === "granted");
