@@ -2021,7 +2021,7 @@
      Once it is added (or the visitor says it is already added) the pop-up never comes again.
      The footer button always stays; if the app is already added it says so. */
   var installEv = null;
-  function appCfg() { var a = S.appInstall; if (a === false) return { footerButton: false, popup: false, popupAfterDays: 4 }; a = a && typeof a === "object" ? a : {}; return { footerButton: a.footerButton !== false, popup: a.popup !== false, popupAfterDays: +a.popupAfterDays > 0 ? +a.popupAfterDays : 4 }; }
+  function appCfg() { var a = S.appInstall; if (a === false) return { footerButton: false, popup: false, popupAfterDays: 4, gapMinutes: 30 }; a = a && typeof a === "object" ? a : {}; return { footerButton: a.footerButton !== false, popup: a.popup !== false, popupAfterDays: +a.popupAfterDays > 0 ? +a.popupAfterDays : 4, gapMinutes: +a.popupGapMinutes >= 0 && a.popupGapMinutes !== "" && a.popupGapMinutes != null ? +a.popupGapMinutes : 30 }; }
   function snoozeMs() { return appCfg().popupAfterDays * 24 * 3600 * 1000; }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -2086,7 +2086,7 @@
   function scheduleOffer() {
     if (offerTimer || !document.body.getAttribute("data-page")) return;
     var snooze = +lsGet("nemi-app-snooze") || 0, seen = false;
-    seen = Date.now() - (+lsGet("nemi-app-offered") || 0) < 30 * 60 * 1000;   /* shown in the last 30 minutes: do not repeat on every page */
+    seen = Date.now() - (+lsGet("nemi-app-offered") || 0) < appCfg().gapMinutes * 60 * 1000;   /* shown a short while ago: do not repeat on every page */
     if (!appCfg().popup || seen || snooze > Date.now() || appAdded()) return;
     offerTimer = setTimeout(function () {
       offerTimer = 0;
