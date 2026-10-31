@@ -129,9 +129,10 @@ window.SITE = {
   // "Add as an app" (PWA). A pop-up offers it to visitors who have not added the app; the footer button is always there.
   //   popup: false            -> no pop-up (people can still add the app from the footer button or their browser menu)
   //   popupAfterDays: 4       -> after "Not now", the pop-up comes back after this many days
+  //   popupGapMinutes: 30     -> if a visitor ignores the pop-up (no tap), it is not shown again for this many minutes (so it does not pop up on every page)
   //   footerButton: false     -> hide the footer button too (the browser's own menu still lets people add the site)
   // Writing  appInstall: false  switches off both the pop-up and the footer button.
-  appInstall: { popup: true, popupAfterDays: 4, footerButton: true },
+  appInstall: { popup: true, popupAfterDays: 4, popupGapMinutes: 30, footerButton: true },
 
   // Bhaktamar path names written in the Google Sheet also appear on the Karyakram page by themselves.
   // Set bhaktamarKaryakram: false to stop that. bhaktamarTime is the time shown (leave "" to show no time).
