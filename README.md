@@ -849,8 +849,8 @@ Home खुलने पर मंत्र अपने आप चलता ह
 
 **एक बार की सेटिंग (सिर्फ़ पहली बार):**
 1. https://onesignal.com पर मुफ़्त अकाउंट बनाओ। "New App" बनाओ, नाम "Nemidham", प्लेटफ़ॉर्म **Web** चुनो।
-2. Web की सेटिंग में **Custom Code** चुनो। Site Name: `नेमिधाम`, Site URL: `https://shenkisinghai.github.io` (आख़िर में `/` या `/Nemidham` नहीं)। Default icon में `https://shenkisinghai.github.io/Nemidham/images/icon-192.png` डालो। Save करो।
-3. OneSignal में **Settings → Keys & IDs** से **App ID** कॉपी करो और `js/data.js` में `notify: { appId: "यहाँ" ...` में डालो।
+2. Web की सेटिंग में **Custom Code** चुनो। OneSignal जो service worker फ़ाइल डाउनलोड करने और `<head>` में कोड डालने को कहता है, वह **नहीं** करना: यह हमारी `sw.js` और `main.js` में पहले से जुड़ा है। Site Name: `नेमिधाम`, Site URL: `https://shenkisinghai.github.io` (आख़िर में `/` या `/Nemidham` नहीं)। Default icon में `https://shenkisinghai.github.io/Nemidham/images/icon-192.png` डालो। Save करो।
+3. OneSignal में **Settings → Keys & IDs** से **App ID** कॉपी करो और `js/data.js` में `notify: { appId: "यहाँ" ...` में डालो। (उसी पेज के कोड में `safari_web_id` भी दिखता है, उसे `safariWebId: "..."` में डालो, यह Mac के Safari के लिए है।)
 4. वहीं से **REST API Key** (नई key बनानी पड़े तो "Add Key") कॉपी करो। यह गुप्त है, इसे `data.js` में **मत** डालना। GitHub रिपॉज़िटरी → **Settings → Secrets and variables → Actions → New repository secret** → Name: `ONESIGNAL_REST_API_KEY`, Secret: कॉपी की हुई key → Add secret.
 5. GitHub रिपॉज़िटरी → **Actions** टैब खोलकर देखो कि "Notifications" दिख रहा है (पहली बार "I understand… enable" दबाना पड़ सकता है)।
 
@@ -874,6 +874,22 @@ Home खुलने पर मंत्र अपने आप चलता ह
 - सेटिंग `js/data.js` → `notify`: `footerButton` (बटन), `askPopup` (सवाल), `askAfterDays`, `askDelaySeconds`. `appId` ख़ाली करो तो सब बंद।
 - सूचनाओं के शब्द `i18n.js` में `nt.` से शुरू होने वाली चाबियों में हैं। अपने आप जाने वाली सूचनाओं के शब्द `.github/scripts/notify.js` में हैं। समय (सुबह 6:30) `.github/workflows/notify.yml` की `cron` लाइन में है (वह समय UTC में लिखा है: भारत का समय = UTC + 5:30)।
 - किसी सूचना के न जाने पर GitHub → Actions → Notifications में उस बार का लॉग खोलकर देखो, वहाँ कारण लिखा होता है।
+
+---
+
+### 5.36 अपना डोमेन (जैसे nemidham.org) आने पर क्या-क्या बदलना है (चेकलिस्ट)
+
+अभी वेबसाइट का पता `https://shenkisinghai.github.io/Nemidham/` है। अपना डोमेन लेने पर नीचे की सारी चीज़ें एक साथ करो, ताकि कुछ न छूटे। (Claude से करवाओ तो बस यह भाग दिखा देना।)
+
+1. **डोमेन जोड़ना:** GitHub रिपॉज़िटरी → Settings → Pages → Custom domain में डोमेन लिखो → Save। डोमेन जहाँ से ख़रीदा (GoDaddy, Hostinger आदि) वहाँ DNS में GitHub के बताए रिकॉर्ड (A रिकॉर्ड / CNAME) डालो। सब ठीक होने पर "Enforce HTTPS" पर टिक करो। (रिपॉज़िटरी में `CNAME` नाम की एक फ़ाइल अपने आप बनती है, उसे मत हटाना।)
+2. **पुराना पता नए से बदलना:** इन फ़ाइलों में जहाँ भी `https://shenkisinghai.github.io/Nemidham/` लिखा है, उसे नए पते (जैसे `https://nemidham.org/`) से बदलो: सारी `.html` फ़ाइलें (ऊपर `<head>` में canonical, og:url, og:image, twitter:image और Google वाली जानकारी), `sitemap.xml`, `robots.txt`, `manifest.webmanifest` (`related_applications` वाली लाइन)। ध्यान: नए डोमेन पर वेबसाइट सीधे डोमेन पर खुलती है, आख़िर में `/Nemidham` नहीं लगता।
+3. **सूचनाएँ (OneSignal):** OneSignal → Settings → Push & In-App → Web में Site URL नया डोमेन करो (जैसे `https://nemidham.org`) और Default icon URL भी नए पते से (`https://nemidham.org/images/icon-512.png`) → Save. फिर `.github/workflows/notify.yml` में `env:` के नीचे एक लाइन जोड़ो: `SITE_URL: https://nemidham.org/` (ताकि सूचना दबाने पर नई वेबसाइट खुले)।
+4. **पुराने सब्सक्राइबर:** फ़ोन/ब्राउज़र सूचना की इजाज़त हर पते के लिए अलग रखते हैं। जिन्होंने पुराने पते पर सूचनाएँ चालू की थीं, उन्हें नए पते पर दोबारा "सूचनाएँ चालू करें" दबाना होगा। डोमेन बदलने से पहले पुराने पते पर एक आख़िरी सूचना भेज दो: "नई वेबसाइट: nemidham.org, कृपया वहाँ से ऐप जोड़ें और सूचनाएँ चालू करें"।
+5. **ऐप (PWA):** जिसने पुराने पते से ऐप जोड़ा था, वह पुराना ऐप हटाकर नए पते से दोबारा जोड़े।
+6. **Google:** Google Search Console में नया डोमेन जोड़ो (भाग 5.30 जैसा), नई `sitemap.xml` जमा करो। पुराना github.io वाला पता Google से धीरे-धीरे हट जाएगा।
+7. **Google Analytics (अगर इस्तेमाल हो रहा है):** Admin → Data streams में वेबसाइट का पता नया करो। GoatCounter (विज़िटर गिनती) में कुछ नहीं बदलना।
+8. **बाहर बाँटे गए लिंक:** WhatsApp ग्रुप, Facebook / Instagram / YouTube के bio, छपे हुए QR कोड और पोस्टर में नया पता डालो।
+9. जो नहीं बदलना: Google Sheet की लिंक (`window.SHEETS`), `data.js` की बाक़ी सब चीज़ें, फ़ोटो, `sw.js`, फ़ॉन्ट। ये अपने आप नए पते पर चलती हैं।
 
 ---
 
