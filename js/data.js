@@ -636,7 +636,7 @@ window.ANNOUNCEMENTS = [
 // To remove a karyakram: delete its whole { ... }, block, or add  hidden: true,  inside it.
 // image: "images/notify/photo.jpg",  (optional) a picture shown inside this karyakram's notifications (README 5.35).
 window.EVENTS = [
-  // NOTE: these cards now come from the Google Sheet tab "Karyakram" (README part 5.37). Edit them there.
+  // NOTE: these cards now come from the Google Sheet tab "Vishesh Karyakram" (README part 5.37). Edit them there.
   // You can still add a card here too; a Sheet row with the same id replaces a card written here.
 
   // TEMPLATE for the next karyakram. It is hidden. To use it: remove the line  hidden: true,
@@ -1090,7 +1090,7 @@ window.SHEETS = {
   dravya: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=2001759128&single=true&output=csv",      // tab "Dravya dan"
   bhaktamar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=700086573&single=true&output=csv",    // tab "Bhaktamar"
   // ---- Website content tabs of the same Sheet (README part 5.37). Empty "" = that part comes only from this file. ----
-  karyakram: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=400287793&single=true&output=csv",     // tab "Karyakram" (special karyakram; Bhaktamar is NOT written here, it comes from the Bhaktamar tab)
+  karyakram: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=400287793&single=true&output=csv",     // tab "Vishesh Karyakram" (special karyakram; Bhaktamar is NOT written here, it comes from the Bhaktamar tab)
   dainik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=509144334&single=true&output=csv",        // tab "Dainik Karyakram" (daily schedule)
   samay: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1120313963&single=true&output=csv",         // tab "Mandir Samay" (opening / abhishek / aarti / closing time, note)
   suchnayein: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=701218416&single=true&output=csv",    // tab "Suchnayein" (announcements)
