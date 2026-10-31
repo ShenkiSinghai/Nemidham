@@ -786,3 +786,4 @@ html[lang="en"] .install-foot { font-size: .7rem; }
 .app-box ol { text-align: left; }
 .app-ic { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 10px; display: block; }
 .app-sub { margin-top: 10px; }
+.install-foot[hidden] { display: none; }

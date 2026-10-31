@@ -2020,7 +2020,9 @@
      A small pop-up offers it to visitors who have not added it yet. "Not now" brings it back after 2 days.
      Once it is added (or the visitor says it is already added) the pop-up never comes again.
      The footer button always stays; if the app is already added it says so. */
-  var installEv = null, SNOOZE_MS = 2 * 24 * 3600 * 1000;
+  var installEv = null;
+  function appCfg() { var a = S.appInstall; if (a === false) return { footerButton: false, popup: false, popupAfterDays: 4 }; a = a && typeof a === "object" ? a : {}; return { footerButton: a.footerButton !== false, popup: a.popup !== false, popupAfterDays: +a.popupAfterDays > 0 ? +a.popupAfterDays : 4 }; }
+  function snoozeMs() { return appCfg().popupAfterDays * 24 * 3600 * 1000; }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
@@ -2028,12 +2030,12 @@
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
   function appAdded() { return lsGet("nemi-app-added") === "1"; }
   function canOfferInstall() {
-    if (S.appInstall === false || isStandalone()) return false;
+    if (isStandalone()) return false;
     return !!installEv || isIOS() || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
   }
-  function refreshInstall() { var on = canOfferInstall(); $$(".install-foot").forEach(function (b) { b.hidden = !on; }); }
+  function refreshInstall() { var on = canOfferInstall() && appCfg().footerButton; $$(".install-foot").forEach(function (b) { b.hidden = !on; }); }
   function closeAppGuide() { var g = document.getElementById("app-guide"); if (g) { g.remove(); document.removeEventListener("keydown", guideKey); } }
-  function guideKey(e) { if (e.key === "Escape") { var snz = document.getElementById("app-guide").getAttribute("data-offer") === "1"; closeAppGuide(); if (snz) lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); } }
+  function guideKey(e) { if (e.key === "Escape") { var snz = document.getElementById("app-guide").getAttribute("data-offer") === "1"; closeAppGuide(); if (snz) lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); } }
   function appBox(html, offer) {
     closeAppGuide();
     var g = document.createElement("div"); g.id = "app-guide"; g.className = "app-guide"; if (offer) g.setAttribute("data-offer", "1");
@@ -2042,10 +2044,9 @@
     g.addEventListener("click", function (e) {
       var b = e.target.closest && e.target.closest("[data-act]"), act = b ? b.getAttribute("data-act") : (e.target === g ? (offer ? "later" : "close") : "");
       if (!act) return;
-      if (act === "later") { lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); closeAppGuide(); }
-      else if (act === "done") { lsSet("nemi-app-added", "1"); closeAppGuide(); }
+      if (act === "later") { lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); closeAppGuide(); }
       else if (act === "close") closeAppGuide();
-      else if (act === "install") { if (offer) lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); doInstall(); }
+      else if (act === "install") { if (offer) lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); doInstall(); }
       else if (act === "how") openAppGuide();
     });
     var f = g.querySelector("[data-act=install], [data-act=close], [data-act=how]"); if (f) f.focus();
@@ -2061,12 +2062,12 @@
   function openOffer() {
     appBox('<img class="app-ic" src="images/icon-192.png" alt="" width="56" height="56"><h3 id="app-gh">' + esc(t("app.h")) + "</h3><p>" + esc(t("app.p")) +
       '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="install">' + esc(t("app.btn")) + '</button></div>' +
-      '<div class="app-acts app-sub"><button type="button" class="app-hide" data-act="later">' + esc(t("app.hide")) + '</button><button type="button" class="app-hide" data-act="done">' + esc(t("app.done")) + "</button></div>", true);
+      '<div class="app-acts app-sub"><button type="button" class="app-hide" data-act="later">' + esc(t("app.hide")) + '</button></div>', true);
   }
   function doInstall() {
     if (installEv) {
       var ev = installEv; installEv = null; closeAppGuide();
-      ev.prompt(); if (ev.userChoice && ev.userChoice.then) ev.userChoice.then(function (c) { if (c && c.outcome === "dismissed") lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); refreshInstall(); }, refreshInstall);
+      ev.prompt(); if (ev.userChoice && ev.userChoice.then) ev.userChoice.then(function (c) { if (c && c.outcome === "dismissed") lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); refreshInstall(); }, refreshInstall);
       refreshInstall();
     } else openAppGuide();
   }
@@ -2084,10 +2085,10 @@
     if (offerTimer || !document.body.getAttribute("data-page")) return;
     var snooze = +lsGet("nemi-app-snooze") || 0, seen = false;
     try { seen = sessionStorage.getItem("nemi-app-offered") === "1"; } catch (e) {}
-    if (seen || snooze > Date.now() || appAdded()) return;
+    if (!appCfg().popup || seen || snooze > Date.now() || appAdded()) return;
     offerTimer = setTimeout(function () {
       offerTimer = 0;
-      if (!canOfferInstall() || appAdded() || document.getElementById("app-guide")) return;
+      if (!appCfg().popup || !canOfferInstall() || appAdded() || document.getElementById("app-guide")) return;
       try { sessionStorage.setItem("nemi-app-offered", "1"); } catch (e) {}
       openOffer();
     }, 3500);
