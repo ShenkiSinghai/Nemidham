@@ -827,9 +827,10 @@ Home खुलने पर मंत्र अपने आप चलता ह
 - **ये फ़ाइलें रिपॉज़िटरी में होनी चाहिए:** `manifest.webmanifest`, `sw.js` (दोनों सबसे ऊपर, बाक़ी `.html` के साथ), और `images/icon-192.png`, `images/icon-512.png`, `images/icon-maskable-512.png`.
 - **ऐप का नाम / रंग बदलना:** `manifest.webmanifest` में `name` (पूरा नाम), `short_name` (आइकन के नीचे का छोटा नाम), `background_color` और `theme_color`.
 - **आइकन बदलना:** ऊपर की तीनों फ़ोटो नई बनाकर उन्हीं नामों से `images` फ़ोल्डर में डालो (192x192, 512x512, और maskable वाली 512x512 जिसमें लोगो बीच के 80% हिस्से में हो और चारों तरफ़ रंग भरा हो)।
-- **पॉप-अप को अपने हिसाब से बदलना / बंद करना:** `window.SITE` में `appInstall: { popup: true, popupAfterDays: 4, popupGapMinutes: 30, footerButton: true }`.
+- **पॉप-अप को अपने हिसाब से बदलना / बंद करना:** `window.SITE` में `appInstall: { popup: true, popupAfterDays: 4, popupDelaySeconds: 4, popupGapMinutes: 30, footerButton: true }`.
   - पॉप-अप बंद करना हो (लोगों को पसंद न आए): `popup: false`. फ़ुटर का बटन और ब्राउज़र के मेनू से ऐप जोड़ना फिर भी चलता रहेगा।
   - "अभी नहीं" के बाद कितने दिन में फिर दिखे: `popupAfterDays` में दिन की संख्या।
+  - पेज खुलने के कितने सेकंड बाद पॉप-अप आए: `popupDelaySeconds` में सेकंड (अभी 4)। `0` लिखो तो तुरंत आएगा।
   - किसी ने पॉप-अप को बिना छुए छोड़ दिया तो वह कितने मिनट तक दोबारा न आए (ताकि हर पेज पर न आए): `popupGapMinutes` में मिनट (अभी 30)। `0` लिखो तो हर पेज खुलने पर आएगा।
   - फ़ुटर का बटन भी छुपाना हो: `footerButton: false` (ब्राउज़र के अपने मेनू से ऐप जोड़ना फिर भी हो सकता है)।
   - सब कुछ एक साथ बंद: `appInstall: false`.

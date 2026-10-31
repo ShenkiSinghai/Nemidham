@@ -2021,7 +2021,7 @@
      Once it is added (or the visitor says it is already added) the pop-up never comes again.
      The footer button always stays; if the app is already added it says so. */
   var installEv = null;
-  function appCfg() { var a = S.appInstall; if (a === false) return { footerButton: false, popup: false, popupAfterDays: 4, gapMinutes: 30 }; a = a && typeof a === "object" ? a : {}; return { footerButton: a.footerButton !== false, popup: a.popup !== false, popupAfterDays: +a.popupAfterDays > 0 ? +a.popupAfterDays : 4, gapMinutes: +a.popupGapMinutes >= 0 && a.popupGapMinutes !== "" && a.popupGapMinutes != null ? +a.popupGapMinutes : 30 }; }
+  function appCfg() { var a = S.appInstall; if (a === false) return { footerButton: false, popup: false, popupAfterDays: 4, gapMinutes: 30, delaySec: 4 }; a = a && typeof a === "object" ? a : {}; return { footerButton: a.footerButton !== false, popup: a.popup !== false, popupAfterDays: +a.popupAfterDays > 0 ? +a.popupAfterDays : 4, gapMinutes: +a.popupGapMinutes >= 0 && a.popupGapMinutes !== "" && a.popupGapMinutes != null ? +a.popupGapMinutes : 30, delaySec: a.popupDelaySeconds != null && a.popupDelaySeconds !== "" && +a.popupDelaySeconds >= 0 ? +a.popupDelaySeconds : 4 }; }
   function snoozeMs() { return appCfg().popupAfterDays * 24 * 3600 * 1000; }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -2093,7 +2093,7 @@
       if (!appCfg().popup || !canOfferInstall() || appAdded() || document.getElementById("app-guide")) return;
       lsSet("nemi-app-offered", String(Date.now()));
       openOffer();
-    }, 3500);
+    }, appCfg().delaySec * 1000);
   }
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
