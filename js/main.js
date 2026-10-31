@@ -2081,15 +2081,17 @@
   });
   /* the pop-up: a few seconds after a page opens, once per visit, only if not added and not snoozed */
   var offerTimer = 0;
+  /* testing: open the site with  ?app=test  at the end of the address to forget the saved choices and see the pop-up again */
+  if (/[?&]app=test\b/.test(location.search)) { lsDel("nemi-app-added"); lsDel("nemi-app-snooze"); lsDel("nemi-app-offered"); }
   function scheduleOffer() {
     if (offerTimer || !document.body.getAttribute("data-page")) return;
     var snooze = +lsGet("nemi-app-snooze") || 0, seen = false;
-    try { seen = sessionStorage.getItem("nemi-app-offered") === "1"; } catch (e) {}
+    seen = Date.now() - (+lsGet("nemi-app-offered") || 0) < 30 * 60 * 1000;   /* shown in the last 30 minutes: do not repeat on every page */
     if (!appCfg().popup || seen || snooze > Date.now() || appAdded()) return;
     offerTimer = setTimeout(function () {
       offerTimer = 0;
       if (!appCfg().popup || !canOfferInstall() || appAdded() || document.getElementById("app-guide")) return;
-      try { sessionStorage.setItem("nemi-app-offered", "1"); } catch (e) {}
+      lsSet("nemi-app-offered", String(Date.now()));
       openOffer();
     }, 3500);
   }
