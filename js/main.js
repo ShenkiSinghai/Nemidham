@@ -528,7 +528,8 @@
     if (fig && img && S.murti) {
       img.onload = function () { fig.classList.add("ok"); };
       img.onerror = function () { fig.classList.remove("ok"); fig.classList.add("fail"); img.removeAttribute("src"); };
-      if (img.getAttribute("src") !== S.murti) img.src = S.murti;
+      /* the built-in smaller copy (neminath-520.webp) is used only for the default photo; a different photo in SITE.murti is shown as it is */
+      if (img.getAttribute("src") !== S.murti) { img.removeAttribute("srcset"); img.src = S.murti; }
       if (img.complete && img.naturalWidth) fig.classList.add("ok");
     }
     /* Namokar mantra marquee: the line is written twice so the loop never shows a gap. */
@@ -612,11 +613,15 @@
       else { ctx.scale(.62, 1); petal(p.s); }
       ctx.restore();
     }
+    /* on phones the petals are drawn 30 times a second (moving twice as far each time), which looks the same but needs half the work */
+    var odd = false;
     function tick() {
       raf = 0; if (!visible || document.hidden) return;
+      var k = W < 700 ? 2 : 1;
+      if (k === 2) { odd = !odd; if (odd) { raf = requestAnimationFrame(tick); return; } }
       ctx.clearRect(0, 0, W, H);
       items.forEach(function (p, i) {
-        p.y += p.vy; p.ph += .012; p.a += p.va;
+        p.y += p.vy * k; p.ph += .012 * k; p.a += p.va * k;
         if (p.y > H + 24) items[i] = mk(false, i);
         draw(p);
       });
@@ -2098,6 +2103,24 @@
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }
+  /* Background animations (rotating mandalas, glow) pause while their area is off the screen or the app is in the background,
+     so the phone does not keep drawing what nobody sees. Nothing changes in how they look. */
+  var animIO = null;
+  function watchAnimations() {
+    if (!("IntersectionObserver" in window)) return;
+    if (!animIO) animIO = new IntersectionObserver(function (es) { es.forEach(function (e) { e.target.classList.toggle("anim-off", !e.isIntersecting); }); }, { rootMargin: "80px" });
+    $$(".hero2, .page-head, footer.site").forEach(function (el) { if (!el.__animWatched) { el.__animWatched = true; animIO.observe(el); } });
+  }
+  document.addEventListener("visibilitychange", function () { document.documentElement.classList.toggle("anim-hidden", document.hidden); });
+  /* App opening animation: when the site is opened from the home-screen icon (installed app), the mandir logo
+     appears with a soft golden glow and the page fades in (once per app opening). Switch off: SITE.appIntro = false. */
+  (function appIntro() {
+    var h = document.documentElement;
+    if (!h.classList.contains("app-intro")) return;
+    if (S.appIntro === false) { h.classList.remove("app-intro"); return; }
+    try { sessionStorage.setItem("nemi-intro", "1"); } catch (e) {}
+    setTimeout(function () { h.classList.remove("app-intro"); }, 1700);
+  })();
   function render() {
     if (timer) { clearInterval(timer); timer = null; }
     ensureTop();
@@ -2136,6 +2159,7 @@
     setupReveal();
     refreshInstall();
     scheduleOffer();
+    watchAnimations();
   }
   render();
 

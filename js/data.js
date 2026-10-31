@@ -97,7 +97,7 @@ window.SITE = {
 
   // Mandir logo shown in the menu. To use another picture, upload it to images/ and write its path here.
   // (images/jain-symbol.svg is the plain Jain symbol, if you ever want it back.)
-  logo: "images/mandir-logo.png",
+  logo: "images/mandir-logo.webp",
 
   // Visitor numbers. analyticsId: Google Analytics, private numbers for you (analytics.google.com).
   analyticsId: "G-BWWJVYC4Q4",
@@ -125,6 +125,9 @@ window.SITE = {
   // Put the file at  audio/namokarmantra.mp3  (any .mp3 is fine, a small file of 1-3 MB is best). If the file is missing, no button shows.
   // The sound starts at the visitor's first tap/click (browsers do not allow sound before that). volume: 0 to 1.
   audio: { enabled: true, file: "audio/namokarmantra.mp3", volume: 0.6 },
+
+  // When the site is opened as an installed app (from the home-screen icon), a short logo animation plays once. false = no animation.
+  appIntro: true,
 
   // "Add as an app" (PWA). A pop-up offers it to visitors who have not added the app; the footer button is always there.
   //   popup: false            -> no pop-up (people can still add the app from the footer button or their browser menu)

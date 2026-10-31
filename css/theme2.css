@@ -787,3 +787,34 @@ html[lang="en"] .install-foot { font-size: .7rem; }
 .app-ic { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 10px; display: block; }
 .app-sub { margin-top: 10px; }
 .install-foot[hidden] { display: none; }
+
+/* ---------- Performance (looks the same, less work for the phone) ---------- */
+/* rotating mandalas get their own GPU layer, so turning them does not redraw the page */
+.h2-mandala, .h2-bham-a, .h2-bham-b, .h2-orbit, .page-head::before, footer.site::after, .h2-glow { will-change: transform; }
+/* animations stop while their area is off the screen or the app is in the background */
+.anim-off, .anim-off *, .anim-off::before, .anim-off::after, .anim-off *::before, .anim-off *::after,
+.anim-hidden *, .anim-hidden *::before, .anim-hidden *::after { animation-play-state: paused !important; }
+/* on phones, frosted-glass blur over moving backgrounds is very costly; a slightly deeper see-through colour looks the same */
+@media (max-width: 760px), (pointer: coarse) {
+  .hero2 .panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12, 8, 22, .7); }
+  .btn-ghost, .nav-toggle { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12, 8, 22, .45); }
+  .audio-btn { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(30, 14, 60, .95); }
+  body[data-page] header.site.scrolled { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(246, 237, 216, .985); }
+  header.site { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (max-width: 760px), (pointer: coarse) { :root[data-theme="dark"] body[data-page] header.site.scrolled { background: rgba(12, 8, 22, .97); } }
+
+/* ---------- App opening animation (only when opened from the home-screen icon) ---------- */
+html.app-intro body::before { content: ""; position: fixed; inset: 0; z-index: 9999; pointer-events: none; background: radial-gradient(circle at 50% 46%, #2A1D52 0%, #120C24 55%, #0C0816 100%); animation: intro-bg 1.6s ease forwards; }
+html.app-intro body::after { content: ""; position: fixed; left: 50%; top: 46%; z-index: 10000; width: 132px; height: 132px; margin: -66px 0 0 -66px; border-radius: 50%; pointer-events: none;
+  background: url("../images/icon-192.png") center / contain no-repeat;
+  background-image: -webkit-image-set(url("../images/icon-192.png") 1x, url("../images/icon-512.png") 2x);   /* sharp logo on high-density phone screens */
+  background-image: image-set(url("../images/icon-192.png") 1x, url("../images/icon-512.png") 2x); animation: intro-logo 1.6s cubic-bezier(.22, 1, .36, 1) forwards; }
+@keyframes intro-bg { 0%, 62% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+@keyframes intro-logo {
+  0% { opacity: 0; transform: scale(.72); box-shadow: 0 0 0 0 rgba(232, 213, 160, .55); }
+  22% { opacity: 1; transform: scale(1.04); }
+  34% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 213, 160, .55); }
+  60% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 46px rgba(232, 213, 160, 0); }
+  100% { opacity: 0; transform: scale(1.35); box-shadow: 0 0 0 46px rgba(232, 213, 160, 0); visibility: hidden; }
+}
