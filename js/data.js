@@ -757,6 +757,7 @@ window.ANNOUNCEMENTS = [
 // pinned: true  shows an UPCOMING karyakram on the Home page too (the next 3 pinned ones). Karyakram without
 //   pinned: true  show only on the Karyakram page. If none is pinned, the karyakram section is left out of Home.
 // To remove a karyakram: delete its whole { ... }, block, or add  hidden: true,  inside it.
+// image: "images/notify/photo.jpg",  (optional) a picture shown inside this karyakram's notifications (README 5.35).
 window.EVENTS = [
   {
     pinned: true,

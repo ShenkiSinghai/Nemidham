@@ -22,6 +22,9 @@ on:
       page:
         description: "Page to open (optional, e.g. yojana.html)"
         required: false
+      image:
+        description: "Picture (optional): a file of the website like images/yojana/photo.jpg, or a full https:// link"
+        required: false
 permissions:
   contents: read
 # Timer runs wait for each other. A push or a hand-run gets its own group, so a waiting timer run can never cancel it.
@@ -48,3 +51,4 @@ jobs:
           IN_TITLE: ${{ github.event.inputs.title }}
           IN_MESSAGE: ${{ github.event.inputs.message }}
           IN_PAGE: ${{ github.event.inputs.page }}
+          IN_IMAGE: ${{ github.event.inputs.image }}

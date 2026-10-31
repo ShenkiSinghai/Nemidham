@@ -44,6 +44,13 @@ function uuidFor(key) {
   var h = crypto.createHash("sha1").update("nemidham|" + APP_ID + "|" + key).digest("hex");
   return h.slice(0, 8) + "-" + h.slice(8, 12) + "-5" + h.slice(13, 16) + "-" + ((parseInt(h.charAt(16), 16) & 3) | 8).toString(16) + h.slice(17, 20) + "-" + h.slice(20, 32);
 }
+/* a picture for the notification: a full https:// link, or a file of this website such as images/yojana/x.jpg */
+function imageUrl(v) {
+  v = String(v || "").trim(); if (!v) return "";
+  if (/^https:\/\//i.test(v)) return v;
+  if (/^http:\/\//i.test(v)) return "";   /* phones show only https pictures */
+  return SITE_URL + v.replace(/^\.?\//, "");
+}
 function send(n) {
   var body = { app_id: APP_ID, target_channel: "push", included_segments: ["Total Subscriptions"],
     priority: 10,   /* "high": phones show it at once instead of holding it to save battery */
@@ -51,8 +58,9 @@ function send(n) {
     contents: { en: n.text.en || n.text.hi, hi: n.text.hi || n.text.en },
     url: SITE_URL + (n.page || ""), chrome_web_icon: SITE_URL + "images/icon-192.png", firefox_icon: SITE_URL + "images/icon-192.png",
     chrome_web_badge: SITE_URL + "images/notify-badge.png" };   /* small white mandir shape in the phone's top bar (instead of a bell) */
+  var img = imageUrl(n.image); if (img) { body.chrome_web_image = img; }   /* large picture inside the notification */
   if (n.key) body.idempotency_key = uuidFor(n.key);   /* OneSignal keeps it 30 days; the same id again = not sent again */
-  console.log("Notification:", JSON.stringify({ title: body.headings, text: body.contents, url: body.url }));
+  console.log("Notification:", JSON.stringify({ title: body.headings, text: body.contents, url: body.url, image: body.chrome_web_image || "" }));
   if (DRY) return Promise.resolve();
   function post(b) {
     return fetch("https://api.onesignal.com/notifications", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Key " + KEY }, body: JSON.stringify(b) })
@@ -182,7 +190,7 @@ function onChange() {
       if (moved[L(e.title, "hi")] || moved[L(e.title, "en")] || (newOn[e.date] || 0) <= (oldOn[e.date] || 0)) return;   /* date changed / title corrected */
       if ((e.endDate || e.date) < TODAY) return;   /* not past ones */
       if (CFG.onlyThisMonth && e.date.slice(0, 7) !== THIS_MONTH) return;   /* later months get their reminders (month start, days before, on the day) */
-      list.push({ key: "new-ev|" + evKey(e, "hi"), page: "karyakram.html", title: { hi: "नया विशेष कार्यक्रम", en: "New special karyakram" },
+      list.push({ key: "new-ev|" + evKey(e, "hi"), image: e.image, page: "karyakram.html", title: { hi: "नया विशेष कार्यक्रम", en: "New special karyakram" },
         text: both(function (l) { return short(L(e.title, l) + " • " + niceDate(e.date, l) + (L(e.time, l) ? ", " + L(e.time, l) : ""), 170); }) });
     });
   }
@@ -190,7 +198,7 @@ function onChange() {
     var hy = {}; real(old.YOJANA).forEach(function (y) { hy[yoKey(y)] = 1; if (!y.id) { hy[L(y.title, "hi")] = hy[L(y.title, "en")] = 1; } });
     real(W.YOJANA).forEach(function (y) {
       if (hy[yoKey(y)] || (!y.id && (hy[L(y.title, "hi")] || hy[L(y.title, "en")]))) return;
-      list.push({ key: "new-yo|" + yoKey(y), page: "yojana.html", title: { hi: "नई योजना: " + L(y.title, "hi"), en: "New yojana: " + L(y.title, "en") },
+      list.push({ key: "new-yo|" + yoKey(y), image: y.image || (y.photos || [])[0], page: "yojana.html", title: { hi: "नई योजना: " + L(y.title, "hi"), en: "New yojana: " + L(y.title, "en") },
         text: both(function (l) { return short(L(y.short, l) || L(y.summary, l) || L(y.title, l), 170); }) });
     });
   }
@@ -198,7 +206,7 @@ function onChange() {
     var ha = {}; real(old.ANNOUNCEMENTS).forEach(function (a) { ["hi", "en"].forEach(function (l) { if (L(a.title, l)) ha["t" + L(a.title, l)] = 1; if (L(a.text, l)) ha["x" + L(a.text, l)] = 1; }); });
     real(W.ANNOUNCEMENTS).forEach(function (a) {
       if (["hi", "en"].some(function (l) { return (L(a.title, l) && ha["t" + L(a.title, l)]) || (L(a.text, l) && ha["x" + L(a.text, l)]); })) return;
-      list.push({ key: "new-an|" + (a.date || "") + "|" + L(a.title, "hi"), page: "announcements.html", title: both(function (l) { return short(L(a.title, l), 60); }), text: both(function (l) { return short(L(a.text, l) || L(a.title, l), 170); }) });
+      list.push({ key: "new-an|" + (a.date || "") + "|" + L(a.title, "hi"), image: a.image, page: "announcements.html", title: both(function (l) { return short(L(a.title, l), 60); }), text: both(function (l) { return short(L(a.text, l) || L(a.title, l), 170); }) });
     });
   }
   if (!list.length) { console.log("Nothing new to announce."); return Promise.resolve(); }
@@ -228,7 +236,7 @@ function onSchedule(force) {
     function dayJobs(day, n) {   /* n = 0 on the day, else days before */
       function head(t, l) { return n === 0 ? (l === "en" ? "Today: " : "आज: ") + t : n === 1 ? (l === "en" ? "Tomorrow: " : "कल: ") + t : (l === "en" ? "In " + n + " days: " : n + " दिन बाद: ") + t; }
       evs.filter(function (e) { return e.date === day; }).forEach(function (e) {
-        jobs.push({ key: "rem|" + n + "|" + day + "|" + L(e.title, "hi"), page: n === 0 ? "daily.html" : "karyakram.html",
+        jobs.push({ key: "rem|" + n + "|" + day + "|" + L(e.title, "hi"), image: e.image, page: n === 0 ? "daily.html" : "karyakram.html",
           title: both(function (l) { return short(head(L(e.title, l), l), 70); }), text: both(function (l) { return short(evMeta(e, l) + (L(e.text, l) ? " • " + L(e.text, l) : ""), 170); }) });
       });
       bh.filter(function (g) { return g.date === day; }).forEach(function (g) {
@@ -259,7 +267,7 @@ function onHand() {
   var t = (process.env.IN_TITLE || "").trim(), m = (process.env.IN_MESSAGE || "").trim(), page = (process.env.IN_PAGE || "").trim();
   if (!t || !m) { console.log("Please write a title and a message."); process.exitCode = 1; return Promise.resolve(); }
   page = page.replace(/^https?:\/\/[^/]+\/[^/]+\//, "").replace(/^\//, "");
-  return send({ page: page, title: { hi: t, en: t }, text: { hi: m, en: m } });
+  return send({ page: page, image: process.env.IN_IMAGE || "", title: { hi: t, en: t }, text: { hi: m, en: m } });
 }
 
 (EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule() : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : onHand()) : Promise.resolve())
