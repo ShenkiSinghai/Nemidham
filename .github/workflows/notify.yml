@@ -5,11 +5,11 @@ on:
     branches: [main]
     paths: ["js/data.js"]
   schedule:
-    - cron: "0 1 * * *"   # every day at 6:30 in the morning, India time
+    - cron: "7,37 * * * *"   # every 30 minutes; the script sends reminders only at the time set in data.js (notify.auto.time)
   workflow_dispatch:
     inputs:
       mode:
-        description: "send = your own message below; today = send today's karyakram reminder now"
+        description: "send = your own message below; today = send today's reminders now (without waiting for the set time)"
         type: choice
         options: [send, today]
         default: send
@@ -24,6 +24,10 @@ on:
         required: false
 permissions:
   contents: read
+# Timer runs wait for each other. A push or a hand-run gets its own group, so a waiting timer run can never cancel it.
+concurrency:
+  group: notifications-${{ github.event_name == 'schedule' && 'timer' || github.run_id }}
+  cancel-in-progress: false
 jobs:
   notify:
     runs-on: ubuntu-latest
