@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths: ["js/data.js"]
   schedule:
-    - cron: "7,37 * * * *"   # every 30 minutes; the script sends reminders only at the time set in data.js (notify.auto.time)
+    - cron: "*/5 * * * *"   # every 5 minutes: new Sheet rows are announced; reminders go only at the time set in data.js (notify.auto.time)
   workflow_dispatch:
     inputs:
       mode:
@@ -37,11 +37,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: ${{ github.event_name == 'push' && '0' || '1' }}   # full history only when data.js was pushed (to compare with the earlier version)
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Remember what was seen in the Sheet (restore)
+        uses: actions/cache/restore@v4
+        with:
+          path: .notify-state
+          key: sheet-seen-${{ github.run_id }}
+          restore-keys: sheet-seen-
       - name: Send notifications
+        id: notify
         run: node .github/scripts/notify.js
         env:
           ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
@@ -52,3 +59,9 @@ jobs:
           IN_MESSAGE: ${{ github.event.inputs.message }}
           IN_PAGE: ${{ github.event.inputs.page }}
           IN_IMAGE: ${{ github.event.inputs.image }}
+      - name: Remember what was seen in the Sheet (save)
+        if: always() && steps.notify.outputs.changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .notify-state
+          key: sheet-seen-${{ github.run_id }}

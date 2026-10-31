@@ -1313,7 +1313,7 @@
       if (!all.length) return [];
       var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
       return all.slice(1).map(function (r) {
-        var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]).trim(); });
+        var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim(); });   /* also removes hidden marks copied from WhatsApp */
         return o;
       });
     });
@@ -2239,6 +2239,196 @@
     try { sessionStorage.setItem("nemi-intro", "1"); } catch (e) {}
     setTimeout(function () { h.classList.remove("app-intro"); }, 1700);
   })();
+
+  /* ---------- website content from the Google Sheet (README part 5.37) ----------
+     Tabs of the same Sheet as the Daan lists: Karyakram, Dainik Karyakram, Mandir Samay, Suchnayein, Yojanayein,
+     Top Banner, Team, Niyamit Daan. Their "Publish to web" CSV links go in window.SHEETS (data.js).
+     - What is written in data.js still shows; a Sheet row with the same id as a data.js card replaces it.
+     - hidden = yes hides a row, pinned = yes puts it on the Home page. Delete a row to remove it.
+     - Hindi and English columns: if only one is filled, that one shows in both languages.
+     - The last copy read is saved in the browser, so pages open at once (and when Google cannot be reached);
+       the fresh copy is read in the background and the page is redrawn only if something changed. */
+  var CS_TABS = {   /* tab key in window.SHEETS : pages that need it */
+    banner: "*", samay: "home visit daily", dainik: "daily", karyakram: "home karyakram daily",
+    suchnayein: "home announcements", yojana: "home yojana", team: "team", niyamitDaan: "daan"
+  };
+  var CS_BASE = null, csRows = {}, hashMissed = false;
+  function csClone(v) { try { return JSON.parse(JSON.stringify(v)); } catch (e) { return v; } }
+  function csBase() {
+    if (!CS_BASE) CS_BASE = { EVENTS: csClone(window.EVENTS || []), ANNOUNCEMENTS: csClone(window.ANNOUNCEMENTS || []), YOJANA: csClone(window.YOJANA || []),
+      DAILY: csClone(window.DAILY || []), TEAM: csClone(window.TEAM || []), RECURRING: csClone(window.RECURRING || []),
+      BANNER: csClone(window.BANNER || {}), timings: csClone(S.timings || null), timingsNote: csClone(S.timingsNote || null), showTimings: S.showTimings };
+    return CS_BASE;
+  }
+  function csClean(v) { return String(v == null ? "" : v).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").replace(/\r/g, "").trim(); }
+  function csYes(v) { return /^(yes|y|haan|han|ha|true|1|✓|✔|हाँ|हां|हा)$/i.test(csClean(v)); }
+  function csNo(v) { return /^(no|n|nahi|nahin|false|0|नहीं|ना)$/i.test(csClean(v)); }
+  function csTx(r, base) {   /* { hi, en } from base_hi / base_en; one filled = shown in both */
+    var hi = csClean(r[base + "_hi"]), en = csClean(r[base + "_en"]), one = csClean(r[base]);
+    if (!hi && !en) hi = en = one;
+    if (!hi) hi = en; if (!en) en = hi;
+    return { hi: hi, en: en };
+  }
+  function csHas(o) { return !!(o && (o.hi || o.en)); }
+  function csLines(r, base) {   /* a cell with one point per line (Alt+Enter) -> [{hi,en}, ...] */
+    var hi = csClean(r[base + "_hi"]).split(/\n+/).map(csClean).filter(Boolean), en = csClean(r[base + "_en"]).split(/\n+/).map(csClean).filter(Boolean), out = [];
+    for (var i = 0; i < Math.max(hi.length, en.length); i++) out.push({ hi: hi[i] || en[i] || "", en: en[i] || hi[i] || "" });
+    return out;
+  }
+  /* a date written in the Sheet: 2026-11-09, 09-11-2026, 09/11/2026, 9 Nov 2026, 9 नवंबर 2026 */
+  function csDate(v) {
+    v = csClean(v); var d = normDate(v), mt;
+    if (d) return d;
+    if ((mt = v.match(/^(\d{1,2})\s*[ -]?\s*([^\s\d,.-]+)[\s,.-]*(\d{4})$/))) { var m = monthNum(mt[2]); if (m) return normDate(mt[3] + "-" + m + "-" + mt[1]); }
+    return "";
+  }
+  /* a time written in the Sheet: 06:30, 6:30, 6.30, 6:30:00 (Google's own time format), 7:00 AM, 7:30 pm -> "HH:MM" (or "" if not a time) */
+  function csTime(v) {
+    var mt = csClean(v).toLowerCase().replace(/\./g, ":").match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*(am|pm|a\.m|p\.m)?$/);
+    if (!mt) return "";
+    var h = +mt[1], m = +mt[2];
+    if (mt[3]) { if (h < 1 || h > 12) return ""; h = h % 12 + (mt[3].charAt(0) === "p" ? 12 : 0); }
+    return h < 24 && m < 60 ? pad2(h) + ":" + pad2(m) : "";
+  }
+  function csList(v) { return csClean(v).split(/[,\n]+/).map(csClean).filter(Boolean); }
+  function csImg(v) { v = csClean(v); return !v || /^(https?:)?\/\//i.test(v) || v.indexOf("/") >= 0 ? v : "images/" + v; }
+  function csNum(v) { v = csClean(v).replace(/[₹,\s]|\/-$/g, ""); return v === "" ? "" : (isNaN(+v) ? csClean(v) : +v); }
+  /* rows of a key / value tab (Mandir Samay, Top Banner) -> { key: value } */
+  function csKV(rows) { var o = {}; (rows || []).forEach(function (r) { var k = csClean(r.key || r.kya || r.setting).toLowerCase(); if (k) o[k] = csClean(r.value || r.mulya || r.samay); }); return o; }
+  /* merge data.js cards with Sheet rows: same id = the Sheet row replaces the card (hidden = yes hides it) */
+  function csMerge(base, rows) {
+    var out = base.slice(), idx = {};
+    out.forEach(function (x, i) { if (x && x.id) idx[x.id] = i; });
+    rows.forEach(function (x) { if (x.id && idx[x.id] != null) out[idx[x.id]] = x; else out.push(x); });
+    return out;
+  }
+  var CS_MAP = {
+    karyakram: function (rows) {
+      return rows.map(function (r) {
+        var d = csDate(r.date), e = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), date: d, endDate: csDate(r.end_date) || "",
+          time: csTx(r, "time"), place: csTx(r, "place"), type: csTx(r, "type"), title: csTx(r, "title"), text: csTx(r, "text"), image: csImg(r.image), fromSheet: true };
+        if (!e.endDate) delete e.endDate;
+        return d && csHas(e.title) ? e : null;
+      }).filter(Boolean);
+    },
+    suchnayein: function (rows) {
+      return rows.map(function (r) {
+        var a = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), date: csDate(r.date), title: csTx(r, "title"), text: csTx(r, "text"), image: csImg(r.image), fromSheet: true };
+        return csHas(a.title) || csHas(a.text) ? a : null;
+      }).filter(Boolean);
+    },
+    yojana: function (rows) {
+      return rows.map(function (r) {
+        var st = csClean(r.status).toLowerCase();
+        st = /^(soon|jald|जल्द|baad)/.test(st) ? "soon" : /^(done|poor|पूर्ण|पूरी|complete)/.test(st) ? "done" : "active";
+        var y = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), status: st, title: csTx(r, "title"), short: csTx(r, "short"), summary: csTx(r, "summary"),
+          details: csLines(r, "details"), target: csClean(r.target), raised: csClean(r.raised), photos: csList(r.photos).map(csImg), formUrl: csClean(r.form_url), fromSheet: true };
+        return csHas(y.title) ? y : null;
+      }).filter(Boolean);
+    },
+    dainik: function (rows) {
+      return rows.map(function (r) {
+        var at = csClean(r.at).toLowerCase(), tm = csTime(r.time), d = { hidden: csYes(r.hidden), icon: csClean(r.icon), title: csTx(r, "title"), text: csTx(r, "text") };
+        if (/^(open|abhishek|aarti|close)$/.test(at)) d.at = at; else if (tm) d.time = tm; else return null;
+        return csHas(d.title) ? d : null;
+      }).filter(Boolean);
+    },
+    team: function (rows) {
+      var groups = [], byName = {};
+      rows.forEach(function (r) {
+        var g = csTx(r, "group"), key = (g.hi || g.en).toLowerCase(); if (!key) return;
+        var m = { hidden: csYes(r.hidden), name: csTx(r, "name"), role: csTx(r, "role"), phone: csClean(r.phone), photo: csImg(r.photo) };
+        if (!csHas(m.name)) return;
+        if (!byName[key]) { byName[key] = { group: g, members: [], fromSheet: true }; groups.push(byName[key]); }
+        if (!m.hidden) byName[key].members.push(m);
+      });
+      return groups.filter(function (g) { return g.members.length; });
+    },
+    niyamitDaan: function (rows) {
+      return rows.map(function (r) {
+        var c = [];
+        [1, 2].forEach(function (n) { var nm = csTx(r, "contact" + n + "_name"), ph = csClean(r["contact" + n + "_phone"]); if (csHas(nm) || ph) c.push({ name: nm, phone: ph }); });
+        var x = { id: csClean(r.id), hidden: csYes(r.hidden), title: csTx(r, "title"), amount: csNum(r.amount), when: csTx(r, "when"), text: csTx(r, "text"), how: csTx(r, "how"), contacts: c, fromSheet: true };
+        return csHas(x.title) ? x : null;
+      }).filter(Boolean);
+    }
+  };
+  /* put Sheet content into window.* (the renderers read these), starting each time from the data.js copy */
+  function csApply() {
+    var B = csBase(), r = csRows, sh = window.SHEETS || {};
+    function on(k) { return sh[k] && r[k]; }
+    window.EVENTS = on("karyakram") ? csMerge(B.EVENTS, CS_MAP.karyakram(r.karyakram)) : csClone(B.EVENTS);
+    window.ANNOUNCEMENTS = on("suchnayein") ? csMerge(B.ANNOUNCEMENTS, CS_MAP.suchnayein(r.suchnayein)) : csClone(B.ANNOUNCEMENTS);
+    window.YOJANA = on("yojana") ? csMerge(B.YOJANA, CS_MAP.yojana(r.yojana)) : csClone(B.YOJANA);
+    window.RECURRING = on("niyamitDaan") ? csMerge(B.RECURRING, CS_MAP.niyamitDaan(r.niyamitDaan)) : csClone(B.RECURRING);
+    window.DAILY = on("dainik") ? csClone(B.DAILY).concat(CS_MAP.dainik(r.dainik)) : csClone(B.DAILY);
+    if (on("team")) {
+      var tg = csClone(B.TEAM), byName = {};
+      tg.forEach(function (g) { ["hi", "en"].forEach(function (l) { var k = (typeof g.group === "string" ? g.group : (g.group && g.group[l]) || "").toLowerCase(); if (k && !byName[k]) byName[k] = g; }); });
+      CS_MAP.team(r.team).forEach(function (g) { var k = (g.group.hi || "").toLowerCase(), k2 = (g.group.en || "").toLowerCase(), old = byName[k] || byName[k2];
+        if (old && !old.hidden) old.members = (old.members || []).concat(g.members); else tg.push(g); });
+      window.TEAM = tg;
+    } else window.TEAM = csClone(B.TEAM);
+    var bn = csClone(B.BANNER);
+    if (on("banner")) {
+      var kv = csKV(r.banner);
+      if (kv.show != null && kv.show !== "") bn.enabled = !csNo(kv.show);
+      var bt = csTx(kv, "text"), bl = csTx(kv, "link_text");
+      if (csHas(bt)) bn.text = bt; if (csHas(bl)) bn.linkText = bl;
+      if ("link" in kv) bn.link = kv.link;   /* the link row is there but empty = no button (as the Sheet says) */
+    }
+    window.BANNER = bn;
+    S.timings = csClone(B.timings); S.timingsNote = csClone(B.timingsNote); S.showTimings = B.showTimings;
+    if (on("samay")) {
+      var sm = csKV(r.samay), T = S.timings || {}, ok = false;
+      ["open", "abhishek", "aarti", "close"].forEach(function (k) { var v = csTime(sm[k]); if (v) { T[k] = v; ok = true; } });
+      if (ok) S.timings = T;
+      var nt = csTx(sm, "note"); if (csHas(nt)) S.timingsNote = nt;
+      if (sm.show != null && sm.show !== "") S.showTimings = !csNo(sm.show);
+    }
+  }
+  function csNeeded(k) { var p = CS_TABS[k]; return p === "*" || (" " + p + " ").indexOf(" " + page + " ") >= 0; }
+  function csCacheKey(k) { return "nemi-cs:" + k + ":" + (window.SHEETS || {})[k]; }   /* a new link never shows the old link's saved copy */
+  function csParse(txt) {
+    if (!txt || /^\s*<(!doctype|html)/i.test(txt)) return null;
+    var all = parseCSV(txt).filter(function (r) { return r.some(function (x) { return String(x).trim() !== ""; }); });
+    if (!all.length) return [];
+    var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
+    return all.slice(1).map(function (r) { var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]); }); return o; });
+  }
+  /* before the first drawing: use the copies saved in this browser */
+  function csFromCache() {
+    var sh = window.SHEETS || {};
+    Object.keys(CS_TABS).forEach(function (k) {
+      if (!sh[k] || !csNeeded(k)) return;
+      var txt = lsGet(csCacheKey(k)), rows = txt ? csParse(txt) : null;
+      if (rows) csRows[k] = rows;
+    });
+    csApply();
+  }
+  /* after the page is drawn: read fresh copies; redraw once if anything changed */
+  function csRefresh() {
+    var sh = window.SHEETS || {}, changed = {}, jobs = [];
+    Object.keys(CS_TABS).forEach(function (k) {
+      if (!sh[k] || !csNeeded(k)) return;
+      var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 12000) : 0;
+      jobs.push(fetch(sh[k], ctl ? { signal: ctl.signal, cache: "no-store" } : { cache: "no-store" }).then(function (res) { return res.ok ? res.text() : ""; }).then(function (txt) {
+        clearTimeout(tm);
+        var rows = csParse(txt); if (!rows) return;
+        if (txt !== lsGet(csCacheKey(k))) { lsSet(csCacheKey(k), txt); csRows[k] = rows; changed[k] = true; }
+        else if (!csRows[k]) { csRows[k] = rows; changed[k] = true; }
+      }).catch(function () { clearTimeout(tm); }));
+    });
+    if (!jobs.length) return;
+    Promise.all(jobs).then(function () {
+      var ks = Object.keys(changed); if (!ks.length) return;
+      csApply();
+      if (ks.length === 1 && ks[0] === "banner") { buildBanner(); return; }   /* only the top strip changed: the rest of the page stays as it is */
+      render();
+      /* a link like yojana.html#bhumi-daan to a card that came only now from the Sheet */
+      if (hashMissed) { var el = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (el) { hashMissed = false; el.scrollIntoView(); } }
+    });
+  }
   function render() {
     if (timer) { clearInterval(timer); timer = null; }
     ensureTop();
@@ -2270,7 +2460,7 @@
       firstRender = false;
       if (location.hash.length > 1) {
         var el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
-        if (el) el.scrollIntoView();
+        if (el) el.scrollIntoView(); else hashMissed = true;
       }
     }
     applyHomeSections();
@@ -2281,7 +2471,9 @@
     scheduleNotifyAsk();
     watchAnimations();
   }
+  csFromCache();
   render();
+  csRefresh();
   notifyBoot();
 
   /* ---------- numbers: wrap digits (pin code, amounts, phone numbers) so they are drawn larger and clearer ---------- */

@@ -137,6 +137,8 @@ window.SITE = {
   //     newKaryakram: a new karyakram is announced as soon as you add it (newKaryakramOnlyThisMonth: true = only if it
   //       is in the current month; false = any coming karyakram)
   //     newYojana / newSandesh: a new yojana / a new announcement, as soon as you add it
+  //     newBhaktamar: a new Bhaktamar name (current month, coming date) in the Bhaktamar tab of the Google Sheet
+  //     (new rows in the Sheet tabs Karyakram / Suchnayein / Yojanayein / Bhaktamar are announced within ~15 minutes)
   //     time: "06:30" = reminders go at this time (India time, 24-hour clock, e.g. "18:00" for 6 in the evening)
   //     onTheDay: reminder on the day of each karyakram and Bhaktamar path
   //     daysBefore: [7] = reminder 7 days before. [7, 1] = 7 days before and 1 day before. [] = none
@@ -145,7 +147,7 @@ window.SITE = {
   //     maxPerRun: if more notifications than this are due at one time, one combined notification is sent instead
   //     false for any of them = do not send that kind.
   notify: { appId: "85660e76-85ad-47b2-97de-a6390ce031cb", safariWebId: "web.onesignal.auto.5f8d50ad-7ec3-4f1c-a2de-134e8949294e", footerButton: true, askPopup: true, askAfterDays: 7, askDelaySeconds: 8,
-    auto: { newKaryakram: true, newKaryakramOnlyThisMonth: true, newYojana: true, newSandesh: true,
+    auto: { newKaryakram: true, newKaryakramOnlyThisMonth: true, newYojana: true, newSandesh: true, newBhaktamar: true,
       time: "06:30", onTheDay: true, daysBefore: [7], monthStart: true, monthStartDay: 1,
       bhaktamar: true, bhaktamarNames: true, maxPerRun: 3 } },
 
@@ -1301,7 +1303,16 @@ window.SHEETS = {
   saptahik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=1603045792&single=true&output=csv",    // tab "Saptahik Shantidhara"
   masik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=947962969&single=true&output=csv",       // tab "Masik Shantidhara"
   dravya: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=2001759128&single=true&output=csv",      // tab "Dravya dan"
-  bhaktamar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=700086573&single=true&output=csv"    // tab "Bhaktamar"
+  bhaktamar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=700086573&single=true&output=csv",    // tab "Bhaktamar"
+  // ---- Website content tabs of the same Sheet (README part 5.37). Empty "" = that part comes only from this file. ----
+  karyakram: "",     // tab "Karyakram" (special karyakram; Bhaktamar is NOT written here, it comes from the Bhaktamar tab)
+  dainik: "",        // tab "Dainik Karyakram" (daily schedule)
+  samay: "",         // tab "Mandir Samay" (opening / abhishek / aarti / closing time, note)
+  suchnayein: "",    // tab "Suchnayein" (announcements)
+  yojana: "",        // tab "Yojanayein"
+  banner: "",        // tab "Top Banner"
+  team: "",          // tab "Team"
+  niyamitDaan: ""    // tab "Niyamit Daan" (the regular daan / seva cards on the Daan page)
 };
 
 /* Shantidhara punyarjak list. Shown on the Daan page as a calendar-style table, month by month,

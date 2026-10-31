@@ -152,6 +152,48 @@ function bhaktamarDates(site, url, local) {
   }).catch(function (e) { return fallback(e && e.message); });
 }
 
+
+/* ---------- website content tabs of the Google Sheet (README part 5.37) ---------- */
+function clean(v) { return String(v == null ? "" : v).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").replace(/\r/g, "").trim(); }
+function isYes(v) { return /^(yes|y|haan|han|ha|true|1|✓|✔|हाँ|हां|हा)$/i.test(clean(v)); }
+function tx(r, base) { var hi = clean(r[base + "_hi"]), en = clean(r[base + "_en"]), one = clean(r[base]); if (!hi && !en) hi = en = one; return { hi: hi || en, en: en || hi }; }
+function sheetDate(v) {
+  v = clean(v); var d = normDate(v), mt;
+  if (d) return d;
+  if ((mt = v.match(/^(\d{1,2})\s*[ -]?\s*([^\s\d,.-]+)[\s,.-]*(\d{4})$/))) { var m = monthNum(mt[2]); if (m) return normDate(mt[3] + "-" + m + "-" + mt[1]); }
+  return "";
+}
+/* rows of one published tab: [{ header: value }], or null when it cannot be read */
+function sheetRows(url) {
+  if (!url) return Promise.resolve(null);
+  return fetch(url).then(function (r) { return r.ok ? r.text() : null; }).then(function (t) {
+    if (t == null || /^\s*<(!doctype|html)/i.test(t)) { console.log("Could not read a Sheet tab:", url.slice(0, 90)); return null; }
+    var rows = parseCSV(t).filter(function (r) { return r.some(function (x) { return String(x).trim() !== ""; }); }); if (!rows.length) return [];
+    var head = rows[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
+    return rows.slice(1).map(function (cells) { var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(cells[i] == null ? "" : cells[i]); }); return o; });
+  }).catch(function (e) { console.log("Could not read a Sheet tab:", e && e.message); return null; });
+}
+/* a picture name from the Sheet: "photo.jpg" alone means images/photo.jpg (the same rule as the website) */
+function sheetImg(v) { v = clean(v); return !v || /^(https?:)?\/\//i.test(v) || v.indexOf("/") >= 0 ? v : "images/" + v; }
+function sheetEvent(r) {
+  var e = { id: clean(r.id), hidden: isYes(r.hidden), date: sheetDate(r.date), endDate: sheetDate(r.end_date), time: tx(r, "time"), place: tx(r, "place"), type: tx(r, "type"), title: tx(r, "title"), text: tx(r, "text"), image: sheetImg(r.image) };
+  if (!e.endDate) delete e.endDate;
+  return e.date && (e.title.hi || e.title.en) ? e : null;
+}
+function mergeById(base, rows) {
+  var out = base.slice(), idx = {};
+  out.forEach(function (x, i) { if (x && x.id) idx[x.id] = i; });
+  rows.forEach(function (x) { if (x.id && idx[x.id] != null) out[idx[x.id]] = x; else out.push(x); });
+  return out;
+}
+/* karyakram of data.js and of the Sheet together (for reminders) */
+function allEvents() {
+  return sheetRows(W.SHEETS && W.SHEETS.karyakram).then(function (rows) {
+    var list = rows ? mergeById(vis(W.EVENTS), rows.map(sheetEvent).filter(Boolean)) : vis(W.EVENTS);
+    return real(list).filter(function (e) { return e.date; });
+  });
+}
+
 /* ---------- main ---------- */
 var W = load(fs.readFileSync("js/data.js", "utf8"));
 if (!W) process.exit(0);
@@ -228,9 +270,9 @@ function reminderTime() {
 }
 function onSchedule(force) {
   if (!force && !reminderTime()) { console.log("Not reminder time yet (set time " + CFG.time + " India time). Nothing sent."); return Promise.resolve(); }
-  var evs = real(W.EVENTS).filter(function (e) { return e.date; });
+  var evs = [];
   var bhP = CFG.bhaktamar ? bhaktamarDates(W.SITE || {}, W.SHEETS && W.SHEETS.bhaktamar, W.BHAKTAMBAR) : Promise.resolve([]);
-  return bhP.then(function (bh) {
+  return allEvents().then(function (list) { evs = list; return bhP; }).then(function (bh) {
     var jobs = [];
     function evMeta(e, l) { return [niceDate(e.date, l), L(e.time, l), L(e.place, l)].filter(Boolean).join(", "); }
     function dayJobs(day, n) {   /* n = 0 on the day, else days before */
@@ -263,6 +305,80 @@ function onSchedule(force) {
   });
 }
 
+
+/* ---------- new rows in the Sheet: notify within minutes (every GitHub run checks) ----------
+   What was seen last time is kept in .notify-state/sheet-seen.json (saved between runs by GitHub's cache).
+   A row counts as new only if the number of rows in its tab went up (so correcting a spelling or a date sends nothing);
+   when rows were changed and added in the same run, the last unseen rows (new rows usually go at the bottom) are the new ones.
+   The first run only remembers what is there. Hidden rows are not remembered, so un-hiding a row announces it. */
+var STATE_FILE = ".notify-state/sheet-seen.json";
+function readState() { try { return JSON.parse(fs.readFileSync(STATE_FILE, "utf8")); } catch (e) { return null; } }
+function writeState(st) {
+  fs.mkdirSync(".notify-state", { recursive: true }); var txt = JSON.stringify(st);
+  var old = ""; try { old = fs.readFileSync(STATE_FILE, "utf8"); } catch (e) {}
+  if (txt !== old) { fs.writeFileSync(STATE_FILE, txt); if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, "changed=true\n"); }
+}
+function bhRowsForPoll(rows) {
+  return (rows || []).map(function (r) {
+    var nm = tx(r, "name"); if (!nm.hi && !nm.en) return null;
+    var d = bhDate(r); if (!d) return null;
+    return { k: "sheet-new|bhaktamar|" + clean(r.year) + "|" + clean(r.month) + "|" + clean(r.date) + "|" + nm.hi, g: "all", date: d, names: nm };
+  }).filter(Boolean);
+}
+function sheetPoll() {
+  var SH = W.SHEETS || {}, tabs = ["karyakram", "suchnayein", "yojana", "bhaktamar"];
+  if (!tabs.some(function (t) { return SH[t]; })) return Promise.resolve();
+  if ((W.SITE || {}).bhaktamarKaryakram === false) tabs = tabs.filter(function (t) { return t !== "bhaktamar"; });
+  return Promise.all(tabs.map(function (t) { return sheetRows(SH[t]); })).then(function (res) {
+    var prev = readState() || {}, next = {}, jobs = [];
+    tabs.forEach(function (t, i) {
+      var rows = res[i];
+      if (rows == null || (!rows.length && prev[t] && prev[t].length)) { if (prev[t]) next[t] = prev[t]; return; }   /* could not read (or Google gave an empty tab for a moment): keep what we had */
+      var cur = [];
+      if (t === "karyakram") rows.forEach(function (r) { var e = sheetEvent(r); if (e && !e.hidden && !placeholder(e)) cur.push({ k: "sheet-new|karyakram|" + (e.id || e.date + "|" + e.title.hi), g: "all", e: e }); });
+      if (t === "suchnayein") rows.forEach(function (r) { var a = { id: clean(r.id), date: sheetDate(r.date), title: tx(r, "title"), text: tx(r, "text"), image: sheetImg(r.image) };
+        if (isYes(r.hidden) || (!a.title.hi && !a.text.hi) || placeholder(a)) return; cur.push({ k: "sheet-new|suchnayein|" + (a.id || a.date + "|" + a.title.hi), g: "all", a: a }); });
+      if (t === "yojana") rows.forEach(function (r) { var y = { id: clean(r.id), title: tx(r, "title"), short: tx(r, "short"), photos: clean(r.photos) };
+        if (isYes(r.hidden) || !y.title.hi || placeholder(y)) return; cur.push({ k: "sheet-new|yojana|" + (y.id || y.title.hi), g: "all", y: y }); });
+      if (t === "bhaktamar") cur = bhRowsForPoll(rows);
+      next[t] = cur.map(function (c) { return { k: c.k, g: c.g }; });
+      if (!prev[t]) { console.log("Sheet tab " + t + ": first look, " + cur.length + " rows remembered (nothing sent)."); return; }
+      var seen = {}, groupsPrev = {};
+      prev[t].forEach(function (p) { seen[p.k] = 1; (groupsPrev[p.g] = groupsPrev[p.g] || []).push(p.k); });
+      var nowKeys = {}; cur.forEach(function (c) { nowKeys[c.k] = 1; });
+      var byGroup = {};
+      cur.forEach(function (c) { if (!seen[c.k]) (byGroup[c.g] = byGroup[c.g] || []).push(c); });
+      Object.keys(byGroup).forEach(function (g) {
+        var gone = (groupsPrev[g] || []).filter(function (k) { return !nowKeys[k]; }).length;   /* rows of this group that changed */
+        var fresh = byGroup[g].slice(Math.min(gone, byGroup[g].length));
+        fresh.forEach(function (c) {
+          if (t === "karyakram") {
+            var e = c.e; if (AUTO.newKaryakram === false || (e.endDate || e.date) < TODAY || (CFG.onlyThisMonth && e.date.slice(0, 7) !== THIS_MONTH)) return;
+            jobs.push({ key: c.k, image: e.image, page: "karyakram.html", title: { hi: "नया विशेष कार्यक्रम", en: "New special karyakram" },
+              text: both(function (l) { return short(L(e.title, l) + " • " + niceDate(e.date, l) + (L(e.time, l) ? ", " + L(e.time, l) : ""), 170); }) });
+          } else if (t === "suchnayein") {
+            var a = c.a; if (AUTO.newSandesh === false) return;
+            jobs.push({ key: c.k, image: a.image, page: "announcements.html", title: both(function (l) { return short(L(a.title, l) || (l === "en" ? "Message from the mandir" : "मंदिर का संदेश"), 60); }), text: both(function (l) { return short(L(a.text, l) || L(a.title, l), 170); }) });
+          } else if (t === "yojana") {
+            var y = c.y; if (AUTO.newYojana === false) return;
+            jobs.push({ key: c.k, image: sheetImg(y.photos.split(/[,\n]/)[0]), page: "yojana.html", title: { hi: "नई योजना: " + y.title.hi, en: "New yojana: " + y.title.en }, text: both(function (l) { return short(L(y.short, l) || L(y.title, l), 170); }) });
+          } else if (t === "bhaktamar") {
+            if (AUTO.newBhaktamar === false || c.date < TODAY || (CFG.onlyThisMonth && c.date.slice(0, 7) !== THIS_MONTH)) return;
+            jobs.push({ key: c.k, page: "karyakram.html", title: BH_TITLE, text: both(function (l) { return short(niceDate(c.date, l) + " • " + (l === "en" ? "Punyarjak family: " : "पुण्यार्जक परिवार: ") + c.names[l], 170); }) });
+          }
+        });
+      });
+    });
+    writeState(next);
+    if (!jobs.length) { console.log("No new rows to announce in the Sheet."); return; }
+    if (jobs.length > MAX_PER_RUN) {
+      var all = jobs; jobs = [{ key: "sheet-many|" + all.map(function (n) { return n.key; }).join("~"), page: "index.html", title: { hi: "मंदिर की नई जानकारी", en: "New at the mandir" },
+        text: both(function (l) { return short(all.map(function (n) { return n.title[l]; }).join(" • "), 170); }) }];
+    }
+    return jobs.reduce(function (p, n) { return p.then(function () { return send(n); }); }, Promise.resolve());
+  });
+}
+
 function onHand() {
   var t = (process.env.IN_TITLE || "").trim(), m = (process.env.IN_MESSAGE || "").trim(), page = (process.env.IN_PAGE || "").trim();
   if (!t || !m) { console.log("Please write a title and a message."); process.exitCode = 1; return Promise.resolve(); }
@@ -270,5 +386,5 @@ function onHand() {
   return send({ page: page, image: process.env.IN_IMAGE || "", title: { hi: t, en: t }, text: { hi: m, en: m } });
 }
 
-(EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule() : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : onHand()) : Promise.resolve())
+(EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : onHand()) : Promise.resolve())
   .catch(function (e) { console.log("Error:", e && e.message); process.exitCode = 1; });
