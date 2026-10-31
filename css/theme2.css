@@ -818,3 +818,12 @@ html.app-intro body::after { content: ""; position: fixed; left: 50%; top: 46%; 
   60% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 46px rgba(232, 213, 160, 0); }
   100% { opacity: 0; transform: scale(1.35); box-shadow: 0 0 0 46px rgba(232, 213, 160, 0); visibility: hidden; }
 }
+
+/* footer: app + notification buttons side by side */
+.foot-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.foot-acts .install-foot { margin-top: 0; }
+.notify-foot[hidden] { display: none; }
+.notify-foot.is-on { border-color: rgba(232, 213, 160, .25); color: rgba(233, 213, 160, .85); }
+.notify-foot { background: transparent; border-color: rgba(233, 213, 160, .4); color: var(--gold-l); padding: .7rem 1.3rem; }
+html[lang="en"] .notify-foot { font-size: .7rem; }
+.notify-foot:hover { background: var(--gold); color: #2B1810; border-color: var(--gold); }

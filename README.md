@@ -39,6 +39,7 @@
 | शांतिधारा, द्रव्य दान, भक्तामर के नाम और राशि (Google Sheet से) | Google Sheet + `window.SHEETS` | 5.12, 5.32 |
 | Home का णमोकार मंत्र (audio) | `audio/namokarmantra.mp3` + `window.SITE` → `audio` | 5.33 |
 | ऐप की तरह जोड़ने का पॉप-अप और बटन, ऐप का नाम / आइकन | `manifest.webmanifest`, `images/icon-*.png`, `window.SITE` → `appInstall` | 5.34 |
+| सूचनाएँ (notifications): बटन, सवाल, अपने आप भेजना | `window.SITE` → `notify`, OneSignal, GitHub Actions | 5.35 |
 | गैलरी की फ़ोटो और वीडियो | `window.GALLERY` | 5.13 |
 | टीम के नाम और फ़ोटो | `window.TEAM` | 5.9 |
 | टाइमलाइन की घटनाएँ और फ़ोटो | `window.TIMELINE` | 5.24 |
@@ -762,7 +763,7 @@ window.MANDIR_NIYAM = {
 
 ### 5.27 रंग, अक्षर और चलती चीज़ें (Theme 2)
 
-- **अक्षर (fonts):** Cinzel, Cormorant Garamond और Tiro Devanagari Hindi, ये Google Fonts से आते हैं। इसके लिए इंटरनेट चाहिए (वैसे भी वेबसाइट के लिए चाहिए)। न मिलें तो वेबसाइट सादे अक्षरों में ठीक दिखती है।
+- **अक्षर (fonts):** Cinzel, Cormorant Garamond, Tiro Devanagari Hindi और Noto Serif Devanagari. ये वही फ़ाइलें हैं जो Google Fonts देता है, पर अब हमारी अपनी रिपॉज़िटरी के `fonts` फ़ोल्डर में रखी हैं और `css/fonts.css` से जुड़ती हैं (Google के सर्वर पर नहीं जाना पड़ता, इसलिए वेबसाइट जल्दी खुलती है और ऐप में बिना इंटरनेट भी अक्षर सही दिखते हैं)। ब्राउज़र सिर्फ़ उतनी फ़ाइलें लेता है जितनी पेज पर लिखे अक्षरों (हिंदी / English) के लिए चाहिए। `fonts` फ़ोल्डर और `css/fonts.css` को मत हटाना। ये फ़ॉन्ट मुफ़्त (Open Font License) हैं, लाइसेंस `fonts/LICENSE-OFL.txt` में है।
 - **रंग:** `css/theme2.css` की शुरुआत में `:root { ... }` में सारे रंग एक जगह हैं (`--gold`, `--midnight`, `--paper`...)। यह कोड वाली फ़ाइल है, बदलना हो तो किसी जानकार से करवाओ।
 - **चलती चीज़ें** (घूमता मंडल, भामंडल, पंखुड़ियाँ, णमोकार पट्टी): जिनके फ़ोन में "कम हलचल" (reduce motion) चालू है उनके लिए अपने आप रुक जाती हैं। पंखुड़ियाँ ख़ुद बंद करनी हों तो `heroPetals: false`.
 - **Light / Dark / High contrast:** ऊपर के बटन से, अपने आप चलता है। High contrast में सारे अक्षर पूरे काले (या dark में पूरे सफ़ेद) हो जाते हैं।
@@ -842,6 +843,40 @@ Home खुलने पर मंत्र अपने आप चलता ह
 
 ---
 
+### 5.35 सूचनाएँ (Notifications): नया कार्यक्रम, योजना, संदेश
+
+लोग "सूचनाएँ चालू करें" दबाकर मंदिर की सूचनाएँ पा सकते हैं (फ़ोन पर, ऐप में या ब्राउज़र में)। सूचनाएँ **OneSignal** (मुफ़्त सेवा) से जाती हैं, और ज़्यादातर **अपने आप** भेजी जाती हैं।
+
+**एक बार की सेटिंग (सिर्फ़ पहली बार):**
+1. https://onesignal.com पर मुफ़्त अकाउंट बनाओ। "New App" बनाओ, नाम "Nemidham", प्लेटफ़ॉर्म **Web** चुनो।
+2. Web की सेटिंग में **Custom Code** चुनो। Site Name: `नेमिधाम`, Site URL: `https://shenkisinghai.github.io` (आख़िर में `/` या `/Nemidham` नहीं)। Default icon में `https://shenkisinghai.github.io/Nemidham/images/icon-192.png` डालो। Save करो।
+3. OneSignal में **Settings → Keys & IDs** से **App ID** कॉपी करो और `js/data.js` में `notify: { appId: "यहाँ" ...` में डालो।
+4. वहीं से **REST API Key** (नई key बनानी पड़े तो "Add Key") कॉपी करो। यह गुप्त है, इसे `data.js` में **मत** डालना। GitHub रिपॉज़िटरी → **Settings → Secrets and variables → Actions → New repository secret** → Name: `ONESIGNAL_REST_API_KEY`, Secret: कॉपी की हुई key → Add secret.
+5. GitHub रिपॉज़िटरी → **Actions** टैब खोलकर देखो कि "Notifications" दिख रहा है (पहली बार "I understand… enable" दबाना पड़ सकता है)।
+
+**अपने आप क्या जाता है** (`data.js` → `notify.auto` में हर एक को `false` करके बंद कर सकते हो):
+- `newKaryakram`: `EVENTS` में **इसी महीने** का नया (आने वाला) कार्यक्रम जोड़ते ही (या `hidden: true` हटाते ही)।
+- `newYojana`: `YOJANA` में नई योजना जोड़ते ही।
+- `newSandesh`: `ANNOUNCEMENTS` में नया संदेश जोड़ते ही।
+- `dailyReminder`: हर सुबह 6:30 बजे, उस दिन के विशेष कार्यक्रम (और Google Sheet के भक्तामर पाठ) की याद। उस दिन कुछ न हो तो कुछ नहीं जाता।
+- `monthStart`: हर महीने की 1 तारीख़ को, उस महीने के कार्यक्रमों की सूची।
+- एक बार में 3 से ज़्यादा नई चीज़ें हों तो एक ही मिली-जुली सूचना जाती है।
+
+**अपनी मर्ज़ी की सूचना भेजना (दो तरीके):**
+- GitHub → **Actions → Notifications → Run workflow**: `title` और `message` लिखो (और चाहो तो `page`, जैसे `yojana.html`) → Run. (`mode` में `today` चुनो तो आज के कार्यक्रम की याद तुरंत चली जाती है।)
+- या OneSignal की वेबसाइट → **Messages → Push → New Push**: शीर्षक, संदेश और लिंक लिखकर Send. वहाँ "Schedule" से बाद के समय के लिए भी रख सकते हो।
+
+**वेबसाइट पर:**
+- हर पेज के फ़ुटर में "सूचनाएँ चालू करें" बटन (चालू होने पर "सूचनाएँ चालू हैं", दबाकर बंद भी कर सकते हैं)।
+- एक छोटा सवाल कभी-कभी आता है: "मंदिर की सूचनाएँ पाएँ?" ("अभी नहीं" के बाद 7 दिन बाद फिर)। यह ऐप वाले पॉप-अप के साथ एक ही विज़िट में नहीं आता।
+- **सूचनाएँ अपने आप चालू नहीं हो सकतीं:** हर फ़ोन / ब्राउज़र का नियम है कि हर व्यक्ति को ख़ुद "Allow" दबाना होता है।
+- **iPhone:** सूचनाएँ सिर्फ़ तब आती हैं जब वेबसाइट ऐप की तरह जुड़ी हो (iOS 16.4 या नया)। Safari में बटन दबाने पर यही बताया जाता है।
+- सेटिंग `js/data.js` → `notify`: `footerButton` (बटन), `askPopup` (सवाल), `askAfterDays`, `askDelaySeconds`. `appId` ख़ाली करो तो सब बंद।
+- सूचनाओं के शब्द `i18n.js` में `nt.` से शुरू होने वाली चाबियों में हैं। अपने आप जाने वाली सूचनाओं के शब्द `.github/scripts/notify.js` में हैं। समय (सुबह 6:30) `.github/workflows/notify.yml` की `cron` लाइन में है (वह समय UTC में लिखा है: भारत का समय = UTC + 5:30)।
+- किसी सूचना के न जाने पर GitHub → Actions → Notifications में उस बार का लॉग खोलकर देखो, वहाँ कारण लिखा होता है।
+
+---
+
 ### 5.30 Google में दिखना और WhatsApp का शेयर फ़ोटो (SEO)
 
 **ये क्या है?** जब कोई वेबसाइट का लिंक WhatsApp/Facebook पर भेजता है तो एक फ़ोटो + नाम + छोटा विवरण दिखता है। ये `images/og-share.jpg` से आता है। Google के लिए `sitemap.xml` (सारे पेजों की सूची) और `robots.txt` बनी हैं।
@@ -914,6 +949,7 @@ Home खुलने पर मंत्र अपने आप चलता ह
 | ट्रस्ट / 80G | `window.TRUST` → `enabled: false` |
 | Home का णमोकार मंत्र (audio) | `window.SITE` → `audio: { enabled: false, ... }` (भाग 5.33) |
 | ऐप जोड़ने का पॉप-अप / फ़ुटर बटन | `window.SITE` → `appInstall: { popup: false }` या `appInstall: false` (भाग 5.34) |
+| सूचनाएँ (notifications) | `window.SITE` → `notify: { appId: "" }` सब बंद; सिर्फ़ सवाल बंद: `askPopup: false`; अपने आप जाने वाली कोई एक: `auto` में उसे `false` (भाग 5.35) |
 | भक्तामर का अपने आप बनने वाला कार्यक्रम | `window.SITE` → `bhaktamarKaryakram: false` (भाग 5.32) |
 | शांतिधारा / द्रव्य दान / भक्तामर की सूची | Sheet की उस टैब की पंक्तियाँ मिटा दो (भाग 5.32). Sheet जुड़ी न हो तो `data.js` की सूची खाली `[ ]` |
 | Home पर कोई योजना / सूचना / कार्यक्रम | `pinned: true,` हटा दो |

@@ -477,12 +477,13 @@
       '<footer class="site"><div class="wrap"><div class="foot-grid">' +
       '<div><p class="foot-name">' + esc(L(S.name)) + "</p><p class=\"foot-addr\">" + addr + "</p></div>" +
       '<div class="foot-right"><ul class="foot-links">' + links + '</ul><span class="foot-follow"><span class="foot-follow-h">' + esc(t("v.follow")) + '</span><span class="foot-social">' + socialIconsHtml("ficon") + "</span></span>" +
-      '<button type="button" class="btn install-btn install-foot" hidden>' + esc(t("app.btn")) + "</button></div></div>" +
+      '<div class="foot-acts"><button type="button" class="btn install-btn install-foot" hidden>' + esc(t("app.btn")) + '</button><button type="button" class="btn install-btn notify-foot" hidden></button></div></div></div>' +
       '<div class="foot-bottom"><p class="legal">' + esc(t("f.legal", { year: new Date().getFullYear(), name: L(S.name), place: L(S.place) })) + "</p>" +
       '<div class="foot-meta"><div class="foot-sub">' + counterHtml() + cred + "</div></div></div></div></footer>");
     fetchVisitorCount();
     syncFollowWidth();
     refreshInstall();
+    refreshNotify();
   }
 
   /* "Follow us" row gets exactly the width of the visitor/credit row below, so left and right edges line up. */
@@ -2040,21 +2041,24 @@
   }
   function refreshInstall() { var on = canOfferInstall() && appCfg().footerButton; $$(".install-foot").forEach(function (b) { b.hidden = !on; }); }
   function closeAppGuide() { var g = document.getElementById("app-guide"); if (g) { g.remove(); document.removeEventListener("keydown", guideKey); } }
-  function guideKey(e) { if (e.key === "Escape") { var snz = document.getElementById("app-guide").getAttribute("data-offer") === "1"; closeAppGuide(); if (snz) lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); } }
-  function appBox(html, offer) {
+  function guideKey(e) { if (e.key === "Escape") { var g = document.getElementById("app-guide"), snz = g.getAttribute("data-offer") === "1", nl = g.getAttribute("data-back") === "n-later"; closeAppGuide(); if (snz) lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); if (nl) lsSet("nemi-notify-snooze", String(Date.now() + notifyCfg().askAfterDays * 864e5)); } }
+  function appBox(html, offer, backAct) {
     closeAppGuide();
-    var g = document.createElement("div"); g.id = "app-guide"; g.className = "app-guide"; if (offer) g.setAttribute("data-offer", "1");
+    var g = document.createElement("div"); g.id = "app-guide"; g.className = "app-guide"; if (offer) g.setAttribute("data-offer", "1"); if (backAct) g.setAttribute("data-back", backAct);
     g.innerHTML = '<div class="app-box" role="dialog" aria-modal="true" aria-labelledby="app-gh">' + html + "</div>";
     document.body.appendChild(g); document.addEventListener("keydown", guideKey);
     g.addEventListener("click", function (e) {
-      var b = e.target.closest && e.target.closest("[data-act]"), act = b ? b.getAttribute("data-act") : (e.target === g ? (offer ? "later" : "close") : "");
+      var b = e.target.closest && e.target.closest("[data-act]"), act = b ? b.getAttribute("data-act") : (e.target === g ? (backAct || (offer ? "later" : "close")) : "");
       if (!act) return;
       if (act === "later") { lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); closeAppGuide(); }
       else if (act === "close") closeAppGuide();
       else if (act === "install") { if (offer) lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); doInstall(); }
       else if (act === "how") openAppGuide();
+      else if (act === "n-yes") { closeAppGuide(); notifySubscribe(); }
+      else if (act === "n-later") { lsSet("nemi-notify-snooze", String(Date.now() + notifyCfg().askAfterDays * 864e5)); closeAppGuide(); }
+      else if (act === "n-off") { closeAppGuide(); notifyOff(); }
     });
-    var f = g.querySelector("[data-act=install], [data-act=close], [data-act=how]"); if (f) f.focus();
+    var f = g.querySelector("[data-act=install], [data-act=n-yes], [data-act=close], [data-act=how]"); if (f) f.focus();
   }
   function openAppGuide() {
     var ios = isIOS(), steps = ios ? ["app.ios1", "app.ios2", "app.ios3"] : ["app.and1", "app.and2", "app.and3"];
@@ -2100,8 +2104,120 @@
       openOffer();
     }, appCfg().delaySec * 1000);
   }
+
+  /* ---------- notifications (OneSignal web push) ----------
+     People can turn on notifications for new karyakram, yojana and sandesh. Sending is done from OneSignal's
+     website or automatically by GitHub (see README). Nothing loads until SITE.notify.appId is filled in.
+     The OneSignal script loads only when needed (button pressed, or notifications already allowed), so pages stay fast. */
+  function notifyCfg() {
+    var n = S.notify && typeof S.notify === "object" ? S.notify : {};
+    return { appId: String(n.appId || "").trim(), button: n.footerButton !== false, ask: n.askPopup !== false,
+      askAfterDays: +n.askAfterDays > 0 ? +n.askAfterDays : 7, askDelay: n.askDelaySeconds != null && +n.askDelaySeconds >= 0 ? +n.askDelaySeconds : 8 };
+  }
+  function pushSupported() { return "Notification" in window && "serviceWorker" in navigator && "PushManager" in window; }
+  function notifyPerm() { return "Notification" in window ? Notification.permission : "default"; }
+  var osState = { loading: null, ready: false, on: false };
+  function swBase() { var u = new URL("sw.js", location.href); return { path: u.pathname.replace(/^\//, ""), scope: u.pathname.replace(/sw\.js$/, "") }; }
+  function loadOneSignal() {
+    if (osState.loading) return osState.loading;
+    var cfg = notifyCfg();
+    osState.loading = new Promise(function (resolve, reject) {
+      if (!cfg.appId || !pushSupported()) { reject(new Error("off")); return; }
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(function (OneSignal) {
+        var b = swBase();
+        return OneSignal.init({ appId: cfg.appId, serviceWorkerPath: b.path, serviceWorkerParam: { scope: b.scope }, allowLocalhostAsSecureOrigin: true })
+          .then(function () {
+            try { OneSignal.User.setLanguage(lang === "en" ? "en" : "hi"); } catch (e) {}
+            osState.ready = true; osState.on = !!(OneSignal.User.PushSubscription.optedIn && notifyPerm() === "granted");
+            try { OneSignal.User.PushSubscription.addEventListener("change", function () { osState.on = !!(OneSignal.User.PushSubscription.optedIn && notifyPerm() === "granted"); refreshNotify(); }); } catch (e) {}
+            refreshNotify(); resolve(OneSignal);
+          }, reject);
+      });
+      var sc = document.createElement("script"); sc.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"; sc.defer = true;
+      sc.onerror = function () { reject(new Error("load")); }; document.head.appendChild(sc);
+    });
+    osState.loading.catch(function () { osState.loading = null; });
+    return osState.loading;
+  }
+  function notifyOn() { return osState.ready ? osState.on : notifyPerm() === "granted" && lsGet("nemi-notify-on") === "1"; }
+  function refreshNotify() {
+    if (osState.ready && window.OneSignal && window.OneSignal.User) { try { window.OneSignal.User.setLanguage(lang === "en" ? "en" : "hi"); } catch (e) {} }
+    var cfg = notifyCfg(), show = !!cfg.appId && cfg.button && (pushSupported() || isIOS());
+    $$(".notify-foot").forEach(function (b) {
+      b.hidden = !show; if (!show) return;
+      var on = notifyOn(); b.classList.toggle("is-on", on);
+      b.textContent = (on ? "🔔 " : "🔕 ") + t(on ? "nt.on" : "nt.btn");
+    });
+  }
+  function notifySubscribe() {
+    if (!pushSupported()) {   /* iPhone in Safari: notifications work only inside the added app */
+      appBox('<h3 id="app-gh">' + esc(t("nt.ios.h")) + "</h3><p>" + esc(t("nt.ios.p")) + '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="how">' + esc(t("app.btn")) + '</button><button type="button" class="app-hide" data-act="close">' + esc(t("app.close")) + "</button></div>", false);
+      return;
+    }
+    if (notifyPerm() === "denied") {
+      appBox('<h3 id="app-gh">' + esc(t("nt.blocked.h")) + "</h3><p>" + esc(t("nt.blocked.p")) + '</p><button type="button" class="btn btn-line" data-act="close">' + esc(t("app.close")) + "</button>", false);
+      return;
+    }
+    /* the browser's own "Allow" question must come straight from the tap, so it is asked first; OneSignal loads after */
+    var ask = notifyPerm() === "granted" ? Promise.resolve("granted") : new Promise(function (res) { var r = Notification.requestPermission(res); if (r && r.then) r.then(res); });
+    ask.then(function (p) {
+      if (p !== "granted") { refreshNotify(); return; }
+      return loadOneSignal().then(function (OneSignal) { return Promise.resolve(OneSignal.User.PushSubscription.optIn()).then(function () { return OneSignal; }); }).then(function (OneSignal) {
+        osState.on = notifyPerm() === "granted" && !!OneSignal.User.PushSubscription.optedIn;
+        lsSet("nemi-notify-on", osState.on ? "1" : "0"); refreshNotify();
+        if (osState.on) appBox('<h3 id="app-gh">' + esc(t("nt.done.h")) + "</h3><p>" + esc(t("nt.done.p")) + '</p><button type="button" class="btn btn-line" data-act="close">' + esc(t("app.close")) + "</button>", false);
+      });
+    }).catch(function () {
+      appBox('<h3 id="app-gh">' + esc(t("nt.err.h")) + "</h3><p>" + esc(t("nt.err.p")) + '</p><button type="button" class="btn btn-line" data-act="close">' + esc(t("app.close")) + "</button>", false);
+    });
+  }
+  function notifyOff() {
+    loadOneSignal().then(function (OneSignal) { return OneSignal.User.PushSubscription.optOut(); })
+      .then(function () { osState.on = false; lsSet("nemi-notify-on", "0"); refreshNotify(); }, function () {});
+  }
+  function notifyClick() {
+    if (notifyOn()) {
+      appBox('<h3 id="app-gh">' + esc(t("nt.on.h")) + "</h3><p>" + esc(t("nt.on.p")) + '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="close">' + esc(t("app.close")) + '</button><button type="button" class="app-hide" data-act="n-off">' + esc(t("nt.off")) + "</button></div>", false);
+    } else notifySubscribe();
+  }
+  document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".notify-foot")) notifyClick(); });
+  /* keep an existing subscription in step (and send the visitor's language) without slowing the page */
+  function notifyBoot() {
+    var cfg = notifyCfg(); if (!cfg.appId || !pushSupported()) return;
+    if (notifyPerm() === "granted" && lsGet("nemi-notify-on") !== "0") {   /* not after "Turn off" on this device */
+      var go = function () { loadOneSignal().catch(function () {}); };
+      if ("requestIdleCallback" in window) requestIdleCallback(go, { timeout: 4000 }); else setTimeout(go, 2500);
+    }
+  }
+  /* a gentle question (once in a while) for people who have not decided yet. Never in the same visit as the app pop-up. */
+  var askTimer = 0;
+  function scheduleNotifyAsk() {
+    var cfg = notifyCfg();
+    if (askTimer || !cfg.appId || !cfg.ask || !document.body.getAttribute("data-page")) return;
+    if (!pushSupported() || notifyPerm() !== "default") return;
+    if ((+lsGet("nemi-notify-snooze") || 0) > Date.now()) return;
+    if (Date.now() - (+lsGet("nemi-notify-asked") || 0) < appCfg().gapMinutes * 60 * 1000) return;
+    askTimer = setTimeout(function () {
+      askTimer = 0;
+      if (notifyPerm() !== "default" || document.getElementById("app-guide")) return;
+      if (Date.now() - (+lsGet("nemi-app-offered") || 0) < appCfg().gapMinutes * 60 * 1000 && !isStandalone()) return;
+      lsSet("nemi-notify-asked", String(Date.now()));
+      appBox('<img class="app-ic" src="images/icon-192.png" alt="" width="56" height="56"><h3 id="app-gh">' + esc(t("nt.ask.h")) + "</h3><p>" + esc(t("nt.ask.p")) +
+        '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="n-yes">' + esc(t("nt.yes")) + '</button></div><div class="app-acts app-sub"><button type="button" class="app-hide" data-act="n-later">' + esc(t("app.hide")) + "</button></div>", false, "n-later");
+    }, (cfg.askDelay + (document.getElementById("app-guide") ? 6 : 0)) * 1000);
+  }
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    /* OneSignal registers the same sw.js with "?appId=..." added. If our sw.js is already registered (with or without
+       that), leave it alone: registering it again under the other address would reinstall it on every page.
+       The browser still checks sw.js for updates by itself. */
+    window.addEventListener("load", function () {
+      var reg = function () { navigator.serviceWorker.register("sw.js").catch(function () {}); };
+      navigator.serviceWorker.getRegistration().then(function (r) {
+        var w = r && (r.active || r.waiting || r.installing);
+        if (!(w && /\/sw\.js(\?|$)/.test(w.scriptURL))) reg();
+      }, reg);
+    });
   }
   /* Background animations (rotating mandalas, glow) pause while their area is off the screen or the app is in the background,
      so the phone does not keep drawing what nobody sees. Nothing changes in how they look. */
@@ -2159,9 +2275,12 @@
     setupReveal();
     refreshInstall();
     scheduleOffer();
+    refreshNotify();
+    scheduleNotifyAsk();
     watchAnimations();
   }
   render();
+  notifyBoot();
 
   /* ---------- numbers: wrap digits (pin code, amounts, phone numbers) so they are drawn larger and clearer ---------- */
   var NUM_RE = /[\u20B9+]?\d(?:[\d,.:\/\- ]*\d)?/g, NUM_SKIP = /^(SCRIPT|STYLE|TEXTAREA|INPUT|SELECT|OPTION|IFRAME|SVG|CODE|TITLE)$/;

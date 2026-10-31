@@ -2,9 +2,14 @@
    - Pages, styles and scripts: asked fresh from the server first (so every website update shows up), but if the
      network is slow (more than 2.5 seconds) the saved copy is shown at once and the fresh copy is saved for next time.
    - Pictures: the saved copy is shown at once and quietly refreshed in the background.
-   Google Sheet lists, fonts and the mantra audio are never saved here. */
-var CACHE = "nemidham-v3";
-var SHELL = ["./", "index.html", "css/style.css", "css/theme2.css", "js/data.js", "js/i18n.js", "js/main.js", "images/mandir-logo.webp", "images/icon-192.png", "images/icon-512.png"];
+   - Font files (fonts/*.woff2): saved once and then always taken from the saved copy.
+   Google Sheet lists and the mantra audio are never saved here. */
+/* Notifications: OneSignal's helper is added here (only one service worker can run for the site). If it cannot load,
+   everything else still works. */
+try { importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js"); } catch (e) {}
+
+var CACHE = "nemidham-v5";
+var SHELL = ["./", "index.html", "css/style.css", "css/theme2.css", "css/fonts.css", "js/data.js", "js/i18n.js", "js/main.js", "images/mandir-logo.webp", "images/icon-192.png", "images/icon-512.png"];
 var WAIT_MS = 2500;
 /* when a page had to be shown from the saved copy (slow network), its styles and scripts are also taken from the saved copy
    at once for a short while, instead of waiting 2.5 seconds again for each one (they are still refreshed for next time) */
@@ -26,6 +31,10 @@ self.addEventListener("fetch", function (e) {
   if (r.method !== "GET" || u.origin !== location.origin || /\.(mp3|mp4|webm)$/i.test(u.pathname) || r.headers.has("range")) return;
   var nav = r.mode === "navigate";
   var key = nav ? new Request(u.origin + u.pathname) : r;   /* one saved copy per page, whatever is after ? or # */
+  if (/\.woff2$/i.test(u.pathname)) {   /* font files never change: saved copy only, fetched once */
+    e.respondWith(caches.match(r).then(function (hit) { return hit || fetch(r).then(function (res) { return save(r, res); }); }));
+    return;
+  }
   if (/\.(png|jpe?g|webp|svg|gif|ico)$/i.test(u.pathname)) {   /* pictures: saved copy first, refreshed quietly */
     e.respondWith(caches.match(r).then(function (hit) {
       var net = fetch(u.href, { cache: "no-cache" }).then(function (res) { return save(r, res); }).catch(function () { return hit || Response.error(); });
