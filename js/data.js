@@ -126,9 +126,12 @@ window.SITE = {
   // The sound starts at the visitor's first tap/click (browsers do not allow sound before that). volume: 0 to 1.
   audio: { enabled: true, file: "audio/namokarmantra.mp3", volume: 0.6 },
 
-  // "Add to phone like an app" button (footer + Home card). It shows only on phones/tablets and where the browser allows installing.
-  // Set appInstall: false to hide the button everywhere.
-  appInstall: true,
+  // "Add as an app" (PWA). A pop-up offers it to visitors who have not added the app; the footer button is always there.
+  //   popup: false            -> no pop-up (people can still add the app from the footer button or their browser menu)
+  //   popupAfterDays: 4       -> after "Not now", the pop-up comes back after this many days
+  //   footerButton: false     -> hide the footer button too (the browser's own menu still lets people add the site)
+  // Writing  appInstall: false  switches off both the pop-up and the footer button.
+  appInstall: { popup: true, popupAfterDays: 4, footerButton: true },
 
   // Bhaktamar path names written in the Google Sheet also appear on the Karyakram page by themselves.
   // Set bhaktamarKaryakram: false to stop that. bhaktamarTime is the time shown (leave "" to show no time).
