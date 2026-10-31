@@ -227,120 +227,8 @@ window.BANNER = {
 // To remove one: delete its whole { ... }, block, or set  hidden: true  (everywhere).
 // To take one off the Home page only: change  pinned: true  to  pinned: false  (or delete that line).
 window.YOJANA = [
-  {
-    id: "bhumi-daan",
-    pinned: true,
-    status: "active",
-    title: { hi: "भूमि दान", en: "Bhumi Daan" },
-    short: {
-      hi: "मंदिर की अपनी भूमि के लिए भूमि दान लिया जा रहा है।",
-      en: "Bhumi daan is being accepted for the mandir's own land."
-    },
-    summary: {
-      hi: "मंदिर बना हुआ है, लेकिन अभी वह धार्मिक कार्य के लिए 3 साल के लिए दान की गई भूमि पर है। मंदिर की अपनी भूमि के लिए हम भूमि दान ले रहे हैं।",
-      en: "The mandir is already built, but for now it stands on land given for religious use for 3 years. We are accepting bhumi daan so that the mandir can have its own land."
-    },
-    details: [
-      { hi: "आवश्यक भूमि का क्षेत्रफल: 4000 वर्ग फुट।", en: "Land required: 4000 sq ft." },
-      { hi: "भूमि दान करने के इच्छुक श्रद्धालु कृपया टीम पेज पर दिए गए सदस्यों से संपर्क करें।", en: "If you wish to donate land, please contact the members listed on the Team page." }
-    ],
-    target: "", raised: "",
-    photos: []        // e.g. ["images/yojana/bhumi.jpg"]  (optional)
-  },
-  {
-    id: "sant-shala",
-    pinned: true,
-    status: "active",
-    title: { hi: "संत शाला", en: "Sant Shala" },
-    short: {
-      hi: "साधु-संतों के ठहरने और साधना के लिए संत शाला का निर्माण।",
-      en: "Building a Sant Shala for monks and sadhvis to stay and practise."
-    },
-    summary: {
-      hi: "साधु-संतों के ठहरने और साधना के लिए मंदिर परिसर में संत शाला बनाने का प्रयास किया जा रहा है।",
-      en: "We are working to build a Sant Shala within the mandir premises, where monks and sadhvis can stay and practise."
-    },
-    details: [
-      { hi: "संत शाला से संबंधित जानकारी के लिए कृपया टीम से संपर्क करें।", en: "For information about the Sant Shala, please connect with the Team." }
-    ],
-    target: "", raised: ""
-  },
-  {
-    id: "murti-mahavir",
-    pinned: true,
-    status: "active",
-    title: { hi: "भगवान महावीर स्वामी की नई प्रतिमा", en: "New Pratima of Bhagwan Mahavir Swami" },
-    short: {
-      hi: "मंदिर जी में विराजमान की जाने वाली भगवान महावीर स्वामी की नई प्रतिमा।",
-      en: "A new pratima of Bhagwan Mahavir Swami to be installed in the mandir."
-    },
-    summary: {
-      hi: "भगवान महावीर स्वामी की नई प्रतिमा मंदिर जी में विराजमान की जाएगी।",
-      en: "A new pratima of Bhagwan Mahavir Swami will be installed in the mandir."
-    },
-    details: [
-      { hi: "8 इंच की अष्टधातु की प्रतिमा।", en: "An 8 inch pratima made of ashtadhatu (eight metals)." },
-      { hi: "प्रतिमा की प्रतिष्ठा मुंबई में नवंबर 2026 में होने वाले पंचकल्याणक में की जाएगी।", en: "The pratima will be consecrated at the Panchkalyanak to be held in Mumbai in November 2026." }
-    ],
-    target: "", raised: ""
-  },
-  {
-    id: "murti-munisuvratnath",
-    pinned: true,
-    status: "active",
-    title: { hi: "भगवान मुनिसुव्रतनाथ की नई प्रतिमा", en: "New Pratima of Bhagwan Munisuvratnath" },
-    short: {
-      hi: "मंदिर जी में विराजमान की जाने वाली भगवान मुनिसुव्रतनाथ की नई प्रतिमा।",
-      en: "A new pratima of Bhagwan Munisuvratnath to be installed in the mandir."
-    },
-    summary: {
-      hi: "भगवान मुनिसुव्रतनाथ की नई प्रतिमा मंदिर जी में विराजमान की जाएगी।",
-      en: "A new pratima of Bhagwan Munisuvratnath will be installed in the mandir."
-    },
-    details: [
-      { hi: "8 इंच की अष्टधातु की प्रतिमा।", en: "An 8 inch pratima made of ashtadhatu (eight metals)." },
-      { hi: "प्रतिमा की प्रतिष्ठा मुंबई में नवंबर 2026 में होने वाले पंचकल्याणक में की जाएगी।", en: "The pratima will be consecrated at the Panchkalyanak to be held in Mumbai in November 2026." }
-    ],
-    target: "", raised: ""
-  },
-  {
-    id: "jain-society",
-    pinned: true,
-    status: "active",
-    title: { hi: "नेमिधाम में आगामी जैन सोसायटी (फ्लैट्स)", en: "Upcoming Jain Society (Flats) at Nemidham" },
-    short: {
-      hi: "नेमिधाम में 150 फ्लैट की जैन सोसायटी बनाने का प्रयास।",
-      en: "Efforts to build a Jain society of 150 flats at Nemidham."
-    },
-    summary: {
-      hi: "नेमिधाम में जैन सोसायटी (फ्लैट्स) बनाने के लिए प्रयास किए जा रहे हैं। सोसायटी में 150 फ्लैट होंगे।",
-      en: "Efforts are on to build a Jain society (flats) at Nemidham. The society will have 150 flats."
-    },
-    details: [
-      { hi: "योजना 150 फ्लैट की सोसायटी की है।", en: "The plan is for a society of 150 flats." },
-      { hi: "अब तक लगभग 70 लोगों ने अपनी रुचि दर्शाई है।", en: "About 70 people have shown interest so far." },
-      { hi: "150 रुचि आने पर इस पर आगे कार्य शुरू किया जाएगा।", en: "Work will move ahead once 150 people have shown interest." },
-      { hi: "जानकारी के लिए सौरभ जैन और नीलेश जैन से संपर्क करें। उनके नंबर टीम पेज पर मिल जाएंगे।", en: "For details, please contact Saurabh Jain and Neelesh Jain. Their numbers are on the Team page." }
-    ],
-    target: "", raised: "",
-    formUrl: "https://forms.gle/NcoF3N6NF8j9S11j6"
-  },
-  {
-    id: "dharmshala",
-    pinned: true,
-    status: "soon",
-    title: { hi: "धर्मशाला और आवास", en: "Dharmshala and aavas" },
-    short: {
-      hi: "यात्रियों के ठहरने की व्यवस्था भविष्य में की जाएगी।",
-      en: "Stay for yatris will be arranged in future."
-    },
-    summary: {
-      hi: "मंदिर आने वाले यात्रियों के लिए धर्मशाला और आवास की व्यवस्था भविष्य में की जाएगी। जानकारी जल्द यहाँ दी जाएगी।",
-      en: "A dharmshala and aavas for visiting yatris will be arranged in future. Details will be shared here soon."
-    },
-    details: [],
-    target: "", raised: ""
-  },
+  // NOTE: these cards now come from the Google Sheet tab "Yojanayein" (README part 5.37). Edit them there.
+  // You can still add a card here too; a Sheet row with the same id replaces a card written here.
 
   // ---- 4 spare cards (hidden). To use one: delete its  hidden: true,  line and write your own text. ----
   {
@@ -734,22 +622,9 @@ window.ACTIVITIES = [
 // pinned: true shows it on Home and keeps it at the top.
 // hidden: true hides an item without deleting it.
 window.ANNOUNCEMENTS = [
-  {
-    date: "2026-10-26", pinned: true,
-    title: { hi: "हमारी नई वेबसाइट में आपका स्वागत है", en: "Welcome to our new website" },
-    text: {
-      hi: "जय जिनेन्द्र। कार्यक्रम, तस्वीरें, योजनाएं और दान की जानकारी अब एक ही जगह है।",
-      en: "Jai Jinendra. Karyakram, photos, yojanayen and daan details are now in one place."
-    }
-  },
-  {
-    date: "2026-10-20", pinned: false,
-    title: { hi: "त्योहार के दिनों में दर्शन का समय", en: "Darshan timings on festival days" },
-    text: {
-      hi: "विशेष दिनों में समय बदल सकता है। जानकारी कुछ दिन पहले यहाँ दी जाएगी।",
-      en: "On special days the timings may change. We will post the details here a few days before."
-    }
-  }
+  // NOTE: these cards now come from the Google Sheet tab "Suchnayein" (README part 5.37). Edit them there.
+  // You can still add a card here too; a Sheet row with the same id replaces a card written here.
+  // { id: "my-sandesh", date: "2026-11-01", pinned: true, title: { hi: "...", en: "..." }, text: { hi: "...", en: "..." } },
 ];
 
 /* ---------- 5. Karyakram (events) ---------- */
@@ -761,17 +636,8 @@ window.ANNOUNCEMENTS = [
 // To remove a karyakram: delete its whole { ... }, block, or add  hidden: true,  inside it.
 // image: "images/notify/photo.jpg",  (optional) a picture shown inside this karyakram's notifications (README 5.35).
 window.EVENTS = [
-  {
-    pinned: true,
-    date: "2026-11-09", time: { hi: "सुबह 7:00", en: "7:00 AM" },
-    place: { hi: "मंदिर जी", en: "Mandir ji" },
-    type: { hi: "उत्सव", en: "Utsav" },
-    title: { hi: "लाडू कार्यक्रम: भगवान महावीर स्वामी का मोक्ष कल्याणक", en: "Laddu Karyakram: Moksha Kalyanak of Bhagwan Mahavir Swami" },
-    text: {
-      hi: "भगवान महावीर स्वामी के मोक्ष कल्याणक के अवसर पर मंदिर जी में लाडू कार्यक्रम होगा। सभी श्रद्धालु आमंत्रित हैं।",
-      en: "A Laddu Karyakram will be held at the mandir on the occasion of the Moksha Kalyanak of Bhagwan Mahavir Swami. All devotees are welcome."
-    }
-  },
+  // NOTE: these cards now come from the Google Sheet tab "Karyakram" (README part 5.37). Edit them there.
+  // You can still add a card here too; a Sheet row with the same id replaces a card written here.
 
   // TEMPLATE for the next karyakram. It is hidden. To use it: remove the line  hidden: true,
   // and change the text. To add one more, copy the whole { ... }, block.
@@ -893,30 +759,9 @@ window.GALLERY = {
 //  - Add a new group (like "Sevaks"): copy a whole  { group: {...}, members: [ ... ] },  block and edit it.
 //  - Hide a group for now: add  hidden: true,  inside its block (as Trustees below).
 window.TEAM = [
-  {
-    // Trustees are hidden for now (everyone is on the working committee at the moment).
-    // When trustees are appointed, delete the line "hidden: true," and fill in the names.
-    hidden: true,
-    group: { hi: "ट्रस्टी", en: "Trustees" },
-    members: [
-      { name: "SAMPLE Name One", role: { hi: "अध्यक्ष", en: "President" }, phone: "", photo: "" },
-      { name: "SAMPLE Name Two", role: { hi: "सचिव", en: "Secretary" }, phone: "", photo: "" },
-      { name: "SAMPLE Name Three", role: { hi: "कोषाध्यक्ष", en: "Treasurer" }, phone: "", photo: "" }
-    ]
-  },
-  {
-    group: { hi: "कार्यकारिणी", en: "Working committee" },
-    members: [
-      { name: "SAMPLE Name Four", role: { hi: "कार्यक्रम संयोजक", en: "Karyakram coordinator" }, phone: "", photo: "" },
-      { name: "SAMPLE Name Five", role: { hi: "स्वयंसेवक संयोजक", en: "Volunteer coordinator" }, phone: "", photo: "" }
-    ]
-  },
-  {
-    group: { hi: "पुजारी", en: "Pujari" },
-    members: [
-      { name: "SAMPLE Name Six", role: { hi: "पुजारी", en: "Pujari" }, phone: "", photo: "" }
-    ]
-  }
+  // NOTE: these cards now come from the Google Sheet tab "Team" (README part 5.37). Edit them there.
+  // You can still add a card here too; a Sheet row with the same id replaces a card written here.
+  // { group: { hi: "कार्यकारिणी", en: "Working committee" }, members: [ { name: { hi: "नाम", en: "Name" }, role: { hi: "पद", en: "Role" }, phone: "", photo: "" } ] },
 ];
 
 /* ---------- 9. About page ---------- */
@@ -1024,12 +869,9 @@ window.HOWTO = [
    Vishesh dinon ke karyakram (tyohar, kalyanak...) section 5 (EVENTS) mein likhe jaate hain, wo us tareekh par
    apne aap is page par dikhte hain. */
 window.DAILY = [
-  { at: "open", icon: "🛕", title: { hi: "मंदिर जी के पट खुलना", en: "Mandir opens" }, text: { hi: "दर्शन शुरू।", en: "Darshan begins." } },
-  { at: "abhishek", icon: "🪔", title: { hi: "महामस्तकाभिषेक", en: "Mahamastakabhishek" }, text: { hi: "भगवान का अभिषेक।", en: "Abhishek of Bhagwan." } },
-  { time: "08:30", icon: "💧", title: { hi: "शांतिधारा", en: "Shantidhara" }, text: { hi: "SAMPLE समय: असली समय लिखें।", en: "SAMPLE time: write the real time." } },
-  { time: "09:30", icon: "🌸", title: { hi: "पूजा", en: "Pooja" }, text: { hi: "SAMPLE समय: असली समय लिखें।", en: "SAMPLE time: write the real time." } },
-  { at: "aarti", icon: "🪔", title: { hi: "आरती", en: "Aarti" }, text: { hi: "सायं आरती।", en: "Evening aarti." } },
-  { at: "close", icon: "🌙", title: { hi: "मंदिर जी के पट बंद होना", en: "Mandir closes" }, text: { hi: "", en: "" } }
+  // NOTE: these cards now come from the Google Sheet tab "Dainik Karyakram" (README part 5.37). Edit them there.
+  // You can still add a card here too; a Sheet row with the same id replaces a card written here.
+  // { time: "08:30", icon: "💧", title: { hi: "शांतिधारा", en: "Shantidhara" }, text: { hi: "", en: "" } },
 ];
 
 /* ---------- 9ख. Timeline (About us > Timeline page) ----------
@@ -1213,65 +1055,8 @@ window.DAAN = {
    and write your own text. Cards are shown in this order, three in a row on a computer screen.
    contacts: [ { name: {hi,en}, phone: "..." } ]  A call button with the name shows under the card once a phone number is written. */
 window.RECURRING = [
-  {
-    title: { hi: "मासिक द्रव्य दान", en: "Masik Dravya Daan" },
-    amount: 1122,   // fixed amount shown on the card (write a number, or "" to hide the line)
-    when: { hi: "हर महीने", en: "Every month" },
-    text: {
-      hi: "हर महीने मंदिर के लिए किसी भी तरह की सामग्री का दान, ख़ासकर पूजा की सामग्री। आप भी इसमें जुड़ सकते हैं।",
-      en: "Every month, items of any kind can be given as daan to the mandir, mainly pooja items. You can join too."
-    },
-    how: {
-      hi: "सामग्री दान करने के लिए कृपया स्वप्निल जैन से संपर्क करें।",
-      en: "To give items as daan, please contact Swapnil Jain."
-    },
-    // Write the phone number between the quotes and a call button with the name appears under this card.
-    contacts: [ { name: { hi: "स्वप्निल जैन", en: "Swapnil Jain" }, phone: "" } ]
-  },
-  {
-    title: { hi: "साप्ताहिक शांतिधारा", en: "Saptahik Shantidhara" },
-    amount: 1022,   // fixed amount shown on the card (write a number, or "" to hide the line)
-    when: { hi: "हर हफ्ते", en: "Every week" },
-    text: {
-      hi: "सप्ताह के किसी एक दिन (जैसे हर मंगलवार) के लिए एक या एक से अधिक श्रद्धालु अपना नाम दे सकते हैं। उस दिन हर हफ्ते उन्हीं पुण्यार्जकों के नाम से शांतिधारा होती है।",
-      en: "One or more devotees can give their name for a particular day of the week (for example, every Tuesday). On that day each week, Shantidhara is performed in the name of those punyarjaks."
-    },
-    how: {
-      hi: "पुण्यार्जक बनने के लिए कृपया टीम पेज पर दिए गए सदस्यों से संपर्क करें।",
-      en: "To become a punyarjak, please contact the members listed on the Team page."
-    },
-    // When the name is confirmed: write it and the phone number here (and change the "how" line above if you like).
-    contacts: [ { name: { hi: "नाम", en: "Name" }, phone: "" } ]
-  },
-  {
-    title: { hi: "मासिक शांतिधारा", en: "Masik Shantidhara" },
-    amount: 522,   // fixed amount shown on the card (write a number, or "" to hide the line)
-    when: { hi: "हर महीने", en: "Every month" },
-    text: {
-      hi: "महीने की किसी एक तारीख के लिए एक या एक से अधिक श्रद्धालु अपना नाम दे सकते हैं। उस तारीख को हर महीने उन्हीं पुण्यार्जकों के नाम से शांतिधारा होती है।",
-      en: "One or more devotees can give their name for a particular date of the month. On that date each month, Shantidhara is performed in the name of those punyarjaks."
-    },
-    how: {
-      hi: "पुण्यार्जक बनने के लिए कृपया टीम पेज पर दिए गए सदस्यों से संपर्क करें।",
-      en: "To become a punyarjak, please contact the members listed on the Team page."
-    },
-    // When the name is confirmed: write it and the phone number here (and change the "how" line above if you like).
-    contacts: [ { name: { hi: "नाम", en: "Name" }, phone: "" } ]
-  },
-  {
-    title: { hi: "मासिक भक्तामर भक्ति", en: "Masik Bhaktamber Bhakti" },
-    amount: 522,   // fixed amount shown on the card (write a number, or "" to hide the line)
-    when: { hi: "हर महीने के दूसरे रविवार", en: "Second Sunday of every month" },
-    text: {
-      hi: "हर महीने कोई भी परिवार अपना नाम देकर उस महीने के भक्तामर पाठ का पुण्यार्जन कर सकता है। यह पाठ महीने के दूसरे रविवार को होता है।",
-      en: "Every month, any family can give its name and earn the punyarjan of that month's Bhaktamber path. The path is held on the second Sunday of the month."
-    },
-    how: {
-      hi: "पुण्यार्जक बनने के लिए कृपया अनुज जैन से संपर्क करें।",
-      en: "To become a punyarjak, please contact Anuj Jain."
-    },
-    contacts: [ { name: { hi: "अनुज जैन", en: "Anuj Jain" }, phone: "" } ]
-  },
+  // NOTE: these cards now come from the Google Sheet tab "Niyamit Daan" (README part 5.37). Edit them there.
+  // You can still add a card here too; a Sheet row with the same id replaces a card written here.
   {
     hidden: true,
     title: { hi: "दान 1", en: "Daan 1" },
@@ -1300,19 +1085,19 @@ window.RECURRING = [
    A link left empty "" means: that list is read from the lists written below in this file (PUNYARJAK, DRAVYA, BHAKTAMBAR).
    Once a link is filled, the Sheet is used and the Daan page shows only the previous / this / next month by itself. */
 window.SHEETS = {
-  saptahik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=1603045792&single=true&output=csv",    // tab "Saptahik Shantidhara"
-  masik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=947962969&single=true&output=csv",       // tab "Masik Shantidhara"
-  dravya: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=2001759128&single=true&output=csv",      // tab "Dravya dan"
-  bhaktamar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0LcLQrJv1MmiZkn-eK_u48xX-6_36mp1-X6XaOgrop888loS6Rrd3IdSLQBHPLA/pub?gid=700086573&single=true&output=csv",    // tab "Bhaktamar"
+  saptahik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1603045792&single=true&output=csv",    // tab "Saptahik Shantidhara"
+  masik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=947962969&single=true&output=csv",       // tab "Masik Shantidhara"
+  dravya: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=2001759128&single=true&output=csv",      // tab "Dravya dan"
+  bhaktamar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=700086573&single=true&output=csv",    // tab "Bhaktamar"
   // ---- Website content tabs of the same Sheet (README part 5.37). Empty "" = that part comes only from this file. ----
-  karyakram: "",     // tab "Karyakram" (special karyakram; Bhaktamar is NOT written here, it comes from the Bhaktamar tab)
-  dainik: "",        // tab "Dainik Karyakram" (daily schedule)
-  samay: "",         // tab "Mandir Samay" (opening / abhishek / aarti / closing time, note)
-  suchnayein: "",    // tab "Suchnayein" (announcements)
-  yojana: "",        // tab "Yojanayein"
-  banner: "",        // tab "Top Banner"
-  team: "",          // tab "Team"
-  niyamitDaan: ""    // tab "Niyamit Daan" (the regular daan / seva cards on the Daan page)
+  karyakram: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=400287793&single=true&output=csv",     // tab "Karyakram" (special karyakram; Bhaktamar is NOT written here, it comes from the Bhaktamar tab)
+  dainik: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=509144334&single=true&output=csv",        // tab "Dainik Karyakram" (daily schedule)
+  samay: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1120313963&single=true&output=csv",         // tab "Mandir Samay" (opening / abhishek / aarti / closing time, note)
+  suchnayein: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=701218416&single=true&output=csv",    // tab "Suchnayein" (announcements)
+  yojana: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1462059264&single=true&output=csv",        // tab "Yojanayein"
+  banner: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=296682865&single=true&output=csv",        // tab "Top Banner"
+  team: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=947760466&single=true&output=csv",          // tab "Team"
+  niyamitDaan: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=709940025&single=true&output=csv"    // tab "Niyamit Daan" (the regular daan / seva cards on the Daan page)
 };
 
 /* Shantidhara punyarjak list. Shown on the Daan page as a calendar-style table, month by month,
