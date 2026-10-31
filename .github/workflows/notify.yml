@@ -1,0 +1,46 @@
+# Mandir notifications (OneSignal). See README part 5.35.
+name: Notifications
+on:
+  push:
+    branches: [main]
+    paths: ["js/data.js"]
+  schedule:
+    - cron: "0 1 * * *"   # every day at 6:30 in the morning, India time
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "send = your own message below; today = send today's karyakram reminder now"
+        type: choice
+        options: [send, today]
+        default: send
+      title:
+        description: "Title (e.g. जय जिनेन्द्र)"
+        required: false
+      message:
+        description: "Message"
+        required: false
+      page:
+        description: "Page to open (optional, e.g. yojana.html)"
+        required: false
+permissions:
+  contents: read
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Send notifications
+        run: node .github/scripts/notify.js
+        env:
+          ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          IN_MODE: ${{ github.event.inputs.mode }}
+          IN_TITLE: ${{ github.event.inputs.title }}
+          IN_MESSAGE: ${{ github.event.inputs.message }}
+          IN_PAGE: ${{ github.event.inputs.page }}
