@@ -49,7 +49,8 @@ function send(n) {
     priority: 10,   /* "high": phones show it at once instead of holding it to save battery */
     headings: { en: n.title.en || n.title.hi, hi: n.title.hi || n.title.en },
     contents: { en: n.text.en || n.text.hi, hi: n.text.hi || n.text.en },
-    url: SITE_URL + (n.page || ""), chrome_web_icon: SITE_URL + "images/icon-192.png", firefox_icon: SITE_URL + "images/icon-192.png" };
+    url: SITE_URL + (n.page || ""), chrome_web_icon: SITE_URL + "images/icon-192.png", firefox_icon: SITE_URL + "images/icon-192.png",
+    chrome_web_badge: SITE_URL + "images/notify-badge.png" };   /* small white mandir shape in the phone's top bar (instead of a bell) */
   if (n.key) body.idempotency_key = uuidFor(n.key);   /* OneSignal keeps it 30 days; the same id again = not sent again */
   console.log("Notification:", JSON.stringify({ title: body.headings, text: body.contents, url: body.url }));
   if (DRY) return Promise.resolve();
