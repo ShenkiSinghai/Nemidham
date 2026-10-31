@@ -126,6 +126,18 @@ window.SITE = {
   // The sound starts at the visitor's first tap/click (browsers do not allow sound before that). volume: 0 to 1.
   audio: { enabled: true, file: "audio/namokarmantra.mp3", volume: 0.6 },
 
+  // NOTIFICATIONS (OneSignal, free). Paste your OneSignal App ID below to switch them on (see README part 5.35).
+  //   appId: ""               -> empty = notifications are off and nothing extra loads
+  //   footerButton: true      -> "Turn on notifications" button in the footer of every page
+  //   askPopup: true          -> a small question asks visitors once in a while; false = only the footer button
+  //   askAfterDays: 7         -> after "Not now", ask again after this many days
+  //   askDelaySeconds: 8      -> the question comes this many seconds after a page opens
+  //   auto: what GitHub sends by itself when you change this file (newKaryakram = a new karyakram of the current month,
+  //         newYojana, newSandesh = a new announcement, dailyReminder = every morning, the day's special karyakram
+  //         and Bhaktamar path, monthStart = on the 1st, the karyakram of the new month). false = do not send that kind.
+  notify: { appId: "", footerButton: true, askPopup: true, askAfterDays: 7, askDelaySeconds: 8,
+    auto: { newKaryakram: true, newYojana: true, newSandesh: true, dailyReminder: true, monthStart: true } },
+
   // When the site is opened as an installed app (from the home-screen icon), a short logo animation plays once. false = no animation.
   appIntro: true,
 
