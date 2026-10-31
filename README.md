@@ -922,9 +922,9 @@ Home खुलने पर मंत्र अपने आप चलता ह
 - फ़ोटो पहले GitHub के `images` फ़ोल्डर में डालो, Sheet में सिर्फ़ नाम (जैसे `yojana/bhumi.jpg`; सिर्फ़ `photo.jpg` लिखो तो `images/photo.jpg` माना जाता है)।
 - **सूचनाएँ:** Karyakram, Suchnayein, Yojanayein और Bhaktamar में नई row जोड़ते ही (या `hidden` हटाते ही) सूचना अपने आप लगभग 10-15 मिनट में जाती है (GitHub हर 5 मिनट Sheet देखता है)। कार्यक्रम और भक्तामर की "नई" वाली सूचना सिर्फ़ इसी महीने की आने वाली तारीख़ के लिए (`notify.auto.newKaryakramOnlyThisMonth`); बाक़ी को याद वाली सूचनाएँ (7 दिन पहले, उस दिन, 1 तारीख़ की सूची) अपने आप मिलती हैं। स्पेलिंग / तारीख़ ठीक करने से सूचना दोबारा नहीं जाती। भक्तामर की नई row की सूचना बंद करनी हो: `notify.auto` में `newBhaktamar: false`.
 - **तुरंत सूचना (1 मिनट):** Sheet में ऊपर मेनू **नेमिधाम → "इस row की सूचना भेजें"** (row की कोई cell चुनकर) या **"अपनी सूचना भेजें"**। GitHub बाद में वही सूचना दोबारा नहीं भेजता।
-- **नाम हिंदी से English:** `GOOGLETRANSLATE` की जगह `=ROMAN(D2)` (दीपक → Deepak, मतलब नहीं बदलता)। इसे सीधे `_en` वाले cell में लिख सकते हो। स्पेलिंग एक बार जाँचो। English से हिंदी का ऐसा formula नहीं है।
+- **नाम हिंदी से English:** `GOOGLETRANSLATE` की जगह `=HI2EN(D2)` (दीपक → Deepak, मतलब नहीं बदलता; नाम ROMAN नहीं रखा क्योंकि Google Sheets में ROMAN पहले से रोमन अंकों के लिए है)। इसे सीधे `_en` वाले cell में लिख सकते हो। स्पेलिंग एक बार जाँचो। English से हिंदी का ऐसा formula नहीं है।
 
-**Apps Script लगाना (मेनू और ROMAN के लिए, एक बार):**
+**Apps Script लगाना (मेनू और HI2EN के लिए, एक बार):**
 1. Sheet खोलो → **Extensions → Apps Script**।
 2. वहाँ जो लिखा है सब मिटाकर रिपॉज़िटरी की फ़ाइल `apps-script/Nemidham.gs` का पूरा text paste करो → Save (💾)।
 3. Sheet को reload करो। ऊपर **नेमिधाम** मेनू आएगा → **सेटअप (एक बार)** → OneSignal App ID और REST API Key डालो (OneSignal → Settings → Keys & IDs)। Google "Authorization required / Allow" पूछे तो अपना account चुनकर Allow करो ("unsafe" लिखा आए तो Advanced → Go to ... दबाओ; यह आपकी अपनी script है)।
