@@ -10,6 +10,8 @@
   "orientation": "portrait",
   "background_color": "#0C0816",
   "theme_color": "#0C0816",
+  "prefer_related_applications": false,
+  "related_applications": [{ "platform": "webapp", "url": "https://shenkisinghai.github.io/Nemidham/manifest.webmanifest" }],
   "icons": [
     { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },

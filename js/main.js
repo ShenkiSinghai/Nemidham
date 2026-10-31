@@ -2016,43 +2016,82 @@
     });
   }
 
-  /* ---------- install on the phone like an app (PWA) ---------- */
-  var installEv = null;
+  /* ---------- install on the phone like an app (PWA) ----------
+     A small pop-up offers it to visitors who have not added it yet. "Not now" brings it back after 2 days.
+     Once it is added (or the visitor says it is already added) the pop-up never comes again.
+     The footer button always stays; if the app is already added it says so. */
+  var installEv = null, SNOOZE_MS = 2 * 24 * 3600 * 1000;
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
   function isStandalone() { return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true; }
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
+  function appAdded() { return lsGet("nemi-app-added") === "1"; }
   function canOfferInstall() {
     if (S.appInstall === false || isStandalone()) return false;
     return !!installEv || isIOS() || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
   }
-  function refreshInstall() {
-    var on = canOfferInstall(), hideHome = false;
-    try { hideHome = localStorage.getItem("nemi-app-hide") === "1"; } catch (e) {}
-    $$(".install-foot").forEach(function (b) { b.hidden = !on; });
-    var hs = document.getElementById("home-install"); if (hs) hs.hidden = !on || hideHome;
-  }
+  function refreshInstall() { var on = canOfferInstall(); $$(".install-foot").forEach(function (b) { b.hidden = !on; }); }
   function closeAppGuide() { var g = document.getElementById("app-guide"); if (g) { g.remove(); document.removeEventListener("keydown", guideKey); } }
-  function guideKey(e) { if (e.key === "Escape") closeAppGuide(); }
-  function openAppGuide() {
+  function guideKey(e) { if (e.key === "Escape") { var snz = document.getElementById("app-guide").getAttribute("data-offer") === "1"; closeAppGuide(); if (snz) lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); } }
+  function appBox(html, offer) {
     closeAppGuide();
-    var ios = isIOS(), steps = ios ? ["app.ios1", "app.ios2", "app.ios3"] : ["app.and1", "app.and2", "app.and3"];
-    var g = document.createElement("div"); g.id = "app-guide"; g.className = "app-guide";
-    g.innerHTML = '<div class="app-box" role="dialog" aria-modal="true" aria-labelledby="app-gh"><h3 id="app-gh">' + esc(t(ios ? "app.ios.h" : "app.and.h")) + "</h3><p>" + esc(t("app.p")) + "</p><ol>" +
-      steps.map(function (k) { return "<li>" + esc(t(k)) + "</li>"; }).join("") + '</ol><button type="button" class="btn btn-line app-close">' + esc(t("app.close")) + "</button></div>";
-    g.addEventListener("click", function (e) { if (e.target === g || e.target.closest(".app-close")) closeAppGuide(); });
+    var g = document.createElement("div"); g.id = "app-guide"; g.className = "app-guide"; if (offer) g.setAttribute("data-offer", "1");
+    g.innerHTML = '<div class="app-box" role="dialog" aria-modal="true" aria-labelledby="app-gh">' + html + "</div>";
     document.body.appendChild(g); document.addEventListener("keydown", guideKey);
-    var cb = g.querySelector(".app-close"); if (cb) cb.focus();
+    g.addEventListener("click", function (e) {
+      var b = e.target.closest && e.target.closest("[data-act]"), act = b ? b.getAttribute("data-act") : (e.target === g ? (offer ? "later" : "close") : "");
+      if (!act) return;
+      if (act === "later") { lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); closeAppGuide(); }
+      else if (act === "done") { lsSet("nemi-app-added", "1"); closeAppGuide(); }
+      else if (act === "close") closeAppGuide();
+      else if (act === "install") { if (offer) lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); doInstall(); }
+      else if (act === "how") openAppGuide();
+    });
+    var f = g.querySelector("[data-act=install], [data-act=close], [data-act=how]"); if (f) f.focus();
   }
-  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEv = e; refreshInstall(); });
-  window.addEventListener("appinstalled", function () { installEv = null; refreshInstall(); });
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest && e.target.closest(".install-btn, .app-hide"); if (!b) return;
-    if (b.classList.contains("app-hide")) { try { localStorage.setItem("nemi-app-hide", "1"); } catch (x) {} refreshInstall(); return; }
+  function openAppGuide() {
+    var ios = isIOS(), steps = ios ? ["app.ios1", "app.ios2", "app.ios3"] : ["app.and1", "app.and2", "app.and3"];
+    appBox('<h3 id="app-gh">' + esc(t(ios ? "app.ios.h" : "app.and.h")) + "</h3><p>" + esc(t("app.p")) + "</p><ol>" +
+      steps.map(function (k) { return "<li>" + esc(t(k)) + "</li>"; }).join("") + '</ol><button type="button" class="btn btn-line" data-act="close">' + esc(t("app.close")) + "</button>", false);
+  }
+  function openAddedInfo() {
+    appBox('<h3 id="app-gh">' + esc(t("app.added.h")) + "</h3><p>" + esc(t("app.added.p")) + '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="close">' + esc(t("app.close")) + '</button><button type="button" class="app-hide" data-act="how">' + esc(t("app.again")) + "</button></div>", false);
+  }
+  function openOffer() {
+    appBox('<img class="app-ic" src="images/icon-192.png" alt="" width="56" height="56"><h3 id="app-gh">' + esc(t("app.h")) + "</h3><p>" + esc(t("app.p")) +
+      '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="install">' + esc(t("app.btn")) + '</button></div>' +
+      '<div class="app-acts app-sub"><button type="button" class="app-hide" data-act="later">' + esc(t("app.hide")) + '</button><button type="button" class="app-hide" data-act="done">' + esc(t("app.done")) + "</button></div>", true);
+  }
+  function doInstall() {
     if (installEv) {
-      var ev = installEv; installEv = null;
-      ev.prompt(); if (ev.userChoice && ev.userChoice.then) ev.userChoice.then(refreshInstall, refreshInstall);
+      var ev = installEv; installEv = null; closeAppGuide();
+      ev.prompt(); if (ev.userChoice && ev.userChoice.then) ev.userChoice.then(function (c) { if (c && c.outcome === "dismissed") lsSet("nemi-app-snooze", String(Date.now() + SNOOZE_MS)); refreshInstall(); }, refreshInstall);
       refreshInstall();
     } else openAppGuide();
+  }
+  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEv = e; lsDel("nemi-app-added"); refreshInstall(); });   /* the browser only offers install when it is NOT installed */
+  window.addEventListener("appinstalled", function () { installEv = null; lsSet("nemi-app-added", "1"); closeAppGuide(); refreshInstall(); });
+  if (isStandalone()) lsSet("nemi-app-added", "1");
+  if (navigator.getInstalledRelatedApps) { try { navigator.getInstalledRelatedApps().then(function (a) { if (a && a.length) lsSet("nemi-app-added", "1"); }, function () {}); } catch (e) {} }
+  document.addEventListener("click", function (e) {
+    if (!(e.target.closest && e.target.closest(".install-foot"))) return;
+    if (installEv) doInstall(); else if (appAdded()) openAddedInfo(); else openAppGuide();
   });
+  /* the pop-up: a few seconds after a page opens, once per visit, only if not added and not snoozed */
+  var offerTimer = 0;
+  function scheduleOffer() {
+    if (offerTimer || !document.body.getAttribute("data-page")) return;
+    var snooze = +lsGet("nemi-app-snooze") || 0, seen = false;
+    try { seen = sessionStorage.getItem("nemi-app-offered") === "1"; } catch (e) {}
+    if (seen || snooze > Date.now() || appAdded()) return;
+    offerTimer = setTimeout(function () {
+      offerTimer = 0;
+      if (!canOfferInstall() || appAdded() || document.getElementById("app-guide")) return;
+      try { sessionStorage.setItem("nemi-app-offered", "1"); } catch (e) {}
+      openOffer();
+    }, 3500);
+  }
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }
@@ -2093,6 +2132,7 @@
     applyHomeSections();
     setupReveal();
     refreshInstall();
+    scheduleOffer();
   }
   render();
 
