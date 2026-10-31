@@ -2237,6 +2237,10 @@
     if (!h.classList.contains("app-intro")) return;
     if (S.appIntro === false) { h.classList.remove("app-intro"); return; }
     try { sessionStorage.setItem("nemi-intro", "1"); } catch (e) {}
+    /* opened from a notification (link ends with ?src=notify): the animation plays; then the mark is taken off the address */
+    if (/[?&]src=notify/.test(location.search) && history.replaceState) {
+      try { history.replaceState(null, "", location.pathname + location.search.replace(/([?&])src=notify(&|$)/, function (m, a, b) { return b ? a : ""; }).replace(/\?$/, "") + location.hash); } catch (e) {}
+    }
     setTimeout(function () { h.classList.remove("app-intro"); }, 1700);
   })();
 

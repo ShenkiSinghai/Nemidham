@@ -301,7 +301,7 @@ window.YOJANA_PAGE = {
                For a NEW activity, make its page file first (steps in README part 5.20), then write its name here.
    comingSoon  true shows a "Coming soon" tag. Write  comingSoon: false,  when the page is ready.
    title       name shown in the menu and at the top of the page.      short   one line under the heading.
-   poster      picture of the poster, e.g. "images/activities/kids-club.jpeg" (upload it into images/activities/).
+   poster      picture of the poster, e.g. "images/activities/kids-club.webp" (upload it into images/activities/; .webp / .jpg / .png all work — a smaller file opens faster).
                Visitors tap it to see it full size. Make the picture small first (README part 4).
    decor       a few emoji shown big and bouncing at the top of the page, e.g. "🎈 ⚽ 🎨 📚" (separate by spaces).
    banner      one bright slogan line, {hi,en}.
@@ -324,7 +324,7 @@ window.ACTIVITIES = [
     banner: { hi: "खेलेंगे साथ, बढ़ेगा अपनापन!", en: "We play together, our bond grows!" },
     title: { hi: "नेमिधाम क्रिकेट क्लब", en: "Nemidham Cricket Club" },
     short: { hi: "खेल से स्वास्थ्य, परिवार से जुड़ाव, और समाज से अपनापन।", en: "Health through sport, bonding through family, belonging through community." },
-    poster: "images/activities/cricket-club.jpeg",
+    poster: "images/activities/cricket-club.webp",
     info: [
       { icon: "📍", label: { hi: "कहाँ", en: "Where" }, value: { hi: "नेमिधाम टर्फ, वाघोली, पुणे", en: "Nemidham Turf, Wagholi, Pune" } },
       { icon: "🏆", label: { hi: "प्रकार", en: "Type" }, value: { hi: "टूर्नामेंट आधारित कार्यक्रम", en: "Tournament based events" } },
@@ -391,7 +391,7 @@ window.ACTIVITIES = [
     banner: { hi: "हर तीसरा रविवार नेमिधाम के नाम!", en: "Every third Sunday belongs to Nemidham!" },
     title: { hi: "नेमिधाम ट्रेकिंग क्लब", en: "Nemidham Trekking Club" },
     short: { hi: "भक्ति, प्रकृति, फिटनेस, संगीत, स्वाद, खेल और परिवार: मंदिर से पहाड़ी तक।", en: "Devotion, nature, fitness, music, food, games and family: from the mandir to the hill." },
-    poster: "images/activities/trekking.jpeg",
+    poster: "images/activities/trekking.webp",
     info: [
       { icon: "📅", label: { hi: "कब", en: "When" }, value: { hi: "हर महीने का तीसरा रविवार", en: "Third Sunday of every month" } },
       { icon: "📍", label: { hi: "कहाँ", en: "Where" }, value: { hi: "नेमिधाम से वाघोली पहाड़ी तक", en: "Nemidham to Wagholi hill" } },
@@ -532,7 +532,7 @@ window.ACTIVITIES = [
     banner: { hi: "हर हफ्ते धर्म-संस्कार, खेल और शिक्षा का संगम!", en: "Every week: dharma, sanskar, games and learning together!" },
     title: { hi: "नेमिधाम किड्स क्लब", en: "Nemidham Kids Club" },
     short: { hi: "बच्चों के लिए अनोखा कॉन्सेप्ट: आओ मिलें, संस्कार पाएं, सीखें और भरपूर मज़ा करें!", en: "A unique concept for children: come, meet, receive sanskar, learn and have lots of fun!" },
-    poster: "images/activities/kids-club.jpeg",
+    poster: "images/activities/kids-club.webp",
     info: [
       { icon: "📅", label: { hi: "कब", en: "When" }, value: { hi: "हर शनिवार शाम", en: "Every Saturday evening" } },
       { icon: "📍", label: { hi: "कहाँ", en: "Where" }, value: { hi: "श्री नेमिनाथ जिनालय (मंदिर) में", en: "At Shri Neminath Jinalay (mandir)" } },

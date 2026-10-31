@@ -51,12 +51,14 @@ function imageUrl(v) {
   if (/^http:\/\//i.test(v)) return "";   /* phones show only https pictures */
   return SITE_URL + v.replace(/^\.?\//, "");
 }
+/* the page link of a notification gets ?src=notify, so the app shows its opening animation */
+function openUrl(u) { var h = u.indexOf("#"), base = h >= 0 ? u.slice(0, h) : u, hash = h >= 0 ? u.slice(h) : ""; return base + (base.indexOf("?") >= 0 ? "&" : "?") + "src=notify" + hash; }
 function send(n) {
   var body = { app_id: APP_ID, target_channel: "push", included_segments: ["Total Subscriptions"],
     priority: 10,   /* "high": phones show it at once instead of holding it to save battery */
     headings: { en: n.title.en || n.title.hi, hi: n.title.hi || n.title.en },
     contents: { en: n.text.en || n.text.hi, hi: n.text.hi || n.text.en },
-    url: SITE_URL + (n.page || ""), chrome_web_icon: SITE_URL + "images/icon-192.png", firefox_icon: SITE_URL + "images/icon-192.png",
+    url: openUrl(SITE_URL + (n.page || "")), chrome_web_icon: SITE_URL + "images/icon-192.png", firefox_icon: SITE_URL + "images/icon-192.png",
     chrome_web_badge: SITE_URL + "images/notify-badge.png" };   /* small white mandir shape in the phone's top bar (instead of a bell) */
   var img = imageUrl(n.image); if (img) { body.chrome_web_image = img; }   /* large picture inside the notification */
   if (n.key) body.idempotency_key = uuidFor(n.key);   /* OneSignal keeps it 30 days; the same id again = not sent again */
