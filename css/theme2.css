@@ -827,3 +827,7 @@ html.app-intro body::after { content: ""; position: fixed; left: 50%; top: 46%; 
 .notify-foot { background: transparent; border-color: rgba(233, 213, 160, .4); color: var(--gold-l); padding: .7rem 1.3rem; }
 html[lang="en"] .notify-foot { font-size: .7rem; }
 .notify-foot:hover { background: var(--gold); color: #2B1810; border-color: var(--gold); }
+/* first visit: while the Google Sheet is being read, an empty box says "Loading…" instead of "will be added soon" */
+.cs-loading .empty { font-size: 0; }
+.cs-loading .empty * { display: none; }
+.cs-loading .empty::before { content: var(--csl, "…"); font-size: 1rem; }

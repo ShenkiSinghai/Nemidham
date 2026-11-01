@@ -2304,6 +2304,7 @@
     return h < 24 && m < 60 ? pad2(h) + ":" + pad2(m) : "";
   }
   function csList(v) { return csClean(v).split(/[,\n]+/).map(csClean).filter(Boolean); }
+  function csImg1(v) { var l = csList(v); return csImg(l[l.length - 1] || ""); }   /* a one-photo cell: if two paths were written by mistake, the last (newest) one is used */
   function csImg(v) { v = csClean(v); return !v || /^(https?:)?\/\//i.test(v) || v.indexOf("/") >= 0 ? v : "images/" + v; }
   function csNum(v) { v = csClean(v).replace(/[₹,\s]|\/-$/g, ""); return v === "" ? "" : (isNaN(+v) ? csClean(v) : +v); }
   /* rows of a key / value tab (Mandir Samay, Top Banner) -> { key: value } */
@@ -2319,14 +2320,14 @@
     karyakram: function (rows) {
       return rows.map(function (r) {
         var d = csDate(r.date), e = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), date: d, endDate: csDate(r.end_date) || "",
-          time: csTx(r, "time"), place: csTx(r, "place"), type: csTx(r, "type"), title: csTx(r, "title"), text: csTx(r, "text"), image: csImg(r.image), fromSheet: true };
+          time: csTx(r, "time"), place: csTx(r, "place"), type: csTx(r, "type"), title: csTx(r, "title"), text: csTx(r, "text"), image: csImg1(r.image), fromSheet: true };
         if (!e.endDate) delete e.endDate;
         return d && csHas(e.title) ? e : null;
       }).filter(Boolean);
     },
     suchnayein: function (rows) {
       return rows.map(function (r) {
-        var a = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), date: csDate(r.date), title: csTx(r, "title"), text: csTx(r, "text"), image: csImg(r.image), fromSheet: true };
+        var a = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), date: csDate(r.date), title: csTx(r, "title"), text: csTx(r, "text"), image: csImg1(r.image), fromSheet: true };
         return csHas(a.title) || csHas(a.text) ? a : null;
       }).filter(Boolean);
     },
@@ -2350,7 +2351,7 @@
       var groups = [], byName = {};
       rows.forEach(function (r) {
         var g = csTx(r, "group"), key = (g.hi || g.en).toLowerCase(); if (!key) return;
-        var m = { hidden: csYes(r.hidden), name: csTx(r, "name"), role: csTx(r, "role"), phone: csClean(r.phone), photo: csImg(r.photo) };
+        var m = { hidden: csYes(r.hidden), name: csTx(r, "name"), role: csTx(r, "role"), phone: csClean(r.phone), photo: csImg1(r.photo) };
         if (!csHas(m.name)) return;
         if (!byName[key]) { byName[key] = { group: g, members: [], fromSheet: true }; groups.push(byName[key]); }
         if (!m.hidden) byName[key].members.push(m);
@@ -2551,7 +2552,7 @@
     if ((f = csFlag(kv, "show")) != null) D.enabled = f;
     if ((t2 = csTxKV(kv, "intro", D.intro))) D.intro = t2;
     v = csVal(kv, "upi_id"); if (v != null) D.upiId = v;
-    v = csVal(kv, "qr_image"); if (v != null) D.qrImage = csImg(v);
+    v = csVal(kv, "qr_image"); if (v != null) D.qrImage = csImg1(v);
     var old = D.bank || [];
     function oldVal(i) { var b = old.filter(function (x) { return L(x.label) === CS_BANK[i][1] || (x.label && x.label.en === CS_BANK[i][2]); })[0]; return b ? b.value : ""; }
     if (CS_BANK.some(function (b) { return csVal(kv, b[0]) != null; })) {
@@ -2656,12 +2657,18 @@
   }
   /* before the first drawing: use the copies saved in this browser */
   function csFromCache() {
-    var sh = window.SHEETS || {};
+    var sh = window.SHEETS || {}, missing = false;
     Object.keys(CS_TABS).forEach(function (k) {
       if (!sh[k] || !csNeeded(k)) return;
       var txt = lsGet(csCacheKey(k)), rows = txt ? csParse(txt) : null;
-      if (rows) csRows[k] = rows;
+      if (rows) csRows[k] = rows; else missing = true;
     });
+    if (missing) {   /* first visit (or a new Sheet link): until the Sheet answers, show "loading" instead of "will be added soon" */
+      var de = document.documentElement;
+      de.style.setProperty("--csl", JSON.stringify(lang === "hi" ? "लोड हो रहा है…" : "Loading…"));
+      de.classList.add("cs-loading");
+      setTimeout(function () { de.classList.remove("cs-loading"); }, 15000);
+    }
     csApply();
   }
   /* after the page is drawn: read fresh copies; redraw once if anything changed */
@@ -2677,8 +2684,10 @@
         else if (!csRows[k]) { csRows[k] = rows; changed[k] = true; }
       }).catch(function () { clearTimeout(tm); }));
     });
-    if (!jobs.length) return;
+    if (!jobs.length) { document.documentElement.classList.remove("cs-loading"); csWarm(); return; }
     Promise.all(jobs).then(function () {
+      document.documentElement.classList.remove("cs-loading");
+      csWarm();
       var ks = Object.keys(changed); if (!ks.length) return;
       csApply();
       if (ks.length === 1 && ks[0] === "banner") { buildBanner(); return; }   /* only the top strip changed: the rest of the page stays as it is */
@@ -2686,6 +2695,21 @@
       /* a link like yojana.html#bhumi-daan to a card that came only now from the Sheet */
       if (hashMissed) { var el = document.getElementById(decodeURIComponent(location.hash.slice(1))); if (el) { hashMissed = false; el.scrollIntoView(); } }
     });
+  }
+  /* after this page's own tabs: quietly save the OTHER pages' Sheet tabs too (at most once every 30 minutes),
+     so the next page opens at once from the saved copy instead of waiting for Google */
+  function csWarm() {
+    var sh = window.SHEETS || {}, c = navigator.connection;
+    if (c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || ""))) return;
+    var last = +lsGet("nemi-cs-warm") || 0; if (Date.now() - last < 30 * 60 * 1000) return;
+    lsSet("nemi-cs-warm", String(Date.now()));
+    var go = function () {
+      Object.keys(CS_TABS).forEach(function (k) {
+        if (!sh[k] || csNeeded(k)) return;
+        fetch(sh[k], { cache: "no-store" }).then(function (res) { return res.ok ? res.text() : ""; }).then(function (txt) { if (csParse(txt)) lsSet(csCacheKey(k), txt); }).catch(function () {});
+      });
+    };
+    if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 4000 }); else setTimeout(go, 2000);
   }
   function render() {
     if (timer) { clearInterval(timer); timer = null; }
