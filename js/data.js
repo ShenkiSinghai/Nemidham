@@ -681,58 +681,13 @@ window.CALENDAR = [
 //   It plays inside the website, nobody has to go to YouTube.
 //   { file: "video1.mp4", title: {...} }  a small video file uploaded into the album's folder (about 25 MB at most).
 window.GALLERY = {
+  // NOTE: this now comes from the Google Sheet tab "Gallery" (one row per album; photos go up with the Sheet menu "फ़ोटो अपलोड करें") (README part 5.37). Edit it there.
+  // What is written here is used only where the Sheet leaves something empty.
   photos: [
-    {
-      id: "bhumipujan", date: "2026-04-13",
-      title: { hi: "भूमि पूजन", en: "Bhumi Pujan" },
-      description: { hi: "", en: "" },
-      folder: "images/gallery/Bhumi Pujan",
-    },
-     {
-      id: "vedi-pratishtha", date: "2026-05-09",
-      title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" },
-      description: { hi: "", en: "" },
-      folder: "images/gallery/vedi-pratishtha",
-    },
-     {
-      id: "kshamavani-2026", date: "2026-09-26",
-      title: { hi: "क्षमावाणी 2026", en: "Kshamavani 2026" },
-      description: { hi: "", en: "" },
-      folder: "images/gallery/Kshamavani-2026",
-    },
-    {
-      hidden: true,
-      id: "sample-utsav", date: "2026-09-10",
-      title: { hi: "SAMPLE: वार्षिक उत्सव", en: "SAMPLE: Annual Utsav" },
-      description: { hi: "", en: "" },
-      folder: "images/gallery",
-      files: [
-        { file: "sample-5.svg", caption: { hi: "नमूना फोटो 5", en: "Sample photo 5" } },
-        { file: "sample-6.svg", caption: { hi: "नमूना फोटो 6", en: "Sample photo 6" } }
-      ]
-    }
+    // { id: "diwali-2026", date: "2026-11-08", title: { hi: "", en: "" }, description: { hi: "", en: "" }, folder: "images/gallery/diwali-2026" },
   ],
   videos: [
-    {
-      id: "mandir-videos", date: "2026-10-28",
-      title: { hi: "मंदिर के वीडियो", en: "Mandir videos" },
-      description: { hi: "", en: "" },
-      items: [
-        { youtube: "https://www.youtube.com/watch?v=w6oB8_KqmOY", title: { hi: "भूमि पूजन", en: "Bhumi Pujan" } },
-        { youtube: "https://www.youtube.com/watch?v=1k3XrL_6LpA", title: { hi: "मुनि श्री अजीत सागर महाराज जी की मंगल देशना", en: "Muni Shri Ajit Sagar Maharaj Ji's Mangal Deshna" } },
-        { youtube: "https://www.youtube.com/watch?v=DbivpjTuzjM", title: { hi: "नेमिधाम वाघोली क्षमावाणी", en: "Nemidham Wagholi Kchamawani" } },
-        { youtube: "https://www.youtube.com/watch?v=5VB2MmrS7Ts", title: { hi: "शांतिधारा", en: "Shantidhara" } }
-      ]
-    },
-    {
-      hidden: true,
-      id: "sample-videos", date: "2026-10-01",
-      title: { hi: "SAMPLE: आरती के वीडियो", en: "SAMPLE: Aarti videos" },
-      description: { hi: "यहाँ YouTube वीडियो का लिंक डालें।", en: "Paste your YouTube video links here." },
-      items: [
-        // { youtube: "https://www.youtube.com/watch?v=XXXXXXXXXXX", title: { hi: "शाम की आरती", en: "Evening Aarti" } }
-      ]
-    }
+    // { id: "mandir-videos", date: "2026-10-28", title: { hi: "", en: "" }, items: [ { youtube: "https://www.youtube.com/watch?v=XXXXXXXXXXX", title: { hi: "", en: "" } } ] },
   ]
 };
 
@@ -833,13 +788,11 @@ window.NEARBY = [
 /* ---------- 9ग. Mandir niyam (Visit page > Mandir niyam / Mandir rules) ----------
    intro: upar ki ek line.  list: har niyam ek { hi, en } line; naya niyam jodne ke liye ek line copy karo, hatane ke liye line delete karo. */
 window.MANDIR_NIYAM = {
-  intro: { hi: "आपका दर्शन के लिए स्वागत है। नीचे कुछ सामान्य नियम हैं।", en: "We welcome you for darshan. These are the usual courtesies." },
+  // NOTE: this now comes from the Google Sheet tab "Mandir Niyam" (README part 5.37). Edit it there.
+  // What is written here is used only where the Sheet leaves something empty.
+  intro: { hi: "", en: "" },
   list: [
-    { hi: "साफ़ और सादे कपड़े पहनकर आएं।", en: "Wear clean, modest clothes." },
-    { hi: "मंदिर में प्रवेश से पहले जूते-चप्पल बाहर उतारें।", en: "Remove footwear before entering." },
-    { hi: "चमड़े की वस्तुएं मंदिर में न लाएं।", en: "Avoid leather items inside the mandir." },
-    { hi: "मोबाइल साइलेंट रखें।", en: "Keep your phone on silent." },
-    { hi: "फोटो लेने से पहले अनुमति लें।", en: "Please ask before taking photographs." }
+    // { hi: "", en: "" },
   ]
 };
 
@@ -853,76 +806,18 @@ window.MANDIR_NIYAM = {
    contactNote (one line above the people), contacts: [ { name: {hi,en}, role: {hi,en}, phone: "..." } ].
    Every info line, list line and contact can also have  hidden: true. */
 window.SUVIDHA = [
-  {
-    id: "bhojanshala", pinned: true, icon: "🍽️", color: "orange",
-    title: { hi: "भोजनशाला", en: "Bhojanshala" },
-    short: { hi: "मंदिर में शुद्ध भोजन की व्यवस्था है। कूपन राशि ₹100 है।", en: "Pure, shuddh bhojan is available at the mandir. Coupon: ₹100." },
-    paragraphs: [
-      { hi: "मंदिर में शुद्ध भोजन की व्यवस्था है।", en: "Shuddh (pure) bhojan is arranged at the mandir." }
-    ],
-    info: [
-      { icon: "🎟️", label: { hi: "कूपन राशि", en: "Coupon amount" }, value: { hi: "₹100", en: "₹100" } }
-    ],
-    list: [],
-    contactNote: { hi: "भोजन के लिए पुजारी भैया नीरज जैन से संपर्क करें।", en: "For bhojan, please contact Pujari Neeraj Jain." },
-    contacts: [
-      { name: { hi: "नीरज जैन", en: "Neeraj Jain" }, role: { hi: "पुजारी", en: "Pujari" }, phone: "8770979624" }
-    ]
-  },
-  {
-    hidden: true, icon: "⭐", color: "blue",   // spare card: delete the "hidden: true," part to show it
-    title: { hi: "नई सुविधा 1", en: "New facility 1" },
-    paragraphs: [ { hi: "यहाँ सुविधा की जानकारी लिखें।", en: "Write the details of this facility here." } ],
-    info: [],
-    list: [],
-    contacts: []
-  },
-  {
-    hidden: true, icon: "⭐", color: "green",   // spare card: delete the "hidden: true," part to show it
-    title: { hi: "नई सुविधा 2", en: "New facility 2" },
-    paragraphs: [ { hi: "यहाँ सुविधा की जानकारी लिखें।", en: "Write the details of this facility here." } ],
-    info: [],
-    list: [],
-    contacts: []
-  },
-  {
-    hidden: true, icon: "⭐", color: "purple",   // spare card: delete the "hidden: true," part to show it
-    title: { hi: "नई सुविधा 3", en: "New facility 3" },
-    paragraphs: [ { hi: "यहाँ सुविधा की जानकारी लिखें।", en: "Write the details of this facility here." } ],
-    info: [],
-    list: [],
-    contacts: []
-  }
+  // NOTE: this now comes from the Google Sheet tab "Suvidhayein" (README part 5.37). Edit it there.
+  // What is written here is used only where the Sheet leaves something empty.
+  // { id: "bhojanshala", pinned: true, icon: "🍽️", title: { hi: "", en: "" }, short: { hi: "", en: "" }, paragraphs: [ { hi: "", en: "" } ], info: [ { icon: "🎟️", label: { hi: "", en: "" }, value: { hi: "", en: "" } } ], list: [], contactNote: { hi: "", en: "" }, contacts: [ { name: { hi: "", en: "" }, role: { hi: "", en: "" }, phone: "" } ] },
 ];
 
 /* ---------- 11. Daan ---------- */
 // enabled: false shows "details coming soon" instead.
 // Leave a field "" to hide it. Check every detail with the trustees first.
 window.DAAN = {
-  enabled: true,
-  intro: {
-    hi: "आपका दान मंदिर की रोज़ की पूजा, मंदिर के रखरखाव और ऊपर दी गई योजनाओं में काम आता है। आपके सहयोग के लिए धन्यवाद।",
-    en: "Your daan supports daily pooja, the upkeep of the mandir and the yojanayen listed on this website. Thank you for your support."
-  },
-  upiId: "eazypay.mxv8ofmr7akehh1@icici",
-  qrImage: "images/upi-qr.png",     // shown just below the UPI ID
-  bank: [
-    { label: { hi: "खाते का नाम", en: "Account name" }, value: "Jain Shravak Sangh" },
-    { label: { hi: "बैंक", en: "Bank" }, value: "ICICI Bank" },
-    { label: { hi: "खाता संख्या", en: "Account number" }, value: "172705005064", copy: true },
-    { label: { hi: "IFSC", en: "IFSC" }, value: "ICIC0001727", copy: true },
-    { label: { hi: "शाखा", en: "Branch" }, value: "Wagholi" }
-  ],
-  inPerson: {
-    hi: "आप मंदिर कार्यालय में खुलने के समय में भी दान दे सकते हैं। रसीद दी जाएगी।",
-    en: "You can also give daan at the mandir office during opening hours. A receipt will be given."
-  },
-  note: { hi: "", en: "" },
-  // A short caution shown on the Daan page just above "Niyamit daan aur seva". Leave both "" to hide it.
-  disclaimer: {
-    hi: "कृपया कोई भी भुगतान (पेमेंट) करने से पहले एक बार मंदिर के कार्यकर्ता से जानकारी जाँच लें, और भुगतान करते समय खाताधारक का नाम भी मिला लें।",
-    en: "Before making any payment, please confirm the details once with a mandir karyakarta, and check the account holder's name when you pay."
-  }
+  // NOTE: this now comes from the Google Sheet owner's private Sheet "Nemidham Private Settings", tab "Daan Details" (UPI, bank, QR) (README part 5.37). Edit it there.
+  // What is written here is used only where the Sheet leaves something empty.
+  // Kept out of this file on purpose, so the bank / UPI details live in one locked place only.
 };
 
 /* Regular daan and seva (every week / every month): one card each on the Daan page.
@@ -980,7 +875,13 @@ window.SHEETS = {
   howto: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=191292584&single=true&output=csv",        // tab "Kaise Pahunchein" (Visit page > How to reach cards)
   timeline: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1180701047&single=true&output=csv",     // tab "Timeline"
   nearby: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1201238355&single=true&output=csv",       // tab "Aas-Paas" (Nearby page: mandirs, tirths, places)
-  calendar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1932071733&single=true&output=csv"      // tab "Jain Calendar"
+  calendar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1932071733&single=true&output=csv",      // tab "Jain Calendar"
+  niyam: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=903434888&single=true&output=csv",       // tab "Mandir Niyam" (Visit page > Mandir rules)
+  suvidha: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1038943295&single=true&output=csv",     // tab "Suvidhayein" (Visit page > Facilities, and Home cards)
+  gallery: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1406422390&single=true&output=csv",     // tab "Gallery" (albums)
+  // ---- the owner's PRIVATE Sheet "Nemidham Private Settings" (only the owner and trusted people can edit it) ----
+  settings: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvGS8p85Vf7NU4JA97DyXB3b4uepKO2M8zgTgxwLBMB953u9sAQ9ol2t4bi788Gs9lAu0zJrN30_f5/pub?gid=1563301521&single=true&output=csv",    // tab "Website Settings" (social links, buttons, pop-ups, slideshow, notification times ...)
+  daanDetails: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvGS8p85Vf7NU4JA97DyXB3b4uepKO2M8zgTgxwLBMB953u9sAQ9ol2t4bi788Gs9lAu0zJrN30_f5/pub?gid=848661276&single=true&output=csv"  // tab "Daan Details" (UPI, bank, QR, trust / 80G)
 };
 
 /* Shantidhara punyarjak list. Shown on the Daan page as a calendar-style table, month by month,
@@ -1007,19 +908,11 @@ window.BHAKTAMBAR = [
 // If every value is empty, visitors see "details will be added soon".
 // You can add more lines by copying one { ... }, block.
 window.TRUST = {
+  // NOTE: this now comes from the Google Sheet owner's private Sheet, tab "Daan Details" (trust_name, pan, 80g_number ...) (README part 5.37). Edit it there.
+  // What is written here is used only where the Sheet leaves something empty.
   enabled: true,
-  items: [
-    { label: { hi: "ट्रस्ट का नाम", en: "Name of the trust" }, value: "" },
-    { label: { hi: "रजिस्ट्रेशन नंबर", en: "Registration number" }, value: "" },
-    { label: { hi: "PAN", en: "PAN" }, value: "" },
-    { label: { hi: "80G नंबर", en: "80G number" }, value: "" },
-    { label: { hi: "80G की वैधता", en: "80G valid till" }, value: "" },
-    { label: { hi: "12A नंबर", en: "12A number" }, value: "" }
-  ],
-  note: {
-    hi: "",   // e.g. "दान की रसीद मंदिर कार्यालय से मिलेगी।"
-    en: ""    // e.g. "A receipt is given by the mandir office."
-  }
+  items: [],
+  note: { hi: "", en: "" }
 };
 
 /* Masik Dravya Daan: list of donors. If there are no rows, the table does not show.
