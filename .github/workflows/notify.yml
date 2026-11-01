@@ -5,13 +5,13 @@ on:
     branches: [main]
     paths: ["js/data.js"]
   schedule:
-    - cron: "*/5 * * * *"   # every 5 minutes: new Sheet rows are announced; reminders go only at the time set in data.js (notify.auto.time)
+    - cron: "17 * * * *"   # backup timer, once an hour. The main timer is Google's: the Sheet's Apps Script starts this workflow every 5 minutes (mode "timer"), because GitHub's own timer often skips runs for hours.
   workflow_dispatch:
     inputs:
       mode:
-        description: "send = your own message below; today = send today's reminders now (without waiting for the set time)"
+        description: "send = your own message below; today = send today's reminders now (without waiting for the set time); timer = a normal timer check (used by the Sheet's 5-minute timer)"
         type: choice
-        options: [send, today]
+        options: [send, today, timer]
         default: send
       title:
         description: "Title (e.g. जय जिनेन्द्र)"
@@ -29,7 +29,7 @@ permissions:
   contents: read
 # Timer runs wait for each other. A push or a hand-run gets its own group, so a waiting timer run can never cancel it.
 concurrency:
-  group: notifications-${{ github.event_name == 'schedule' && 'timer' || github.run_id }}
+  group: notifications-${{ (github.event_name == 'schedule' || github.event.inputs.mode == 'timer') && 'timer' || github.run_id }}
   cancel-in-progress: false
 jobs:
   notify:

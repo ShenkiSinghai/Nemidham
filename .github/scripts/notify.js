@@ -394,5 +394,5 @@ function onHand() {
   return send({ page: page, image: process.env.IN_IMAGE || "", title: { hi: t, en: t }, text: { hi: m, en: m } });
 }
 
-(EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : onHand()) : Promise.resolve())
+(EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : process.env.IN_MODE === "timer" ? onSchedule().then(sheetPoll) : onHand()) : Promise.resolve())
   .catch(function (e) { console.log("Error:", e && e.message); process.exitCode = 1; });
