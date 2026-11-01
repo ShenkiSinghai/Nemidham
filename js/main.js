@@ -549,6 +549,7 @@
   var audioState = null;
   function setupMantraAudio() {
     var A = S.audio;
+    if (audioState && (!A || !A.enabled)) { audioState.stop = true; audioState.au.pause(); audioState.btn.hidden = true; return; }   /* switched off in the Sheet after it had started */
     if (!A || !A.enabled || !A.file || audioState) return;
     var off = false; try { off = localStorage.getItem("nemi-audio") === "off"; } catch (e) {}
     var au = new Audio(); au.loop = true; au.preload = "none"; au.volume = A.volume > 0 && A.volume <= 1 ? A.volume : 0.6;
@@ -560,7 +561,7 @@
       btn.setAttribute("aria-pressed", playing ? "true" : "false");
       btn.innerHTML = '<span aria-hidden="true">' + (playing ? "🔊" : "🔇") + "</span><b>" + esc(t(playing ? "audio.stop" : "audio.play")) + "</b>";
     }
-    function start() { var p = au.play(); if (p && p.then) p.then(label, function () { label(); armFirstTouch(); }); }
+    function start() { if (audioState.stop) return; var p = au.play(); if (p && p.then) p.then(label, function () { label(); armFirstTouch(); }); }
     var armed = false;
     function armFirstTouch() {
       if (armed || off) return; armed = true;
@@ -576,7 +577,7 @@
     au.addEventListener("pause", label); au.addEventListener("play", label);
     /* the button shows only if the audio file really exists */
     fetch(A.file, { method: "HEAD", cache: "no-store" }).then(function (r) {
-      if (!r.ok) throw 0;
+      if (!r.ok || audioState.stop) throw 0;
       au.src = A.file; document.body.appendChild(btn); btn.hidden = false; label();
       if (!off) { start(); armFirstTouch(); }
     }).catch(function () {});
@@ -1792,13 +1793,12 @@
   /* ---------- visit: one page, four tabs (Timings, How to reach, Facilities, Dress code) ---------- */
   var VISIT_TABS_ALL = [["timings", "v.tab_timings"], ["reach", "v.tab_reach"], ["facilities", "v.tab_fac"], ["rules", "v.tab_dress"]];
   /* SITE.hideVisitTabs: ["facilities", "rules", ...] hides tabs of the Visit page */
-  var VISIT_TABS = VISIT_TABS_ALL.filter(function (x) { return (S.hideVisitTabs || []).indexOf(x[0]) < 0; });
-  if (!VISIT_TABS.length) VISIT_TABS = VISIT_TABS_ALL;
+  function visitTabs() { var v = VISIT_TABS_ALL.filter(function (x) { return (S.hideVisitTabs || []).indexOf(x[0]) < 0; }); return v.length ? v : VISIT_TABS_ALL; }
   var VISIT_ALIAS = { contact: "timings", address: "reach", timings: "timings", map: "reach", reach: "reach", facilities: "facilities", suvidha: "facilities", rules: "rules", niyam: "rules", dresscode: "rules", dress: "rules" };
   function visitTabFromHash() {
     var h = decodeURIComponent((location.hash || "").replace("#", ""));
     var w = VISIT_ALIAS[h] || "timings";
-    return VISIT_TABS.some(function (x) { return x[0] === w; }) ? w : VISIT_TABS[0][0];
+    var vt = visitTabs(); return vt.some(function (x) { return x[0] === w; }) ? w : vt[0][0];
   }
   function visitPanels() {
     var src = mapSrc(), open = mapOpen(), T = S.timings || {};
@@ -1839,8 +1839,8 @@
     var host = document.getElementById("visit"); if (!host) return;
     var panels = visitPanels();
     host.innerHTML = '<div class="vtabs" role="tablist" aria-label="' + esc(t("v.tabs_aria")) + '">' +
-      VISIT_TABS.map(function (x) { return '<button class="vtab" type="button" role="tab" data-v="' + x[0] + '" aria-selected="false">' + esc(t(x[1])) + "</button>"; }).join("") + "</div>" +
-      VISIT_TABS.map(function (x) { return '<div class="vpanel" role="tabpanel" data-v="' + x[0] + '" hidden>' + panels[x[0]] + "</div>"; }).join("");
+      visitTabs().map(function (x) { return '<button class="vtab" type="button" role="tab" data-v="' + x[0] + '" aria-selected="false">' + esc(t(x[1])) + "</button>"; }).join("") + "</div>" +
+      visitTabs().map(function (x) { return '<div class="vpanel" role="tabpanel" data-v="' + x[0] + '" hidden>' + panels[x[0]] + "</div>"; }).join("");
     function show(which, push) {
       $$(".vtab", host).forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-v") === which ? "true" : "false"); });
       $$(".vpanel", host).forEach(function (pn) { pn.hidden = pn.getAttribute("data-v") !== which; });
@@ -2232,7 +2232,7 @@
   document.addEventListener("visibilitychange", function () { document.documentElement.classList.toggle("anim-hidden", document.hidden); });
   /* App opening animation: when the site is opened from the home-screen icon (installed app), the mandir logo
      appears with a soft golden glow and the page fades in (once per app opening). Switch off: SITE.appIntro = false. */
-  (function appIntro() {
+  function appIntro() {   /* called after csFromCache(), so the Sheet's app_intro setting counts */
     var h = document.documentElement;
     if (!h.classList.contains("app-intro")) return;
     if (S.appIntro === false) { h.classList.remove("app-intro"); return; }
@@ -2242,7 +2242,7 @@
       try { history.replaceState(null, "", location.pathname + location.search.replace(/([?&])src=notify(&|$)/, function (m, a, b) { return b ? a : ""; }).replace(/\?$/, "") + location.hash); } catch (e) {}
     }
     setTimeout(function () { h.classList.remove("app-intro"); }, 1700);
-  })();
+  }
 
   /* ---------- website content from the Google Sheet (README part 5.37) ----------
      Tabs of the same Sheet as the Daan lists: Karyakram, Dainik Karyakram, Mandir Samay, Suchnayein, Yojanayein,
@@ -2255,15 +2255,22 @@
   var CS_TABS = {   /* tab key in window.SHEETS : pages that need it */
     banner: "*", samay: "home visit daily", dainik: "daily", karyakram: "home karyakram daily",
     suchnayein: "home announcements", yojana: "home yojana", team: "team", niyamitDaan: "daan",
-    about: "about", howto: "visit", timeline: "timeline", nearby: "nearby", calendar: "calendar daily"
+    about: "about", howto: "visit", timeline: "timeline", nearby: "nearby", calendar: "calendar daily",
+    settings: "*", daanDetails: "daan", niyam: "visit", suvidha: "home visit suvidha", gallery: "home gallery"
   };
+  /* website settings that the Sheet's "Website Settings" tab may change (a copy of data.js is kept to start from each time) */
+  var CS_SET_KEYS = ["social", "phone", "whatsapp", "email", "addressLines", "mapLink", "mapEmbed", "heroLine", "heroInvocation", "tagline", "heroPetals", "heroButtons",
+    "hideMenu", "hideHome", "hideVisitTabs", "dharmshalaSoon", "appIntro", "appInstall", "notify", "slideshow", "audio", "albumOrder", "karyakramPastDays",
+    "bhaktamarKaryakram", "bhaktamarTime", "youtubeChannelId"];
   var CS_BASE = null, csRows = {}, hashMissed = false;
   function csClone(v) { try { return JSON.parse(JSON.stringify(v)); } catch (e) { return v; } }
   function csBase() {
     if (!CS_BASE) CS_BASE = { EVENTS: csClone(window.EVENTS || []), ANNOUNCEMENTS: csClone(window.ANNOUNCEMENTS || []), YOJANA: csClone(window.YOJANA || []),
       DAILY: csClone(window.DAILY || []), TEAM: csClone(window.TEAM || []), RECURRING: csClone(window.RECURRING || []),
       BANNER: csClone(window.BANNER || {}), ABOUT: csClone(window.ABOUT || []), HOWTO: csClone(window.HOWTO || []), TIMELINE: csClone(window.TIMELINE || []),
-      NEARBY: csClone(window.NEARBY || []), CALENDAR: csClone(window.CALENDAR || []), timings: csClone(S.timings || null), timingsNote: csClone(S.timingsNote || null), showTimings: S.showTimings };
+      NEARBY: csClone(window.NEARBY || []), CALENDAR: csClone(window.CALENDAR || []), DAAN: csClone(window.DAAN || {}), TRUST: csClone(window.TRUST || {}),
+      NIYAM: csClone(window.MANDIR_NIYAM || window.DRESSCODE || {}), SUVIDHA: csClone(window.SUVIDHA || []), GALLERY: csClone(window.GALLERY || {}),
+      SET: (function () { var o = {}; CS_SET_KEYS.forEach(function (k) { o[k] = csClone(S[k]); }); return o; })(), timings: csClone(S.timings || null), timingsNote: csClone(S.timingsNote || null), showTimings: S.showTimings };
     return CS_BASE;
   }
   function csClean(v) { return String(v == null ? "" : v).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").replace(/\r/g, "").trim(); }
@@ -2399,6 +2406,48 @@
     },
     /* Aas-Paas: one row = one card. group_id puts it in a tab (button); group_id left empty = same tab as the row above.
        The tab's name / icon / intro are read from the first row of that tab that has them. */
+    niyam: function (rows, base) {
+      var out = { intro: csClone(base.intro || { hi: "", en: "" }), list: [] }, got = false;
+      rows.forEach(function (r) {
+        var x = csTx(r, "text"); if (!csHas(x)) return;
+        if (/^(intro|upar|ऊपर)/i.test(csClean(r.type))) { if (!csYes(r.hidden)) out.intro = x; got = true; return; }
+        got = true; if (!csYes(r.hidden)) out.list.push(x);
+      });
+      if (!out.list.length && !rows.some(function (r) { return csHas(csTx(r, "text")) && !/^(intro|upar|ऊपर)/i.test(csClean(r.type)); })) out.list = csClone(base.list || []);
+      return got ? out : csClone(base);
+    },
+    suvidha: function (rows) {
+      return rows.map(function (r) {
+        var c = [];
+        [1, 2].forEach(function (n) { var nm = csTx(r, "contact" + n + "_name"), ph = csClean(r["contact" + n + "_phone"]); if (csHas(nm) || ph) c.push({ name: nm, role: csTx(r, "contact" + n + "_role"), phone: ph }); });
+        var x = { id: csClean(r.id), hidden: csYes(r.hidden), pinned: csYes(r.pinned), icon: csClean(r.icon), title: csTx(r, "title"), short: csTx(r, "short"),
+          paragraphs: csLines(r, "text"), info: csInfo(r), list: csLines(r, "points"), contactNote: csTx(r, "contact_note"), contacts: c, fromSheet: true };
+        return csHas(x.title) ? x : (x.id && x.hidden ? x : null);
+      }).filter(Boolean);
+    },
+    /* Gallery: one row = one album. kind = photos / videos. folder = images/gallery/<name> (just the name is enough).
+       videos: one video per line: "YouTube link | हिंदी नाम | English name" */
+    gallery: function (rows) {
+      var out = { photos: [], videos: [] };
+      rows.forEach(function (r) {
+        var kind = /^(v|वी)/i.test(csClean(r.kind)) ? "videos" : "photos";
+        var a = { id: csClean(r.id), hidden: csYes(r.hidden), date: csDate(r.date) || csClean(r.date), title: csTx(r, "title"), description: csTx(r, "description"),
+          folder: csGalleryFolder(r.folder), fromSheet: true };
+        var cv = csClean(r.cover); if (cv) a.cover = /^(https?:)?\/\//i.test(cv) || cv.indexOf("/") >= 0 ? cv : (a.folder ? a.folder + "/" + cv : csImg(cv));
+        var fl = csList(r.files); if (fl.length) a.files = fl;
+        if (kind === "videos") {
+          a.items = csClean(r.videos).split(/\n+/).map(function (line) {
+            var p = line.split("|").map(csClean); if (!p[0]) return null;
+            var ttl = { hi: p[1] || p[2] || "", en: p[2] || p[1] || "" };
+            return /^https?:/i.test(p[0]) ? { youtube: p[0], title: ttl } : { file: p[0], title: ttl };
+          }).filter(Boolean);
+          if (!a.folder) delete a.folder;
+        }
+        if (!a.id || (!csHas(a.title) && !a.hidden)) return;
+        out[kind].push(a);
+      });
+      return out;
+    },
     nearby: function (rows) {
       var gs = [], byId = {}, last = "";
       rows.forEach(function (r) {
@@ -2418,6 +2467,121 @@
       return gs;
     }
   };
+  /* key / value tabs (Website Settings, Daan Details): an empty value = keep what data.js says; "-" = make it empty */
+  function csVal(kv, k) { return Object.prototype.hasOwnProperty.call(kv, k) && kv[k] !== "" ? (kv[k] === "-" ? "" : kv[k]) : null; }
+  function csTxKV(kv, base, old) {   /* { hi, en } from base_hi / base_en; null if neither row is filled */
+    var hi = csVal(kv, base + "_hi"), en = csVal(kv, base + "_en");
+    if (hi == null && en == null) return null;
+    old = old && typeof old === "object" ? old : { hi: old || "", en: old || "" };
+    hi = hi == null ? (en || old.hi || "") : hi; en = en == null ? (hi || old.en || "") : en;
+    return { hi: hi, en: en };
+  }
+  function csFlag(kv, k) { var v = csVal(kv, k); return v == null ? null : csYes(v) ? true : csNo(v) ? false : null; }
+  function csCount(kv, k) { var v = csVal(kv, k); return v == null || v === "" || isNaN(+v) ? null : +v; }
+  function csNames(kv, k) { var v = csVal(kv, k); return v == null ? null : v.split(/[,\n]+/).map(function (x) { return csClean(x).toLowerCase(); }).filter(Boolean); }
+  /* "Website Settings" tab -> S (SITE). Every row is optional. */
+  function csSettings(kv) {
+    var v, f, n, t2;
+    var soc = csClone(S.social || {}) || {};
+    [["whatsapp_group", "whatsappGroup"], ["facebook", "facebook"], ["instagram", "instagram"], ["youtube", "youtube"]].forEach(function (x) { v = csVal(kv, x[0]); if (v != null) soc[x[1]] = v; });
+    S.social = soc;
+    ["phone", "whatsapp", "email"].forEach(function (k) { v = csVal(kv, k); if (v != null) S[k] = v; });
+    var ah = csVal(kv, "address_hi"), ae = csVal(kv, "address_en");
+    if (ah != null || ae != null) {
+      var lh = String(ah == null ? "" : ah).split(/\n+/).map(csClean).filter(Boolean), le = String(ae == null ? "" : ae).split(/\n+/).map(csClean).filter(Boolean), al = [];
+      for (var i = 0; i < Math.max(lh.length, le.length); i++) al.push({ hi: lh[i] || le[i] || "", en: le[i] || lh[i] || "" });
+      S.addressLines = al;
+    }
+    v = csVal(kv, "map_link"); if (v != null) S.mapLink = v;
+    v = csVal(kv, "map_embed"); if (v != null) S.mapEmbed = v;
+    if ((t2 = csTxKV(kv, "hero_line", S.heroLine))) S.heroLine = t2;
+    if ((t2 = csTxKV(kv, "hero_invocation", S.heroInvocation))) S.heroInvocation = t2;   /* "-" in both = { hi: "", en: "" } = the line is hidden ("" would bring back the default) */
+    if ((t2 = csTxKV(kv, "tagline", S.tagline))) S.tagline = t2;
+    if ((f = csFlag(kv, "hero_petals")) != null) S.heroPetals = f;
+    var hb = csClone(S.heroButtons || []) || [];
+    [1, 2].forEach(function (k) {
+      var b = hb[k - 1] || { href: "", label: { hi: "", en: "" }, style: k === 1 ? "gold" : "ghost" }, ch = false;
+      if ((t2 = csTxKV(kv, "hero_button" + k + "_text", b.label))) { b.label = t2; ch = true; }
+      v = csVal(kv, "hero_button" + k + "_link"); if (v != null) { b.href = v; ch = true; }
+      if (ch) hb[k - 1] = b;
+    });
+    S.heroButtons = hb.filter(Boolean);
+    if ((n = csNames(kv, "hide_menu"))) S.hideMenu = n;
+    if ((n = csNames(kv, "hide_home"))) S.hideHome = n;
+    if ((n = csNames(kv, "hide_visit_tabs"))) S.hideVisitTabs = n;
+    if ((f = csFlag(kv, "dharmshala_soon")) != null) S.dharmshalaSoon = f;
+    if ((f = csFlag(kv, "app_intro")) != null) S.appIntro = f;
+    var ai = S.appInstall === false ? { popup: false, footerButton: false } : (csClone(S.appInstall) || {});
+    if ((f = csFlag(kv, "app_footer_button")) != null) ai.footerButton = f;
+    if ((f = csFlag(kv, "app_popup")) != null) ai.popup = f;
+    if ((n = csCount(kv, "app_popup_after_days")) != null) ai.popupAfterDays = n;
+    if ((n = csCount(kv, "app_popup_delay_seconds")) != null) ai.popupDelaySeconds = n;
+    if ((n = csCount(kv, "app_popup_gap_minutes")) != null) ai.popupGapMinutes = n;
+    S.appInstall = ai;
+    var nt = csClone(S.notify) || {};
+    if ((f = csFlag(kv, "notify_footer_button")) != null) nt.footerButton = f;
+    if ((f = csFlag(kv, "notify_ask_popup")) != null) nt.askPopup = f;
+    if ((n = csCount(kv, "notify_ask_after_days")) != null) nt.askAfterDays = n;
+    if ((n = csCount(kv, "notify_ask_delay_seconds")) != null) nt.askDelaySeconds = n;
+    S.notify = nt;
+    var ss = csClone(S.slideshow) || {};
+    if ((f = csFlag(kv, "slideshow_show")) != null) ss.enabled = f;
+    v = csVal(kv, "slideshow_album"); if (v != null) ss.source = v || "all";
+    if ((f = csFlag(kv, "slideshow_shuffle")) != null) ss.shuffle = f;
+    v = csVal(kv, "slideshow_count"); if (v != null) ss.count = /^(all|sab|सब)$/i.test(v) || v === "" ? "all" : (+v > 0 ? +v : ss.count);
+    if ((n = csCount(kv, "slideshow_seconds")) != null && n > 0) ss.seconds = n;
+    S.slideshow = ss;
+    var au = csClone(S.audio) || {};
+    if ((f = csFlag(kv, "audio_on")) != null) au.enabled = f;
+    if ((n = csCount(kv, "audio_volume")) != null) au.volume = Math.max(0, Math.min(1, n > 1 ? n / 100 : n));
+    S.audio = au;
+    v = csVal(kv, "album_order"); if (v != null) S.albumOrder = /^(old|purani|पुरान)/i.test(v) ? "oldest" : "newest";
+    v = csVal(kv, "karyakram_past_days"); if (v != null) S.karyakramPastDays = /^(year|saal|साल)$/i.test(v) || v === "" ? "year" : (isNaN(+v) ? "year" : +v);
+    if ((f = csFlag(kv, "bhaktamar_on_karyakram")) != null) S.bhaktamarKaryakram = f;
+    if ((t2 = csTxKV(kv, "bhaktamar_time", S.bhaktamarTime))) S.bhaktamarTime = t2;
+    v = csVal(kv, "youtube_channel_id"); if (v != null) S.youtubeChannelId = v;
+  }
+  /* "Daan Details" tab -> window.DAAN and window.TRUST */
+  var CS_BANK = [["account_name", "खाते का नाम", "Account name", false], ["bank_name", "बैंक", "Bank", false], ["account_number", "खाता संख्या", "Account number", true],
+    ["ifsc", "IFSC", "IFSC", true], ["branch", "शाखा", "Branch", false]];
+  var CS_TRUST = [["trust_name", "ट्रस्ट का नाम", "Name of the trust"], ["registration_number", "रजिस्ट्रेशन नंबर", "Registration number"], ["pan", "PAN", "PAN"],
+    ["80g_number", "80G नंबर", "80G number"], ["80g_valid_till", "80G की वैधता", "80G valid till"], ["12a_number", "12A नंबर", "12A number"]];
+  function csDaan(kv, D, TR) {
+    var f, v, t2;
+    if ((f = csFlag(kv, "show")) != null) D.enabled = f;
+    if ((t2 = csTxKV(kv, "intro", D.intro))) D.intro = t2;
+    v = csVal(kv, "upi_id"); if (v != null) D.upiId = v;
+    v = csVal(kv, "qr_image"); if (v != null) D.qrImage = csImg(v);
+    var old = D.bank || [];
+    function oldVal(i) { var b = old.filter(function (x) { return L(x.label) === CS_BANK[i][1] || (x.label && x.label.en === CS_BANK[i][2]); })[0]; return b ? b.value : ""; }
+    if (CS_BANK.some(function (b) { return csVal(kv, b[0]) != null; })) {
+      D.bank = CS_BANK.map(function (b, i) { var x = csVal(kv, b[0]); return { label: { hi: b[1], en: b[2] }, value: x == null ? oldVal(i) : x, copy: b[3] }; });
+    }
+    if ((t2 = csTxKV(kv, "in_person", D.inPerson))) D.inPerson = t2;
+    if ((t2 = csTxKV(kv, "note", D.note))) D.note = t2;
+    if ((t2 = csTxKV(kv, "disclaimer", D.disclaimer))) D.disclaimer = t2;
+    if ((f = csFlag(kv, "trust_show")) != null) TR.enabled = f;
+    var ot = TR.items || [];
+    if (CS_TRUST.some(function (b) { return csVal(kv, b[0]) != null; })) {
+      TR.items = CS_TRUST.map(function (b) { var x = csVal(kv, b[0]), o = ot.filter(function (i) { return i.label && (i.label.en === b[2] || i.label.hi === b[1]); })[0]; return { label: { hi: b[1], en: b[2] }, value: x == null ? (o ? o.value : "") : x }; });
+    }
+    if ((t2 = csTxKV(kv, "trust_note", TR.note))) TR.note = t2;
+  }
+  /* "Suvidhayein" tab: info lines are "कूपन राशि: ₹100" (an emoji at the start becomes the small icon) */
+  function csInfo(r) {
+    var hi = csClean(r.info_hi).split(/\n+/).map(csClean).filter(Boolean), en = csClean(r.info_en).split(/\n+/).map(csClean).filter(Boolean), out = [];
+    function split(line) {
+      var icon = "", parts = line.split(" ");
+      if (parts.length > 1 && !/[A-Za-z0-9\u0900-\u097F]/.test(parts[0])) { icon = parts[0]; line = parts.slice(1).join(" "); }
+      var c = line.indexOf(":"); return { icon: icon, label: c >= 0 ? csClean(line.slice(0, c)) : "", value: c >= 0 ? csClean(line.slice(c + 1)) : line };
+    }
+    for (var i = 0; i < Math.max(hi.length, en.length); i++) {
+      var a = split(hi[i] || en[i]), b = split(en[i] || hi[i]);
+      out.push({ icon: a.icon || b.icon, label: { hi: a.label, en: b.label }, value: { hi: a.value, en: b.value } });
+    }
+    return out;
+  }
+  function csGalleryFolder(v) { v = csClean(v).replace(/^\/+|\/+$/g, ""); return !v || v.indexOf("/") >= 0 || /^https?:/i.test(v) ? v : "images/gallery/" + v; }
   /* Aas-Paas: a Sheet tab (group) with the same id as a data.js group takes its place; a tab with no visible card is hidden */
   function csNearby(base, groups) {
     if (base && !Array.isArray(base)) base = ["mandirs", "tirths"].map(function (k) { return { id: k, title: { hi: (UIX.hi || {})["nb." + k] || k, en: (UIX.en || {})["nb." + k] || k }, items: base[k] || [] }; });   /* old data.js format { mandirs: [], tirths: [] } */
@@ -2444,6 +2608,17 @@
     window.TIMELINE = on("timeline") ? csMerge(B.TIMELINE, CS_MAP.timeline(r.timeline)) : csClone(B.TIMELINE);
     window.CALENDAR = on("calendar") ? csMerge(B.CALENDAR, CS_MAP.calendar(r.calendar)) : csClone(B.CALENDAR);
     window.NEARBY = on("nearby") ? csNearby(B.NEARBY, CS_MAP.nearby(r.nearby)) : csClone(B.NEARBY);
+    CS_SET_KEYS.forEach(function (k) { S[k] = csClone(B.SET[k]); });
+    if (on("settings")) csSettings(csKV(r.settings));
+    if (window.LINKS && S.social) window.LINKS = S.social;
+    var D = csClone(B.DAAN), TR = csClone(B.TRUST);
+    if (on("daanDetails")) csDaan(csKV(r.daanDetails), D, TR);
+    window.DAAN = D; window.TRUST = TR;
+    window.MANDIR_NIYAM = on("niyam") ? CS_MAP.niyam(r.niyam, B.NIYAM) : csClone(B.NIYAM);
+    window.SUVIDHA = on("suvidha") ? csMerge(B.SUVIDHA, CS_MAP.suvidha(r.suvidha)) : csClone(B.SUVIDHA);
+    var G = csClone(B.GALLERY) || {};
+    if (on("gallery")) { var sg = CS_MAP.gallery(r.gallery); G.photos = csMerge(G.photos || [], sg.photos); G.videos = csMerge(G.videos || [], sg.videos); }
+    window.GALLERY = G;
     window.DAILY = on("dainik") ? csClone(B.DAILY).concat(CS_MAP.dainik(r.dainik)) : csClone(B.DAILY);
     if (on("team")) {
       var tg = csClone(B.TEAM), byName = {};
@@ -2555,6 +2730,7 @@
     watchAnimations();
   }
   csFromCache();
+  appIntro();
   render();
   csRefresh();
   notifyBoot();

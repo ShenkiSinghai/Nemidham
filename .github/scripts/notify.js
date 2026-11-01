@@ -200,22 +200,49 @@ function allEvents() {
 /* ---------- main ---------- */
 var W = load(fs.readFileSync("js/data.js", "utf8"));
 if (!W) process.exit(0);
-var NC = (W.SITE && W.SITE.notify) || {}, AUTO = NC.auto || {}, APP_ID = String(NC.appId || "").trim();
-/* settings from SITE.notify.auto (js/data.js), with safe defaults */
-var CFG = {
-  time: /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(AUTO.time || "").trim()) ? String(AUTO.time).trim() : "06:30",
-  onTheDay: AUTO.onTheDay !== false && AUTO.dailyReminder !== false,
-  daysBefore: (Array.isArray(AUTO.daysBefore) ? AUTO.daysBefore : AUTO.daysBefore == null ? [7] : [AUTO.daysBefore]).map(Number).filter(function (n, i, a) { return n > 0 && n < 100 && n % 1 === 0 && a.indexOf(n) === i; }),
-  monthStart: AUTO.monthStart !== false,
-  monthStartDay: +AUTO.monthStartDay >= 1 && +AUTO.monthStartDay <= 28 ? +AUTO.monthStartDay : 1,
-  bhaktamar: AUTO.bhaktamar !== false,
-  bhaktamarNames: AUTO.bhaktamarNames !== false,
-  onlyThisMonth: AUTO.newKaryakramOnlyThisMonth !== false,
-  maxPerRun: +AUTO.maxPerRun > 0 ? +AUTO.maxPerRun : 3
-};
-var MAX_PER_RUN = CFG.maxPerRun;
-if (AUTO.time && String(AUTO.time).trim() !== CFG.time) console.log("notify.auto.time \"" + AUTO.time + "\" is not a valid HH:MM time, using " + CFG.time + ".");
-if (!APP_ID || (!KEY && !DRY)) { console.log("Notifications are not set up yet (SITE.notify.appId or the ONESIGNAL_REST_API_KEY secret is empty). Nothing sent."); process.exit(0); }
+var NC, AUTO, APP_ID, CFG, MAX_PER_RUN;
+/* The Google Sheet's "Website Settings" tab (window.SHEETS.settings) may change the notification settings:
+   an empty value keeps what data.js says (the same rule as the website). */
+function applySheetSettings() {
+  var url = W.SHEETS && W.SHEETS.settings;
+  if (!url) return Promise.resolve();
+  return sheetRows(url).then(function (rows) {
+    if (!rows) return;
+    var kv = {}; rows.forEach(function (r) { var k = clean(r.key).toLowerCase(); if (k) kv[k] = clean(r.value); });
+    W.SITE = W.SITE || {}; var n = W.SITE.notify = W.SITE.notify || {}, a = n.auto = n.auto || {};
+    function val(k) { return kv[k] != null && kv[k] !== "" ? (kv[k] === "-" ? "" : kv[k]) : null; }
+    function flag(k) { var v = val(k); return v == null ? null : isYes(v) ? true : /^(no|n|nahi|nahin|false|0|नहीं|ना)$/i.test(v) ? false : null; }
+    [["notify_new_karyakram", "newKaryakram"], ["notify_new_karyakram_only_this_month", "newKaryakramOnlyThisMonth"], ["notify_new_yojana", "newYojana"],
+     ["notify_new_sandesh", "newSandesh"], ["notify_new_bhaktamar", "newBhaktamar"], ["notify_on_the_day", "onTheDay"], ["notify_month_start", "monthStart"],
+     ["notify_bhaktamar", "bhaktamar"], ["notify_bhaktamar_names", "bhaktamarNames"]].forEach(function (x) { var f = flag(x[0]); if (f != null) a[x[1]] = f; });
+    var v;
+    if ((v = val("notify_time")) != null) a.time = v.replace(".", ":");
+    if ((v = val("notify_days_before")) != null) a.daysBefore = v.split(/[,\s]+/).filter(Boolean).map(Number);
+    if ((v = val("notify_month_start_day")) != null) a.monthStartDay = +v;
+    if ((v = val("notify_max_per_run")) != null) a.maxPerRun = +v;
+    var f = flag("bhaktamar_on_karyakram"); if (f != null) W.SITE.bhaktamarKaryakram = f;
+    console.log("Read the Website Settings tab of the Google Sheet.");
+  }).catch(function (e) { console.log("Could not read the Website Settings tab:", e && e.message); });
+}
+function setup() {
+  NC = (W.SITE && W.SITE.notify) || {}; AUTO = NC.auto || {}; APP_ID = String(NC.appId || "").trim();
+  /* settings from SITE.notify.auto (js/data.js, or the Sheet's Website Settings tab), with safe defaults */
+  CFG = {
+    time: /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(AUTO.time || "").trim()) ? String(AUTO.time).trim() : "06:30",
+    onTheDay: AUTO.onTheDay !== false && AUTO.dailyReminder !== false,
+    daysBefore: (Array.isArray(AUTO.daysBefore) ? AUTO.daysBefore : AUTO.daysBefore == null ? [7] : [AUTO.daysBefore]).map(Number).filter(function (n, i, a) { return n > 0 && n < 100 && n % 1 === 0 && a.indexOf(n) === i; }),
+    monthStart: AUTO.monthStart !== false,
+    monthStartDay: +AUTO.monthStartDay >= 1 && +AUTO.monthStartDay <= 28 ? +AUTO.monthStartDay : 1,
+    bhaktamar: AUTO.bhaktamar !== false,
+    bhaktamarNames: AUTO.bhaktamarNames !== false,
+    onlyThisMonth: AUTO.newKaryakramOnlyThisMonth !== false,
+    maxPerRun: +AUTO.maxPerRun > 0 ? +AUTO.maxPerRun : 3
+  };
+  MAX_PER_RUN = CFG.maxPerRun;
+  if (AUTO.time && String(AUTO.time).trim() !== CFG.time) console.log("notify.auto.time \"" + AUTO.time + "\" is not a valid HH:MM time, using " + CFG.time + ".");
+  if (!APP_ID || (!KEY && !DRY)) { console.log("Notifications are not set up yet (SITE.notify.appId or the ONESIGNAL_REST_API_KEY secret is empty). Nothing sent."); return false; }
+  return true;
+}
 var BH_TITLE = { hi: "मासिक भक्तामर पाठ", en: "Monthly Bhaktamar Path" };
 
 function onChange() {
@@ -395,5 +422,5 @@ function onHand() {
   return send({ page: page, image: process.env.IN_IMAGE || "", title: { hi: t, en: t }, text: { hi: m, en: m } });
 }
 
-(EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : process.env.IN_MODE === "timer" ? onSchedule().then(sheetPoll) : onHand()) : Promise.resolve())
+applySheetSettings().then(function () { if (!setup()) return; return (EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : process.env.IN_MODE === "timer" ? onSchedule().then(sheetPoll) : onHand()) : Promise.resolve()); })
   .catch(function (e) { console.log("Error:", e && e.message); process.exitCode = 1; });
