@@ -39,6 +39,7 @@
 | हमारे बारे में, कैसे पहुँचें, टाइमलाइन, आस-पास, जैन कैलेंडर | Google Sheet के टैब (Hamare Baare Mein, Kaise Pahunchein, Timeline, Aas-Paas, Jain Calendar) | 5.37 |
 | मंदिर नियम, सुविधाएँ, गैलरी के एल्बम, फ़ोटो अपलोड | Google Sheet के टैब (Mandir Niyam, Suvidhayein, Gallery) और मेनू "फ़ोटो जोड़ें" | 5.37 |
 | सोशल मीडिया लिंक, बटन / pop-up / slideshow की सेटिंग, UPI / बैंक / 80G | owner की Private Sheet (Website Settings, Daan Details) | 5.37 |
+| AI: "मंदिर से पूछें" (वेबसाइट) और "AI सहायक" (Sheet) | Private Sheet → AI सेटअप; Website Settings `ai_chat`, `ai_daily_limit` | 5.38 |
 | दान: UPI, बैंक, QR | `window.DAAN` | 5.10 |
 | शांतिधारा, द्रव्य दान, भक्तामर के नाम और राशि (Google Sheet से) | Google Sheet + `window.SHEETS` | 5.12, 5.32 |
 | Home का णमोकार मंत्र (audio) | `audio/namokarmantra.mp3` + `window.SITE` → `audio` | 5.33 |
@@ -1009,6 +1010,21 @@ Home खुलने पर मंत्र अपने आप चलता ह
 **जो Sheet से नहीं बदलता (GitHub पर `js/data.js` में, इसी README के भागों से):** वेबसाइट का नाम, लोगो, मुख्य मूर्ति की फ़ोटो, गतिविधियों के पेज (क्रिकेट क्लब आदि), Google Analytics / GoatCounter, मेनू का ढाँचा। मंदिर का समय (Home और दर्शन दोनों जगह एक ही) Sheet के **Mandir Samay** टैब से।
 
 **कुछ गड़बड़ हो तो वापस (rollback):** Sheet वाला बदलाव शुरू करने से ठीक पहले की वेबसाइट GitHub पर `backup-before-sheet-content` नाम से सुरक्षित है। पूरा वापस जाना हो तो Claude से कहो "backup-before-sheet-content पर वापस करो"। सिर्फ़ Sheet की ग़लती हो तो Sheet में File → Version history से पुराना वापस लाओ।
+
+### 5.38 AI: "मंदिर से पूछें" (वेबसाइट पर) और "AI सहायक" (Sheet में)
+
+**क्या है:**
+- **मंदिर से पूछें** (वेबसाइट पर नीचे दाएँ बटन): visitor हिंदी / English में कुछ भी पूछे (समय, कार्यक्रम, भक्तामर, दान, सुविधा, रास्ता)। AI पहले वेबसाइट की Google Sheet (और Private Sheet की सेटिंग / दान वाले सामान्य टैब) पढ़ता है, फिर **सिर्फ़ उसी से** जवाब देता है (इसे RAG कहते हैं: "पहले ढूँढो, फिर जवाब दो")। पता न हो तो "मंदिर से संपर्क करें" कहता है। UPI / बैंक नंबर ख़ुद नहीं लिखता, दान पेज का लिंक देता है। यह कुछ बदल नहीं सकता।
+- **AI सहायक** (वेबसाइट Sheet → मेनू **नेमिधाम → AI सहायक**, कंप्यूटर पर): आम भाषा में लिखो, जैसे "9 नवंबर सुबह 7 बजे मंदिर जी में लाडू कार्यक्रम जोड़ो" या कोई WhatsApp मैसेज चिपकाकर "इससे इस महीने की शांतिधारा सूची बनाओ"। AI बदलाव **तैयार** करता है (हिंदी + English दोनों), तुम हर बदलाव देखते हो, जो ठीक लगे उन पर ✓ रखकर **"लागू करें"** दबाते हो, तभी Sheet में लिखा जाता है। ग़लत टैब, पहले से मौजूद id, ग़लत तारीख़ पीले रंग में दिखते हैं और लागू नहीं होते; ग़लत column छोड़ दिया जाता है (⚠ में लिखा दिखता है)। AI सिर्फ़ जोड़ता / बदलता / छुपाता है, कुछ मिटाता नहीं; Logs, दान की जानकारी (Private Sheet), Notification भेजना और फ़ोटो जोड़ना / डिलीट करना उसका काम नहीं। हर लागू बदलाव **AI Log** टैब में (किसने, क्या कहा, क्या हुआ)।
+
+**ख़र्च और सीमा:** Google Gemini का **free tier** इस्तेमाल होता है (कोई card नहीं)। free tier की सीमा उस Google Cloud **project** की होती है जिसकी key है, तुम्हारे फ़ोन वाले Gemini ऐप की नहीं; वेबसाइट तुम्हारे निजी Gemini इस्तेमाल को नहीं खाती। पूरी तरह अलग रखना हो तो key मंदिर के अलग Gmail से बनाओ। अपनी सीमा देखो: aistudio.google.com/rate-limit। सीमा पूरी हो जाए तो उस दिन वेबसाइट पर "आज के लिए सीमा पूरी" दिखता है, बाक़ी वेबसाइट चलती रहती है। बचाव के लिए Private Sheet → Website Settings में `ai_daily_limit` (वेबसाइट के कुल सवाल रोज़, पहले से 300), हर visitor रोज़ 25 सवाल, AI सहायक रोज़ 200 बार। **ध्यान:** free tier में Google सवाल-जवाब अपने products सुधारने के लिए देख सकता है, इसलिए chat में "निजी जानकारी न लिखें" लिखा है। हर वेबसाइट सवाल-जवाब **AI Chat Log** टैब (ताले में) में दर्ज होता है, ताकि देख सको लोग क्या पूछते हैं और कहाँ जानकारी कम है।
+
+**एक बार का सेटअप (owner, कंप्यूटर पर):**
+1. **Gemini key:** aistudio.google.com खोलो (वही या मंदिर का Gmail) → **Get API key → Create API key** (कहे तो नया project, जैसे "Nemidham AI") → key copy (AIza... से शुरू; किसी को न दें)।
+2. **Private Sheet** ("Nemidham Private Settings") → Extensions → Apps Script → (नई script paste की हो तो Save) → ऊपर दाएँ **Deploy → New deployment** → ⚙️ (Select type) → **Web app** → Description: `Nemidham AI` → **Execute as: Me** → **Who has access: Anyone** → **Deploy** → Authorize (Advanced → Go to … → Allow) → **Web app URL** copy (https://script.google.com/macros/s/.../exec)।
+3. Private Sheet → मेनू **नेमिधाम (Owner) → AI सेटअप (Gemini)** → key डालो → Web app URL डालो → "AI चालू हो गया"। यह Website Settings में `ai_chat = yes`, `ai_chat_url`, `ai_daily_limit` अपने आप भरता है।
+4. 5-10 मिनट में वेबसाइट पर "मंदिर से पूछें" बटन। बंद करना हो: Website Settings में `ai_chat` = `no`।
+5. **ज़रूरी:** जब भी Private Sheet में script का नया version paste करो, **Deploy → Manage deployments → ✏️ (Edit) → Version: New version → Deploy** भी करो (लिंक वही रहता है), नहीं तो वेबसाइट का AI पुराना code चलाता रहेगा।
 
 ---
 

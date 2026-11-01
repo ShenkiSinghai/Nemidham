@@ -2105,6 +2105,90 @@
     }, appCfg().delaySec * 1000);
   }
 
+
+  /* ---------- "मंदिर से पूछें": AI chat (README part 5.38) ----------
+     A small button (bottom right) opens a chat. The question goes to the mandir's own Google Apps Script (the owner's
+     private Sheet), which answers ONLY from the website's Google Sheet with Google Gemini. Settings: Website Settings
+     ai_chat (yes / no) and ai_chat_url (filled by "AI सेटअप"). Nothing loads until the button is pressed. */
+  function aiCfg() { var a = S.ai || {}; var u = String(a.url || "").trim(); return { on: a.chat !== false && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u), url: u }; }
+  var aiState = { open: false, busy: false, hist: null };
+  function aiHist() {
+    if (!aiState.hist) { try { aiState.hist = JSON.parse(sessionStorage.getItem("nemi-ai-h") || "[]"); } catch (e) { aiState.hist = []; } }
+    return aiState.hist;
+  }
+  function aiSave() { try { sessionStorage.setItem("nemi-ai-h", JSON.stringify(aiHist().slice(-20))); } catch (e) {} }
+  function aiVid() { var v = lsGet("nemi-vid"); if (!v) { v = "v" + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); lsSet("nemi-vid", v); } return v; }
+  /* plain text answer -> safe HTML (links of this website and https links become clickable) */
+  function aiText(s) {
+    return esc(s).replace(/(https:\/\/[^\s<]+[^\s<.,;:!?)\u0964])/g, function (u) {
+      var show = u.indexOf(location.origin) === 0 || /github\.io\/Nemidham\//.test(u) ? (u.replace(/^https:\/\/[^\/]+\/(Nemidham\/)?/, "") || "Home") : u.replace(/^https:\/\//, "");
+      return '<a href="' + u + '">🔗 ' + show + "</a>";
+    }).replace(/\n/g, "<br>");
+  }
+  function aiDraw() {
+    var box = document.getElementById("ai-log"); if (!box) return;
+    var h = aiHist();
+    box.innerHTML = '<div class="ai-msg a">' + esc(t("ai.hello")) + "</div>" + h.map(function (m) {
+      return '<div class="ai-msg ' + (m.r === "u" ? "u" : "a") + '">' + (m.r === "u" ? esc(m.t) : aiText(m.t)) + "</div>";
+    }).join("") + (aiState.busy ? '<div class="ai-msg a ai-typing" aria-live="polite">' + esc(t("ai.typing")) + "</div>" : "");
+    var sug = document.getElementById("ai-sug"); if (sug) sug.hidden = h.length > 0;
+    box.scrollTop = box.scrollHeight;
+    $$('a[href^="https://"]', box).forEach(function (a) { if (a.href.indexOf(location.origin) !== 0) { a.target = "_blank"; a.rel = "noopener"; } });
+  }
+  function aiAsk(q) {
+    q = String(q || "").trim(); var c = aiCfg();
+    if (!q || aiState.busy || !c.on) return;
+    var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiDraw(); aiSave();
+    var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 45000) : 0;
+    var body = JSON.stringify({ q: q.slice(0, 500), lang: lang, vid: aiVid(), history: h.slice(-7, -1) });
+    fetch(c.url, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var msg = j && j.ok ? j.answer : t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : "ai.err");
+        h.push({ r: "a", t: msg });
+      })
+      .catch(function () { h.push({ r: "a", t: t("ai.err") }); })
+      .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
+  }
+  function aiOpen(on) {
+    var p = document.getElementById("ai-panel"), b = document.getElementById("ai-btn"); if (!p || !b) return;
+    aiState.open = on; p.hidden = !on; b.setAttribute("aria-expanded", on ? "true" : "false");
+    document.documentElement.classList.toggle("ai-open", on);
+    if (on) { aiDraw(); var i = document.getElementById("ai-q"); if (i) setTimeout(function () { i.focus(); }, 30); } else b.focus();
+  }
+  function aiBoot() {
+    var c = aiCfg(), b = document.getElementById("ai-btn"), p = document.getElementById("ai-panel");
+    if (!c.on) { if (b) b.remove(); if (p) p.remove(); return; }
+    if (!b) {
+      b = document.createElement("button"); b.type = "button"; b.id = "ai-btn"; b.className = "ai-btn"; b.setAttribute("aria-controls", "ai-panel"); b.setAttribute("aria-expanded", "false");
+      b.addEventListener("click", function () { aiOpen(!aiState.open); });
+      document.body.appendChild(b);
+      p = document.createElement("div"); p.id = "ai-panel"; p.className = "ai-panel"; p.hidden = true; p.setAttribute("role", "dialog");
+      document.body.appendChild(p);
+      p.addEventListener("click", function (e) {
+        var x = e.target.closest && e.target.closest("[data-ai]"); if (!x) return;
+        var a = x.getAttribute("data-ai");
+        if (a === "close") aiOpen(false);
+        else if (a === "clear") { aiState.hist = []; aiSave(); aiDraw(); }
+        else if (a === "sug") aiAsk(x.textContent);
+      });
+      p.addEventListener("submit", function (e) { e.preventDefault(); var i = document.getElementById("ai-q"); var v = i.value; i.value = ""; aiAsk(v); });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && aiState.open) aiOpen(false); });
+    }
+    /* words follow the language (drawn again on every render) */
+    b.innerHTML = '<span aria-hidden="true">🙏</span> <b>' + esc(t("ai.btn")) + "</b>";
+    b.setAttribute("aria-label", t("ai.btn"));
+    p.setAttribute("aria-label", t("ai.title"));
+    var oldQ = document.getElementById("ai-q"), typed = oldQ ? oldQ.value : "", hadFocus = oldQ && document.activeElement === oldQ;   /* a re-render (Sheet data arriving) keeps what was being typed */
+    p.innerHTML = '<div class="ai-head"><b>' + esc(t("ai.title")) + '</b><span><button type="button" class="ai-x" data-ai="clear" title="' + esc(t("ai.clear")) + '" aria-label="' + esc(t("ai.clear")) + '">⟲</button><button type="button" class="ai-x" data-ai="close" aria-label="' + esc(t("ai.close")) + '">✕</button></span></div>' +
+      '<div class="ai-log" id="ai-log" aria-live="polite"></div>' +
+      '<div class="ai-sug" id="ai-sug">' + ["ai.s1", "ai.s2", "ai.s3", "ai.s4"].map(function (k) { return '<button type="button" data-ai="sug">' + esc(t(k)) + "</button>"; }).join("") + "</div>" +
+      '<form class="ai-form" autocomplete="off"><input id="ai-q" maxlength="500" placeholder="' + esc(t("ai.ph")) + '" aria-label="' + esc(t("ai.ph")) + '"><button type="submit" aria-label="' + esc(t("ai.send")) + '">➤</button></form>' +
+      '<p class="ai-note">' + esc(t("ai.note")) + "</p>";
+    var newQ = document.getElementById("ai-q"); if (newQ) { newQ.value = typed; if (hadFocus) newQ.focus(); }
+    if (aiState.open) aiDraw();
+  }
+
   /* ---------- notifications (OneSignal web push) ----------
      People can turn on notifications for new karyakram, yojana and sandesh. Sending is done from OneSignal's
      website or automatically by GitHub (see README). Nothing loads until SITE.notify.appId is filled in.
@@ -2261,7 +2345,7 @@
   /* website settings that the Sheet's "Website Settings" tab may change (a copy of data.js is kept to start from each time) */
   var CS_SET_KEYS = ["social", "phone", "whatsapp", "email", "addressLines", "mapLink", "mapEmbed", "heroLine", "heroInvocation", "tagline", "heroPetals", "heroButtons",
     "hideMenu", "hideHome", "hideVisitTabs", "dharmshalaSoon", "appIntro", "appInstall", "notify", "slideshow", "audio", "albumOrder", "karyakramPastDays",
-    "bhaktamarKaryakram", "bhaktamarTime", "youtubeChannelId"];
+    "bhaktamarKaryakram", "bhaktamarTime", "youtubeChannelId", "ai"];
   var CS_BASE = null, csRows = {}, hashMissed = false;
   function csClone(v) { try { return JSON.parse(JSON.stringify(v)); } catch (e) { return v; } }
   function csBase() {
@@ -2541,6 +2625,10 @@
     if ((f = csFlag(kv, "bhaktamar_on_karyakram")) != null) S.bhaktamarKaryakram = f;
     if ((t2 = csTxKV(kv, "bhaktamar_time", S.bhaktamarTime))) S.bhaktamarTime = t2;
     v = csVal(kv, "youtube_channel_id"); if (v != null) S.youtubeChannelId = v;
+    var ai = csClone(S.ai) || {};
+    if ((f = csFlag(kv, "ai_chat")) != null) ai.chat = f;
+    v = csVal(kv, "ai_chat_url"); if (v != null) ai.url = v;
+    S.ai = ai;
   }
   /* "Daan Details" tab -> window.DAAN and window.TRUST */
   var CS_BANK = [["account_name", "खाते का नाम", "Account name", false], ["bank_name", "बैंक", "Bank", false], ["account_number", "खाता संख्या", "Account number", true],
@@ -2751,6 +2839,7 @@
     scheduleOffer();
     refreshNotify();
     scheduleNotifyAsk();
+    aiBoot();
     watchAnimations();
   }
   csFromCache();
