@@ -658,21 +658,9 @@ window.EVENTS = [
 // Please copy these dates from a calendar / panchang you trust.
 // hidden: true hides an item without deleting it.
 window.CALENDAR = [
-  {
-    id: "sample-parv", date: "2026-11-08", type: "parv",
-    title: { hi: "SAMPLE: पर्व का नाम", en: "SAMPLE: Name of the parv" },
-    note: { hi: "SAMPLE: तिथि और मंदिर में क्या होगा, यहाँ लिखें।", en: "SAMPLE: Write the tithi and what happens at the mandir." }
-  },
-  {
-    id: "sample-kalyanak", date: "2026-11-20", type: "kalyanak",
-    title: { hi: "SAMPLE: कल्याणक का नाम", en: "SAMPLE: Name of the kalyanak" },
-    note: { hi: "", en: "" }
-  },
-  {
-    id: "sample-tithi", date: "2026-10-01", type: "tithi",
-    title: { hi: "SAMPLE: बीती हुई तिथि", en: "SAMPLE: A past tithi" },
-    note: { hi: "", en: "" }
-  }
+  // NOTE: these now come from the Google Sheet tab "Jain Calendar" (README part 5.37). Edit them there.
+  // You can still add one here too; a Sheet row with the same id replaces it.
+  // { id: "mahavir-jayanti-2027", date: "2027-04-19", type: "kalyanak", title: { hi: "", en: "" }, note: { hi: "", en: "" } },
 ];
 
 /* ---------- 7. Gallery ---------- */
@@ -768,97 +756,18 @@ window.TEAM = [
 // Each section has an id (no spaces), a title, and paragraphs.
 // Add  list: [ {hi:"",en:""}, ... ]  to show bullet points after the paragraphs.
 window.ABOUT = [
-  {
-    id: "mandir",
-    title: { hi: "मंदिर के बारे में", en: "About the mandir" },
-    paragraphs: [
-      {
-        hi: "श्री 1008 नेमिनाथ दिगंबर जैन मंदिर, नेमिधाम भगवान नेमिनाथ को समर्पित जैन मंदिर है।",
-        en: "Shri 1008 Neminath Digambar Jain Mandir, Nemidham is a Jain mandir dedicated to Bhagwan Neminath."
-      },
-      {
-        hi: "पुणे की पावन धरा पर बसे जैन परिवारों के मन में एक ही संकल्प था— अपना जमीन से घर हो जहां अपने निवास के समीप एक जिनालय हो, जहाँ भक्ति की धारा अविरल बहती रहे। इसी पवित्र विचार ने जैन श्रावक संघ के अंतर्गत एक स्वरूप लिया। मंदिर निर्माण का यह स्वप्न मात्र एक विचार से शुरू होकर, श्रद्धा और समर्पण की एक अद्भुत यात्रा बन गया।",
-        en: "The Jain families living on the holy land of Pune shared one wish: a Jinalaya close to their homes, where the stream of devotion keeps flowing. This pure thought took shape under the Jain Shravak Sangh. The dream of building the mandir began as a single idea and became a wonderful journey of faith and dedication."
-      },
-      {
-        hi: "इस भव्य मंदिर की नींव और निर्माण की यात्रा 1 जुलाई 2024 को प्रारंभ हुई थी। श्रावकों के अटूट सहयोग और गुरुओं के मार्गदर्शन से, लगभग दो वर्षों के प्रयास के बाद 13 अप्रैल 2026 को भूमि पूजन हुआ और 9 मई 2026 को वेदी प्रतिष्ठा संपन्न हुई।",
-        en: "The journey of laying the foundation and building this grand mandir began on 1 July 2024. With the unfailing support of the shravaks and the guidance of the gurus, after about two years of effort, the Bhumi Pujan was held on 13 April 2026 and the Vedi Pratishtha was completed on 9 May 2026."
-      },
-      {
-        hi: "मूलनायक भगवान की घोषणा मुनि श्री वीर सागर जी, और वेदी प्रतिष्ठा मुनि श्री अजित सागर जी महाराज के मंगल सानिध्य में संपन्न हुई।",
-        en: "The Mulnayak Bhagwan was announced by Muni Shri Veer Sagar Ji, and the Vedi Pratishtha was completed in the auspicious presence of Muni Shri Ajit Sagar Ji Maharaj."
-      },
-      {
-        hi: "मंदिर बना हुआ है और अभी धार्मिक कार्य के लिए 3 साल के लिए दान की गई भूमि पर है। मंदिर की अपनी भूमि के लिए भूमि दान लिया जा रहा है और विकास जारी है।",
-        en: "The mandir is built and, for now, stands on land given for religious use for 3 years. Bhumi daan is being accepted for the mandir's own land, and development is going on."
-      }
-    ],
-    list: [
-      { hi: "मंगल सान्निध्य: मुनि श्री 108 अजित सागर जी, मुनि श्री 108 नीराग सागर जी, और ऐलक श्री 105 विवेकानंद सागर जी महाराज", en: "Mangal Sannidhya: Muni Shri 108 Ajit Sagar Ji, Muni Shri 108 Neerag Sagar Ji and Aelak Shri 105 Vivekanand Sagar Ji Maharaj" },
-      { hi: "प्रतिष्ठाचार्य: भाई प्रदीप भैया 'सुयश'", en: "Pratishthacharya: Bhai Pradeep Bhaiya 'Suyash'" },
-      { hi: "सूर्यमंत्र प्रदाता: निर्यापक मुनिपुंगव श्री 108 सुधासागर जी महाराज", en: "Surya Mantra Pradata: Niryapak Munipungav Shri 108 Sudhasagar Ji Maharaj" },
-      { hi: "मंगल आशीर्वाद: निर्यापक मुनि श्री 108 वीर सागर जी महाराज", en: "Mangal Ashirvad: Niryapak Muni Shri 108 Veer Sagar Ji Maharaj" }
-    ]
-  },
-  {
-    id: "bhagwan",
-    title: { hi: "भगवान नेमिनाथ", en: "Bhagwan Neminath" },
-    paragraphs: [
-      {
-        hi: "भगवान नेमिनाथ जैन परंपरा में वर्तमान काल के 22वें तीर्थंकर माने जाते हैं। उनका चिह्न शंख है।",
-        en: "Bhagwan Neminath is the 22nd Tirthankar of the present age in Jain tradition. His emblem is the conch (shankh)."
-      },
-      {
-        hi: "उनकी करुणा के लिए उन्हें याद किया जाता है। परंपरा के अनुसार, विवाह के भोज के लिए इकट्ठे पशुओं को देखकर उन्होंने संसार त्याग दिया और दीक्षा ली। जैन परंपरा मानती है कि उन्होंने गिरनार में मोक्ष प्राप्त किया।",
-        en: "He is remembered for his deep compassion. According to tradition, when he saw the animals gathered for his wedding feast, he turned away from worldly life and took diksha. Jain tradition holds that he attained moksha at Girnar."
-      }
-    ]
-  },
-  {
-    id: "vision",
-    title: { hi: "हमारी दृष्टि (Vision)", en: "Our vision" },
-    paragraphs: [
-      {
-        hi: "जैन श्रावक संघ द्वारा संचालित यह मंदिर आगामी पीढ़ियों के लिए संस्कार, संस्कृति और धर्म का केंद्र बनेगा। हमारा उद्देश्य यहाँ आने वाले हर श्रद्धालु को शांति, ध्यान और भगवान के दर्शन से आत्मिक संतोष प्रदान करना है।",
-        en: "Run by the Jain Shravak Sangh, this mandir will become a centre of values, culture and dharma for the coming generations. Our aim is to give every devotee who comes here peace, meditation and spiritual contentment through the darshan of Bhagwan."
-      }
-    ]
-  }
+  // NOTE: the About page sections now come from the Google Sheet tab "Hamare Baare Mein" (README part 5.37). Edit them there.
+  // You can still add one here too; a Sheet row with the same id replaces it.
+  // { id: "mandir", title: { hi: "", en: "" }, paragraphs: [ { hi: "", en: "" } ], list: [ { hi: "", en: "" } ] },
 ];
 
 /* ---------- 10. How to reach ---------- */
 // Add or remove blocks. "title" and "text" can be edited freely.
 // hidden: true  hides a block without deleting it (the Parking block below is hidden for now).
 window.HOWTO = [
-  {
-    id: "road",
-    title: { hi: "सड़क से", en: "By road" },
-    text: {
-      hi: "खराडी, पुणे से नगर रोड पर वाघोली की ओर आएं और बकोरी रोड पर मंदिर पहुँचें। खराडी से दूरी लगभग 10 किमी है।",
-      en: "From Kharadi, Pune, take Nagar Road towards Wagholi, then Bakori Road to reach the mandir. It is about 10 km from Kharadi."
-    }
-  },
-  {
-    id: "rail",
-    title: { hi: "रेल से", en: "By rail" },
-    text: {
-      hi: "सबसे नज़दीकी स्टेशन पुणे रेलवे स्टेशन है, जो लगभग 18 किमी दूर है। हडपसर रेलवे स्टेशन लगभग 14 किमी दूर है।",
-      en: "The nearest station is Pune Railway Station, about 18 km away. Hadapsar Railway Station is about 14 km away."
-    }
-  },
-  {
-    id: "air",
-    title: { hi: "हवाई जहाज़ से", en: "By air" },
-    text: {
-      hi: "सबसे नज़दीकी हवाई अड्डा पुणे अंतरराष्ट्रीय हवाई अड्डा, विमान नगर है, जो लगभग 14 किमी दूर है।",
-      en: "The nearest airport is Pune International Airport, Viman Nagar, about 14 km away."
-    }
-  },
-  {
-    id: "parking", hidden: true,
-    title: { hi: "पार्किंग और सुविधाएं", en: "Parking and facilities" },
-    text: { hi: "SAMPLE: पार्किंग, पीने का पानी आदि की जानकारी लिखें।", en: "SAMPLE: Write about parking, drinking water and other facilities." }
-  }
+  // NOTE: these cards now come from the Google Sheet tab "Kaise Pahunchein" (README part 5.37). Edit them there.
+  // You can still add one here too; a Sheet row with the same id replaces it.
+  // { id: "road", title: { hi: "", en: "" }, text: { hi: "", en: "" } },
 ];
 
 /* ---------- 9क. Dainik karyakram (roz ka karyakram) — "Dainik Karyakram" page ----------
@@ -896,12 +805,9 @@ window.DAILY = [
            Photo HATANE ke liye:  photo: "" ya photos: [] kar do (ya wo line delete kar do).
    NOTE: entries mandir ke asli safar ki hain; nayi ghatna upar bataye tareeke se jodo. */
 window.TIMELINE = [
-  { id: "neev-2024", year: "2024", when: { hi: "1 जुलाई", en: "1 July" }, title: { hi: "नींव और निर्माण की शुरुआत", en: "Foundation and construction begin" }, text: { hi: "मंदिर निर्माण की यात्रा शुरू हुई।", en: "The journey of building the mandir began." }, photo: "" },
-  { id: "bhumi-pujan-2026", year: "2026", when: { hi: "13 अप्रैल", en: "13 April" }, title: { hi: "भूमि पूजन", en: "Bhumi Pujan" }, text: { hi: "श्रावकों के साथ भूमि पूजन संपन्न हुआ।", en: "Bhumi Pujan was held with the shravaks." }, photo: "images/timeline/bhumi-pujan.webp" },
-  { id: "vedi-pratishtha-2026", year: "2026", when: { hi: "9 मई", en: "9 May" }, title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" }, text: { hi: "भव्य वेदी प्रतिष्ठा संपन्न हुई।", en: "The grand Vedi Pratishtha was completed." }, photo: "images/timeline/vedi-pratishtha.webp" },
-  { id: "moksh-kalyanak-2026", year: "2026", when: { hi: "20 जुलाई", en: "20 July" }, title: { hi: "भगवान नेमिनाथ का मोक्ष कल्याणक", en: "Moksha Kalyanak of Bhagwan Neminath" }, text: { hi: "मंदिर जी में पहली बार निर्वाण लड्डू चढ़ाया गया।", en: "The Nirvan Laddu was offered in the mandir for the first time." }, photo: "images/timeline/moksh-kalyanak-ladoo.webp" },
-  { id: "dashlakshan-2026", year: "2026", when: { hi: "16 सितंबर", en: "16 September" }, title: { hi: "पहला दसलक्षण पर्व", en: "First Dashlakshan Parv" }, text: { hi: "मंदिर जी में पहली बार दसलक्षण पर्व मनाया गया।", en: "Dashlakshan Parv was celebrated in the mandir for the first time." }, photo: "images/timeline/dashlakshan.webp" },
-  { id: "kshamavani-2026", year: "2026", when: { hi: "26 सितंबर", en: "26 September" }, title: { hi: "पहली क्षमावाणी", en: "First Kshamavani" }, text: { hi: "मंदिर जी में पहली बार क्षमावाणी मनाई गई।", en: "Kshamavani was celebrated in the mandir for the first time." }, photo: "images/timeline/kshamavani.webp" }
+  // NOTE: these entries now come from the Google Sheet tab "Timeline" (README part 5.37). Edit them there.
+  // You can still add one here too; a Sheet row with the same id replaces it.
+  // { id: "bhumi-pujan-2026", year: "2026", when: { hi: "", en: "" }, title: { hi: "", en: "" }, text: { hi: "", en: "" }, photo: "images/timeline/x.webp" },
 ];
 
 /* ---------- 9ख-2. Nearby (Visit > Nearby page): mandirs, tirths, tourist places ... ----------
@@ -919,40 +825,9 @@ window.TIMELINE = [
    Har group mein 3 khali card (hidden: true) taiyaar hain: "hidden: true," mita do to dikhne lagenge.
    NOTE: sab entries SAMPLE hain. Asli naam, pata, number likho. */
 window.NEARBY = [
-  {
-    id: "mandirs", icon: "🛕", title: { hi: "आस-पास के मंदिर", en: "Nearby Mandirs" }, intro: { hi: "", en: "" },
-    items: [
-      { name: { hi: "SAMPLE: पास का जैन मंदिर", en: "SAMPLE: Nearby Jain Mandir" }, distance: { hi: "SAMPLE: 3 किमी", en: "SAMPLE: 3 km" }, address: { hi: "SAMPLE: यहाँ मंदिर का पता लिखें", en: "SAMPLE: Write the mandir address here" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { name: { hi: "SAMPLE: दूसरा जैन मंदिर", en: "SAMPLE: Another Jain Mandir" }, distance: { hi: "SAMPLE: 8 किमी", en: "SAMPLE: 8 km" }, address: { hi: "SAMPLE: यहाँ मंदिर का पता लिखें", en: "SAMPLE: Write the mandir address here" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नया मंदिर", en: "New mandir" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नया मंदिर", en: "New mandir" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नया मंदिर", en: "New mandir" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
-    ]
-  },
-  {
-    id: "tirths", icon: "🙏", title: { hi: "आस-पास के तीर्थ क्षेत्र", en: "Nearby Tirth Kshetras" }, intro: { hi: "", en: "" },
-    items: [
-      { name: { hi: "SAMPLE: पास का तीर्थ क्षेत्र", en: "SAMPLE: Nearby Tirth Kshetra" }, distance: { hi: "SAMPLE: 40 किमी", en: "SAMPLE: 40 km" }, address: { hi: "SAMPLE: यहाँ तीर्थ का पता लिखें", en: "SAMPLE: Write the tirth address here" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नया तीर्थ क्षेत्र", en: "New tirth kshetra" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नया तीर्थ क्षेत्र", en: "New tirth kshetra" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नया तीर्थ क्षेत्र", en: "New tirth kshetra" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
-    ]
-  },
-  {
-    id: "tourist", icon: "🏞️", title: { hi: "घूमने की जगहें", en: "Tourist Places" }, intro: { hi: "", en: "" },
-    items: [
-      { name: { hi: "SAMPLE: घूमने की जगह", en: "SAMPLE: Tourist place" }, distance: { hi: "SAMPLE: 15 किमी", en: "SAMPLE: 15 km" }, address: { hi: "SAMPLE: यहाँ पता लिखें", en: "SAMPLE: Write the address here" }, text: { hi: "SAMPLE: जगह के बारे में एक-दो लाइन।", en: "SAMPLE: One or two lines about the place." }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true },
-      { hidden: true, name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
-    ]
-  },
-  {
-    hidden: true, id: "extra", icon: "⭐", title: { hi: "और जगहें", en: "More places" }, intro: { hi: "", en: "" },   // spare group: "hidden: true," mita do to ye button dikhega
-    items: [
-      { name: { hi: "नई जगह", en: "New place" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [], hidePhoto: true }
-    ]
-  }
+  // NOTE: these groups and cards now come from the Google Sheet tab "Aas-Paas" (README part 5.37). Edit them there.
+  // You can still add one here too; a Sheet row with the same id replaces it.
+  // { id: "mandirs", icon: "🛕", title: { hi: "", en: "" }, intro: { hi: "", en: "" }, items: [ { name: { hi: "", en: "" }, distance: { hi: "", en: "" }, address: { hi: "", en: "" }, text: { hi: "", en: "" }, phone: "", mapLink: "", photos: [] } ] },
 ];
 
 /* ---------- 9ग. Mandir niyam (Visit page > Mandir niyam / Mandir rules) ----------
@@ -1101,11 +976,11 @@ window.SHEETS = {
   banner: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=296682865&single=true&output=csv",        // tab "Top Banner"
   team: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=947760466&single=true&output=csv",          // tab "Team"
   niyamitDaan: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=709940025&single=true&output=csv",   // tab "Niyamit Daan" (the regular daan / seva cards on the Daan page)
-  about: "",        // tab "Hamare Baare Mein" (About page sections)
-  howto: "",        // tab "Kaise Pahunchein" (Visit page > How to reach cards)
-  timeline: "",     // tab "Timeline"
-  nearby: "",       // tab "Aas-Paas" (Nearby page: mandirs, tirths, places)
-  calendar: ""      // tab "Jain Calendar"
+  about: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=18569743&single=true&output=csv",        // tab "Hamare Baare Mein" (About page sections)
+  howto: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=191292584&single=true&output=csv",        // tab "Kaise Pahunchein" (Visit page > How to reach cards)
+  timeline: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1180701047&single=true&output=csv",     // tab "Timeline"
+  nearby: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1201238355&single=true&output=csv",       // tab "Aas-Paas" (Nearby page: mandirs, tirths, places)
+  calendar: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1932071733&single=true&output=csv"      // tab "Jain Calendar"
 };
 
 /* Shantidhara punyarjak list. Shown on the Daan page as a calendar-style table, month by month,

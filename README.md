@@ -44,11 +44,11 @@
 | सूचनाएँ (notifications): बटन, सवाल, अपने आप भेजना | `window.SITE` → `notify`, OneSignal, GitHub Actions | 5.35 |
 | गैलरी की फ़ोटो और वीडियो | `window.GALLERY` | 5.13 |
 | टीम के नाम और फ़ोटो | `window.TEAM` | 5.9 |
-| टाइमलाइन की घटनाएँ और फ़ोटो | `window.TIMELINE` | 5.24 |
-| आस-पास के मंदिर, तीर्थ, घूमने की जगहें | `window.NEARBY` | 5.29 |
+| टाइमलाइन की घटनाएँ और फ़ोटो | Google Sheet का टैब Timeline (या `window.TIMELINE`) | 5.37, 5.24 |
+| आस-पास के मंदिर, तीर्थ, घूमने की जगहें | Google Sheet का टैब Aas-Paas (या `window.NEARBY`) | 5.37, 5.29 |
 | मंदिर नियम, सुविधाएँ, कैसे पहुँचें | `MANDIR_NIYAM`, `SUVIDHA`, `HOWTO` | 5.25, 5.21, 5.15 |
 | गतिविधियाँ (क्रिकेट क्लब आदि) | `window.ACTIVITIES` | 5.20 |
-| दैनिक कार्यक्रम, जैन कैलेंडर | `window.DAILY`, `window.CALENDAR` | 5.23, 5.16 |
+| दैनिक कार्यक्रम, जैन कैलेंडर | Google Sheet के टैब Dainik Karyakram, Jain Calendar (या `window.DAILY`, `window.CALENDAR`) | 5.37, 5.23, 5.16 |
 | Home की लाइन, बटन, भगवान की फ़ोटो | `window.SITE` | 5.22 |
 | Home के हिस्से, मेन्यू या टैब छुपाना | `window.SITE` → `hideHome`, `hideMenu`, `hideVisitTabs` | 5.26 |
 | मंदिर का नाम, लोगो, "वेबसाइट संयोजक" | `window.SITE`, `images/mandir-logo.webp` | 5.17 |
@@ -171,7 +171,7 @@
 | **गतिविधियाँ** (मेन्यू में: क्रिकेट क्लब, ट्रेकिंग, यात्रा संघ, किड्स क्लब; पेज `cricket-club.html`, `trekking.html`, `tirth-yatra.html` (नाम "यात्रा संघ"), `kids-club.html`) | हर गतिविधि का अपना पेज: पोस्टर, जानकारी, संपर्क, फ़ॉर्म | `window.ACTIVITIES` | 5.20 |
 | **सूचनाएँ** (`announcements.html`) | सारी सूचनाएँ, नई से पुरानी | `window.ANNOUNCEMENTS` | 5.1 |
 | **कार्यक्रम** (`karyakram.html`) | आने वाले और पुराने कार्यक्रम (टैब में) | `window.EVENTS` | 5.2 |
-| **जैन कैलेंडर** (`calendar.html`) | पर्व, कल्याणक, तिथियाँ | `window.CALENDAR` | 5.16 |
+| **जैन कैलेंडर** (`calendar.html`) | पर्व, कल्याणक, तिथियाँ | Sheet टैब Jain Calendar (या `window.CALENDAR`) | 5.37, 5.16 |
 | **गैलरी** (`gallery.html`) | फ़ोटो एलबम और वीडियो एलबम | `window.GALLERY` (फ़ोटो `images/gallery/` में) | 5.13 |
 | **दान** (`daan.html`) | शुरुआती लाइन, UPI, QR, बैंक, "मंदिर कार्यालय" कार्ड, नोट का डिब्बा (⚠️ सावधानी और स्क्रीनशॉट वाली लाइन) | `window.DAAN` | 5.10 |
 | | "नियमित दान और सेवा" के कार्ड | `window.RECURRING` | 5.11 |
@@ -181,12 +181,12 @@
 | | Home पर नीचे का सुविधा कार्ड (जैसे भोजनशाला) | `window.SUVIDHA` में `pinned: true,` | 5.21 |
 | **टीम** (`team.html`) | ट्रस्टी, कार्यकारिणी, पुजारी, नाम, पद, फ़ोन, फ़ोटो | `window.TEAM` (फ़ोटो `images/team/` में) | 5.9 |
 | **दैनिक कार्यक्रम** (`daily.html`, मेन्यू: कार्यक्रम → दैनिक कार्यक्रम) | रोज़ का क्रम (पट खुलना, अभिषेक, शांतिधारा, पूजा, आरती, पट बंद) और किसी भी तारीख़ (बीती या आने वाली) की तिथि वाला कैलेंडर | `window.DAILY` (समय `window.SITE` → `timings` से) | 5.23 |
-| **हमारे बारे में** (`about.html`) | मंदिर, भगवान नेमिनाथ | `window.ABOUT` | 5.15 |
-| **टाइमलाइन** (`timeline.html`, मेन्यू: हमारे बारे में → टाइमलाइन) | मंदिर के सफ़र की घटनाएँ, साल के हिसाब से, फ़ोटो के साथ | `window.TIMELINE` | 5.24 |
+| **हमारे बारे में** (`about.html`) | मंदिर, भगवान नेमिनाथ | Sheet टैब Hamare Baare Mein (या `window.ABOUT`) | 5.37, 5.15 |
+| **टाइमलाइन** (`timeline.html`, मेन्यू: हमारे बारे में → टाइमलाइन) | मंदिर के सफ़र की घटनाएँ, साल के हिसाब से, फ़ोटो के साथ | Sheet टैब Timeline (या `window.TIMELINE`) | 5.37, 5.24 |
 | **दर्शन** (`visit.html`, 4 टैब: दर्शन का समय / कैसे पहुँचें / सुविधाएँ / मंदिर नियम) | समय, संपर्क | `window.SITE` → `timings`, `phone`, `whatsapp`, `email` | 5.5, 5.6 |
-| | कैसे पहुँचें: पता, नक्शा, सड़क / रेल / हवाई / पार्किंग का रास्ता | `window.SITE` → `addressLines`, `mapEmbed`, `mapLink`; `window.HOWTO` | 5.6, 5.15 |
+| | कैसे पहुँचें: पता, नक्शा, सड़क / रेल / हवाई / पार्किंग का रास्ता | `window.SITE` → `addressLines`, `mapEmbed`, `mapLink`; रास्ते के कार्ड: Sheet टैब Kaise Pahunchein (या `window.HOWTO`) | 5.6, 5.37, 5.15 |
 | | मंदिर नियम | `window.MANDIR_NIYAM` | 5.25 |
-| **आस-पास** (`nearby.html`, मेन्यू: दर्शन → आस-पास) | बटन वाला पेज: मंदिर, तीर्थ, घूमने की जगहें (नए बटन भी बना सकते हो): नाम, दूरी, पता, फ़ोन, फ़ोटो, नक्शे का लिंक | `window.NEARBY` (फ़ोटो `images/nearby/` में) | 5.29 |
+| **आस-पास** (`nearby.html`, मेन्यू: दर्शन → आस-पास) | बटन वाला पेज: मंदिर, तीर्थ, घूमने की जगहें (नए बटन भी बना सकते हो): नाम, दूरी, पता, फ़ोन, फ़ोटो, नक्शे का लिंक | Sheet टैब Aas-Paas (या `window.NEARBY`; फ़ोटो `images/nearby/` में) | 5.37, 5.29 |
 | हर पेज का शीर्षक और उसके नीचे की लाइन | | `i18n.js` → `p.<पेज>.h1` / `.lead` | 5.19 |
 
 ### बाक़ी फ़ाइलें और पेज
@@ -472,6 +472,8 @@ slideshow: { enabled: true, source: "diwali-2026", shuffle: false, count: "all",
 
 ### 5.15 "हमारे बारे में" और "कैसे पहुँचें"
 
+> **अब यह Google Sheet के टैब "Hamare Baare Mein" और "Kaise Pahunchein" से बदलता है (भाग 5.37, कॉलम Sheet के Instructions टैब में)।** नीचे का `js/data.js` वाला तरीका भी चलता है: data.js में जोड़ा हुआ भी दिखता है, और Sheet में उसी `id` की row हो तो Sheet वाली दिखती है। एक चीज़ एक ही जगह रखो।
+
 **हमारे बारे में** (`window.ABOUT`): इसमें कई हिस्से (section) होते हैं, हर हिस्सा अपनी `id` और `title` से पहचाना जाता है।
 
 1. `window.ABOUT` ढूँढो और हिस्से को उसके `title` से पहचानो।
@@ -485,6 +487,8 @@ slideshow: { enabled: true, source: "diwali-2026", shuffle: false, count: "all",
 **कैसे पहुँचें** (`window.HOWTO`): यह "दर्शन" पेज के "कैसे पहुँचें" टैब में दिखता है। सबसे ऊपर अकेला **पता** का कार्ड (पता `window.SITE` → `addressLines` से), उसके नीचे नक्शा, फिर "कैसे पहुँचें - साधन" के नीचे सड़क / रेल / हवाई मार्ग / पार्किंग के डिब्बे, हर एक `{ title, text }`. `hi`/`en` बदलो। जो डिब्बा `hidden: true,` से छुपा हो, उसे दिखाना हो तो वह लाइन मिटा दो। फ़ोन और नक्शे का लिंक `window.SITE` में हैं (भाग 5.6).
 
 ### 5.16 जैन कैलेंडर (पर्व, कल्याणक, तिथि)
+
+> **अब यह Google Sheet के टैब "Jain Calendar" से बदलता है (भाग 5.37, कॉलम Sheet के Instructions टैब में)।** नीचे का `js/data.js` वाला तरीका भी चलता है: data.js में जोड़ा हुआ भी दिखता है, और Sheet में उसी `id` की row हो तो Sheet वाली दिखती है। एक चीज़ एक ही जगह रखो।
 
 `window.CALENDAR` में हर तारीख़ एक डिब्बा है:
 
@@ -661,6 +665,10 @@ slideshow: { enabled: true, source: "diwali-2026", shuffle: false, count: "all",
 
 ### 5.24 टाइमलाइन (मंदिर का सफ़र): जोड़ना, हटाना, छुपाना, फ़ोटो
 
+> **अब यह Google Sheet के टैब "Timeline" से बदलता है (भाग 5.37, कॉलम Sheet के Instructions टैब में)।** नीचे का `js/data.js` वाला तरीका भी चलता है: data.js में जोड़ा हुआ भी दिखता है, और Sheet में उसी `id` की row हो तो Sheet वाली दिखती है। एक चीज़ एक ही जगह रखो।
+
+> Sheet में फ़ोटो: पहले फ़ोटो GitHub के `images/timeline/` में डालो (नीचे के स्टेप 1-2), फिर Sheet की `photos` cell में उसका पता लिखो (जैसे `images/timeline/bhumi-pujan.webp`, कई फ़ोटो कॉमा से)। छुपानी हो तो `hide_photo` = yes।
+
 पेज: मेन्यू → हमारे बारे में → टाइमलाइन। `js/data.js` में `window.TIMELINE` ढूँढो।
 
 **हर घटना (entry) एक अलग डिब्बा है और डिब्बे बारी-बारी से बाएँ और दाएँ दिखते हैं।** एक ही साल की दो घटनाएँ भी अलग-अलग तरफ़ आती हैं।
@@ -703,6 +711,10 @@ window.MANDIR_NIYAM = {
 नियम जोड़ना, बदलना, हटाना भाग 2.3 जैसा। टैब का नाम बदलना हो तो `i18n.js` में `v.tab_dress` (हिंदी: "मंदिर नियम", English: "Mandir rules").
 
 ### 5.29 आस-पास (मंदिर, तीर्थ, घूमने की जगहें): बटन वाला पेज
+
+> **अब यह Google Sheet के टैब "Aas-Paas" से बदलता है (भाग 5.37, कॉलम Sheet के Instructions टैब में)।** नीचे का `js/data.js` वाला तरीका भी चलता है: data.js में जोड़ा हुआ भी दिखता है, और Sheet में उसी `id` की row हो तो Sheet वाली दिखती है। एक चीज़ एक ही जगह रखो।
+
+> Sheet में: हर row एक कार्ड; `group_id` = बटन (नया नाम = नया बटन); बटन का नाम और emoji उस group की पहली row में। फ़ोटो पहले GitHub के `images/nearby/` में, फिर `photos` में पता।
 
 पेज: मेन्यू → दर्शन → आस-पास (`nearby.html`)। इस पेज पर ऊपर **बटन (टैब)** हैं, जैसे "दर्शन" पेज पर होते हैं। जिस बटन को दबाओ, सिर्फ़ उसी के कार्ड दिखते हैं। हर बटन `window.NEARBY` के एक group से बनता है। कुछ तैयार बटन `hidden: true,` से छुपे भी रखे हो सकते हैं।
 
@@ -929,7 +941,7 @@ Home खुलने पर मंत्र अपने आप चलता ह
 - **सूचनाएँ:** Vishesh Karyakram, Suchnayein, Yojanayein और Bhaktamar में नई row जोड़ते ही (या `hidden` हटाते ही) सूचना अपने आप लगभग 10-15 मिनट में जाती है (Google टाइमर हर 5 मिनट जाँच चलवाता है)। कार्यक्रम और भक्तामर की "नई" वाली सूचना सिर्फ़ इसी महीने की आने वाली तारीख़ के लिए (`notify.auto.newKaryakramOnlyThisMonth`); बाक़ी को याद वाली सूचनाएँ (7 दिन पहले, उस दिन, 1 तारीख़ की सूची) अपने आप मिलती हैं। स्पेलिंग / तारीख़ ठीक करने से सूचना दोबारा नहीं जाती। भक्तामर की नई row की सूचना बंद करनी हो: `notify.auto` में `newBhaktamar: false`.
 - **तुरंत Notification (1 मिनट):** Sheet में ऊपर मेनू **नेमिधाम → "इस row का Notification भेजें"** (row की कोई cell चुनकर; उसी row से text बनता है) या **"अपना Custom Notification भेजें"** (एक छोटा फ़ॉर्म: शीर्षक, संदेश, कौन सा पेज खुले, और चाहो तो कंप्यूटर / फ़ोन से फ़ोटो)। GitHub बाद में वही Notification दोबारा नहीं भेजता। फ़ॉर्म से चुनी फ़ोटो Google Drive में **उसी फ़ोल्डर के अंदर "Notification Photos"** में रखी जाती है जिसमें यह Sheet है (इसलिए Sheet को Drive में एक फ़ोल्डर, जैसे `Nemidham`, में रखो), "लिंक वाले सब देख सकें" के साथ (Notification में दिखाने के लिए ज़रूरी)। जिसके साथ सिर्फ़ Sheet share की है (फ़ोल्डर नहीं), उसकी फ़ोटो उसकी अपनी Drive के "Notification Photos" फ़ोल्डर में जाती है। फ़ोटो या पूरा फ़ोल्डर 1-2 दिन बाद मिटा सकते हो (फ़ोल्डर अगली बार अपने आप बन जाता है); बहुत जल्दी मिटाओ तो देर से पहुँचे Notification में फ़ोटो नहीं दिखेगी।
 - **मोबाइल से Notification (tick box):** फ़ोन के Google Sheets ऐप में ऊपर वाला मेनू नहीं दिखता। इसलिए Vishesh Karyakram, Suchnayein, Yojanayein और Bhaktamar टैब में आख़िर में दो खाने हैं: `notification` (tick box) और `notification_status`। row का box tick करो: उसका Notification चला जाता है (मेनू वाले "इस row का Notification भेजें" जैसा), box अपने आप ख़ाली हो जाता है और `notification_status` में लिखा आता है "✓ भेजा गया ..." या गड़बड़ की वजह। पहली बार tick = एक ही बार जाता है (GitHub पहले भेज चुका हो तो दोबारा नहीं); status में ✓ होने के बाद फिर tick = जानबूझकर दोबारा। फ़ोन पर पूछता नहीं, tick करते ही चला जाता है, इसलिए सोचकर tick करो। ये दोनों खाने "Google टाइमर और मोबाइल Notification चालू करें" से अपने आप बनते हैं; इन्हें मत मिटाओ और नाम मत बदलो (वेबसाइट इन्हें अनदेखा करती है)। नई row जोड़ो और उसमें box न दिखे: ऊपर वाली row का box copy करके paste करो, या कंप्यूटर से वही मेनू एक बार फिर चलाओ।
-- **किसने भेजा (Notification Log):** Sheet से भेजे गए हर Notification (मेनू, Custom फ़ॉर्म, tick box) की एक row अपने आप **Notification Log** टैब में जुड़ती है: समय, किसने भेजा (उसका Google account), कैसे, शीर्षक, संदेश, नतीजा। मेनू और फ़ॉर्म से भेजने वाले का account हमेशा आता है। tick box में Google कभी-कभी नाम नहीं देता (आम Gmail account में); तब उस tick box cell पर right-click → **Show edit history** से दिखता है किसने tick किया। OneSignal ख़ुद नहीं बता सकता कि किसने भेजा (सब एक ही key से जाता है), और GitHub के अपने आप वाले Notification GitHub → Actions में दिखते हैं। इस टैब को Publish नहीं करना।
+- **किसने भेजा (Notification Log):** Sheet से भेजे गए हर Notification (मेनू, Custom फ़ॉर्म, tick box) की एक row अपने आप **Notification Log** टैब में जुड़ती है: समय, किसने भेजा (उसका Google account), कैसे, शीर्षक, संदेश, नतीजा। मेनू और फ़ॉर्म से भेजने वाले का account हमेशा आता है। tick box में Google कभी-कभी नाम नहीं देता (आम Gmail account में); तब उस tick box cell पर right-click → **Show edit history** से दिखता है किसने tick किया। OneSignal ख़ुद नहीं बता सकता कि किसने भेजा (सब एक ही key से जाता है), और GitHub के अपने आप वाले Notification GitHub → Actions में दिखते हैं। इस टैब को Publish नहीं करना। **यह टैब ताले में है:** सिर्फ़ Google टाइमर चालू करने वाला (और Sheet का मालिक) इसे बदल सकता है, बाक़ी सब सिर्फ़ पढ़ सकते हैं, ताकि कोई लाइन मिटा न सके। दूसरों के भेजे Notification की लाइन लगभग 5 मिनट में आती है (टाइमर लिखता है)। ध्यान: जिसके पास Sheet का edit access है वह Apps Script भी खोल सकता है, इसलिए edit access सिर्फ़ भरोसेमंद लोगों को दो।
 - **हर row का Notification एक ही बार जाता है** (ताकि किसी को दो बार न मिले, चाहे GitHub भी भेजे)। उसी row का Notification जानबूझकर फिर भेजना हो (जैसे याद दिलाने के लिए): मेनू **नेमिधाम → "इस row का Notification दोबारा भेजें"**।
 - टैब का नाम बदलने से वेबसाइट का लिंक नहीं टूटता (लिंक टैब के नंबर gid से चलता है), पर नाम ऐसा रखो कि पहचान में आए। Notification वाला मेनू "Vishesh Karyakram" / "Karyakram", "Suchnayein", "Yojanayein", "Bhaktamar" नाम से टैब पहचानता है।
 - **बदलाव तुरंत क्यों नहीं दिखता:** Google अपनी publish वाली कॉपी लगभग 5 मिनट में एक बार नई करता है। इसे Sheet से जल्दी नहीं करवाया जा सकता (कोई बटन नहीं है)। जैसे ही Google की कॉपी नई होती है, वेबसाइट अगली बार खुलने पर नया दिखाती है।
