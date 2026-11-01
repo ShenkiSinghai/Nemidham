@@ -36,6 +36,7 @@
 | नई सूचना / नया कार्यक्रम | Google Sheet के टैब Suchnayein / Karyakram (या `window.ANNOUNCEMENTS` / `window.EVENTS`) | 5.37, 5.1, 5.2 |
 | योजनाएं और उनकी फ़ोटो | Google Sheet का टैब Yojanayein (या `window.YOJANA`) | 5.37, 5.3 |
 | टीम, रोज़ का कार्यक्रम, मंदिर का समय, ऊपर की पट्टी, नियमित दान कार्ड | Google Sheet के टैब (Team, Dainik Karyakram, Mandir Samay, Top Banner, Niyamit Daan) | 5.37 |
+| हमारे बारे में, कैसे पहुँचें, टाइमलाइन, आस-पास, जैन कैलेंडर | Google Sheet के टैब (Hamare Baare Mein, Kaise Pahunchein, Timeline, Aas-Paas, Jain Calendar) | 5.37 |
 | दान: UPI, बैंक, QR | `window.DAAN` | 5.10 |
 | शांतिधारा, द्रव्य दान, भक्तामर के नाम और राशि (Google Sheet से) | Google Sheet + `window.SHEETS` | 5.12, 5.32 |
 | Home का णमोकार मंत्र (audio) | `audio/namokarmantra.mp3` + `window.SITE` → `audio` | 5.33 |
@@ -912,6 +913,11 @@ Home खुलने पर मंत्र अपने आप चलता ह
 | Top Banner | ऊपर की सुनहरी पट्टी | `banner` |
 | Team | टीम पेज | `team` |
 | Niyamit Daan | दान पेज के "नियमित दान और सेवा" कार्ड | `niyamitDaan` |
+| Hamare Baare Mein | "हमारे बारे में" पेज। हर row एक पैराग्राफ़ (`type` = `para`) या एक बिंदु (`type` = `point`); एक ही `section_id` वाली rows एक हिस्सा, `title` सिर्फ़ पहली row में | `about` |
+| Kaise Pahunchein | दर्शन पेज → कैसे पहुँचें के कार्ड | `howto` |
+| Timeline | टाइमलाइन पेज (ऊपर से नीचे पुरानी से नई; `photos` में comma से कई फ़ोटो, `hide_photo` = `yes` से फ़ोटो छुपी) | `timeline` |
+| Aas-Paas | आस-पास पेज। हर row एक कार्ड; `group_id` (जैसे `mandirs`, `tirths`, `tourist` या नया नाम) बताता है किस बटन में; बटन का नाम / emoji उस group की पहली row में; `map_link` में Google Maps लिंक या सिर्फ़ "जगह, शहर" | `nearby` |
+| Jain Calendar | जैन कैलेंडर पेज और दैनिक कार्यक्रम का कैलेंडर (`type` = kalyanak / parv / tithi / other) | `calendar` |
 
 **कैसे काम करता है:**
 - Sheet के हर टैब में: नई row = नया कार्ड; `hidden` में `yes` = छुपा; `pinned` में `yes` = Home पर भी; row मिटाओ = हट गया। हिंदी या English में से एक ही भरा हो तो वही दोनों भाषाओं में दिखता है।
@@ -922,6 +928,7 @@ Home खुलने पर मंत्र अपने आप चलता ह
 - फ़ोटो पहले GitHub के `images` फ़ोल्डर में डालो, Sheet में सिर्फ़ नाम (जैसे `yojana/bhumi.jpg`; सिर्फ़ `photo.jpg` लिखो तो `images/photo.jpg` माना जाता है)।
 - **सूचनाएँ:** Vishesh Karyakram, Suchnayein, Yojanayein और Bhaktamar में नई row जोड़ते ही (या `hidden` हटाते ही) सूचना अपने आप लगभग 10-15 मिनट में जाती है (Google टाइमर हर 5 मिनट जाँच चलवाता है)। कार्यक्रम और भक्तामर की "नई" वाली सूचना सिर्फ़ इसी महीने की आने वाली तारीख़ के लिए (`notify.auto.newKaryakramOnlyThisMonth`); बाक़ी को याद वाली सूचनाएँ (7 दिन पहले, उस दिन, 1 तारीख़ की सूची) अपने आप मिलती हैं। स्पेलिंग / तारीख़ ठीक करने से सूचना दोबारा नहीं जाती। भक्तामर की नई row की सूचना बंद करनी हो: `notify.auto` में `newBhaktamar: false`.
 - **तुरंत Notification (1 मिनट):** Sheet में ऊपर मेनू **नेमिधाम → "इस row का Notification भेजें"** (row की कोई cell चुनकर; उसी row से text बनता है) या **"अपना Custom Notification भेजें"** (एक छोटा फ़ॉर्म: शीर्षक, संदेश, कौन सा पेज खुले, और चाहो तो कंप्यूटर / फ़ोन से फ़ोटो)। GitHub बाद में वही Notification दोबारा नहीं भेजता। फ़ॉर्म से चुनी फ़ोटो Google Drive में **उसी फ़ोल्डर के अंदर "Notification Photos"** में रखी जाती है जिसमें यह Sheet है (इसलिए Sheet को Drive में एक फ़ोल्डर, जैसे `Nemidham`, में रखो), "लिंक वाले सब देख सकें" के साथ (Notification में दिखाने के लिए ज़रूरी)। जिसके साथ सिर्फ़ Sheet share की है (फ़ोल्डर नहीं), उसकी फ़ोटो उसकी अपनी Drive के "Notification Photos" फ़ोल्डर में जाती है। फ़ोटो या पूरा फ़ोल्डर 1-2 दिन बाद मिटा सकते हो (फ़ोल्डर अगली बार अपने आप बन जाता है); बहुत जल्दी मिटाओ तो देर से पहुँचे Notification में फ़ोटो नहीं दिखेगी।
+- **मोबाइल से Notification (tick box):** फ़ोन के Google Sheets ऐप में ऊपर वाला मेनू नहीं दिखता। इसलिए Vishesh Karyakram, Suchnayein, Yojanayein और Bhaktamar टैब में आख़िर में दो खाने हैं: `notification` (tick box) और `notification_status`। row का box tick करो: उसका Notification चला जाता है (मेनू वाले "इस row का Notification भेजें" जैसा), box अपने आप ख़ाली हो जाता है और `notification_status` में लिखा आता है "✓ भेजा गया ..." या गड़बड़ की वजह। पहली बार tick = एक ही बार जाता है (GitHub पहले भेज चुका हो तो दोबारा नहीं); status में ✓ होने के बाद फिर tick = जानबूझकर दोबारा। फ़ोन पर पूछता नहीं, tick करते ही चला जाता है, इसलिए सोचकर tick करो। ये दोनों खाने "Google टाइमर और मोबाइल Notification चालू करें" से अपने आप बनते हैं; इन्हें मत मिटाओ और नाम मत बदलो (वेबसाइट इन्हें अनदेखा करती है)। नई row जोड़ो और उसमें box न दिखे: ऊपर वाली row का box copy करके paste करो, या कंप्यूटर से वही मेनू एक बार फिर चलाओ।
 - **हर row का Notification एक ही बार जाता है** (ताकि किसी को दो बार न मिले, चाहे GitHub भी भेजे)। उसी row का Notification जानबूझकर फिर भेजना हो (जैसे याद दिलाने के लिए): मेनू **नेमिधाम → "इस row का Notification दोबारा भेजें"**।
 - टैब का नाम बदलने से वेबसाइट का लिंक नहीं टूटता (लिंक टैब के नंबर gid से चलता है), पर नाम ऐसा रखो कि पहचान में आए। Notification वाला मेनू "Vishesh Karyakram" / "Karyakram", "Suchnayein", "Yojanayein", "Bhaktamar" नाम से टैब पहचानता है।
 - **बदलाव तुरंत क्यों नहीं दिखता:** Google अपनी publish वाली कॉपी लगभग 5 मिनट में एक बार नई करता है। इसे Sheet से जल्दी नहीं करवाया जा सकता (कोई बटन नहीं है)। जैसे ही Google की कॉपी नई होती है, वेबसाइट अगली बार खुलने पर नया दिखाती है।
@@ -934,17 +941,20 @@ Home खुलने पर मंत्र अपने आप चलता ह
 3. Sheet को reload करो। ऊपर **नेमिधाम** मेनू आएगा → **सेटअप (एक बार)** → OneSignal App ID और REST API Key डालो (OneSignal → Settings → Keys & IDs), तीसरा डिब्बा (वेबसाइट का पता) ख़ाली छोड़ दो। script का नया version paste करने पर सेटअप दोबारा नहीं करना पड़ता; बस Google दोबारा "Allow" माँग सकता है (फ़ोटो के लिए Google Drive की इजाज़त भी)। Google "Authorization required / Allow" पूछे तो अपना account चुनकर Allow करो ("unsafe" लिखा आए तो Advanced → Go to ... दबाओ; यह आपकी अपनी script है)।
 4. **ध्यान:** REST API Key script की settings में रहती है। जो Sheet edit कर सकता है वह इसे देख सकता है, इसलिए edit access सिर्फ़ भरोसेमंद लोगों को दो।
 
-**Google टाइमर लगाना (एक बार, ताकि Notification और याद समय पर जाएँ):**
+**Google टाइमर और मोबाइल Notification लगाना (एक बार, ताकि Notification और याद समय पर जाएँ):**
 1. GitHub पर एक token बनाओ: GitHub में ऊपर दाएँ अपनी फ़ोटो → **Settings** → सबसे नीचे बाएँ **Developer settings** → **Personal access tokens → Fine-grained tokens** → **Generate new token**।
-2. Token name: `Nemidham timer`. Expiration: सबसे लंबा (जैसे 1 साल, या "No expiration" दिखे तो वह)। Repository access: **Only select repositories** → `Nemidham`।
-3. Permissions → **Repository permissions** → **Actions**: `Read and write` (बाक़ी सब जैसे हैं वैसे छोड़ो) → नीचे **Generate token** → token कॉपी करो (एक ही बार दिखता है, किसी को न दें)।
-4. Sheet (कंप्यूटर पर) → मेनू **नेमिधाम → Google टाइमर चालू करें (एक बार)** → token डालो → OK. Google "Allow" माँगे तो Select all → Continue, फिर दोबारा यही मेनू दबाकर token डालो। "Google टाइमर चालू हो गया" आना चाहिए।
-5. **यह सब मुफ़्त है:** GitHub Actions सार्वजनिक (public) रिपॉज़िटरी के लिए मुफ़्त है; Google टाइमर रोज़ लगभग 300 बार चलता है, Google की मुफ़्त सीमा (लगभग 20,000 बाहरी request और 90 मिनट टाइमर-समय रोज़) से बहुत कम; OneSignal web push मुफ़्त।
-6. token की मियाद ख़त्म हो (जैसे 1 साल बाद) तो Google टाइमर रुक जाएगा और सिर्फ़ GitHub का घंटे वाला टाइमर बचेगा: नया token बनाकर फिर से "Google टाइमर चालू करें" करो। बंद करना हो: "Google टाइमर बंद करें"। टाइमर उसी के Google account से चलता है जिसने इसे चालू किया।
+2. Token name: `Nemidham timer`. Expiration: **No expiration** (न दिखे तो सबसे लंबा)। Repository access: **Only select repositories** → `Nemidham`।
+3. **Permissions** में **+ Add permissions** दबाओ → **Actions** चुनो → उसके आगे `Read-only` को बदलकर **`Read and write`** करो (Metadata अपने आप आए तो रहने दो, और कुछ मत जोड़ो) → नीचे **Generate token** → token कॉपी करो (एक ही बार दिखता है, किसी को न दें)।
+4. Sheet (कंप्यूटर पर) → मेनू **नेमिधाम → Google टाइमर और मोबाइल Notification चालू करें (एक बार)** → token डालो → OK. Google "Allow" माँगे तो Select all → Continue, फिर दोबारा यही मेनू दबाकर token डालो। "चालू हो गया" आना चाहिए, और चारों Notification वाले टैब में आख़िर में `notification` / `notification_status` खाने जुड़ जाते हैं।
+5. **सिर्फ़ एक व्यक्ति यह करे।** टाइमर और tick box उसी के Google account से सबके लिए चलते हैं (जिनके साथ Sheet share है वे बस tick करें या मेनू से भेजें, उन्हें कुछ चालू नहीं करना)। कोई दूसरा ग़लती से चालू करे तो Sheet बताती है कि पहले से चालू है; फिर भी करे तो नया वाला चलता है और पुराना अपने आप रुक जाता है (कुछ दो बार नहीं जाता)। जिसने चालू किया उसका Google account बंद हो जाए / उसकी Sheet की access हटे तो किसी और को यही चरण (नया token के साथ) करने होंगे।
+6. **token कहाँ रहता है:** सिर्फ़ चालू करने वाले की अपनी script settings में (Sheet edit करने वाले दूसरे लोग इसे नहीं देख सकते)। यह token सिर्फ़ Nemidham में GitHub Actions चला / रोक सकता है; वेबसाइट की फ़ाइलें नहीं बदल सकता।
+7. **Expiry:** No expiration चुना हो तो कभी ख़त्म नहीं होता। GitHub फिर भी "expiry रखो" की सलाह देता है: उसका मतलब है कि token कभी किसी के हाथ लग जाए तो expiry वाला अपने आप बेकार हो जाता है, बिना expiry वाला तब तक चलता है जब तक आप उसे मिटा न दो। token लीक होने का शक हो (या बदलना हो): GitHub → Settings → Developer settings → Fine-grained tokens → `Nemidham timer` → **Delete**, फिर नया token बनाकर चरण 4 दोबारा। अगर expiry वाला token लिया था तो GitHub ख़त्म होने से पहले ईमेल भेजता है; ख़त्म होने पर Google टाइमर रुक जाता है (GitHub का घंटे वाला टाइमर चलता रहता है), तब नया token बनाकर चरण 4 दोबारा।
+8. **यह सब मुफ़्त है:** GitHub Actions सार्वजनिक (public) रिपॉज़िटरी के लिए मुफ़्त है; Google टाइमर रोज़ लगभग 300 बार चलता है, Google की मुफ़्त सीमा (लगभग 20,000 बाहरी request और 90 मिनट टाइमर-समय रोज़) से बहुत कम; OneSignal web push मुफ़्त।
+9. बंद करना हो: मेनू **नेमिधाम → Google टाइमर और मोबाइल Notification बंद करें** (मेनू से Notification भेजना चलता रहता है)।
 
 **नया टैब जोड़ने के बाद (एक बार):** हर नए टैब को अलग Publish करो (File → Share → Publish to web → वह टैब → CSV → Publish), लिंक `js/data.js` के `window.SHEETS` में उस टैब के नाम के आगे डालो। लिंक ख़ाली हो तो वह हिस्सा सिर्फ़ data.js से चलता है।
 
-**जो Sheet से नहीं बदलता (GitHub पर `js/data.js` में, इसी README के भागों से):** वेबसाइट का नाम, लोगो, UPI ID और बैंक खाता (जानबूझकर, ताकि कोई Sheet से पैसे का खाता न बदल सके), QR, ट्रस्ट / 80G, मेनू और सेटिंग, गैलरी, "हमारे बारे में", कैसे पहुँचें, आस-पास, टाइमलाइन, जैन कैलेंडर, गतिविधियाँ, सुविधाएँ, मंदिर नियम, सूचना / पॉप-अप की सेटिंग। (हमारे बारे में, कैसे पहुँचें, आस-पास, टाइमलाइन और कैलेंडर अगले चरण में Sheet में आ सकते हैं।)
+**जो Sheet से नहीं बदलता (GitHub पर `js/data.js` में, इसी README के भागों से):** वेबसाइट का नाम, लोगो, UPI ID और बैंक खाता (जानबूझकर, ताकि कोई Sheet से पैसे का खाता न बदल सके), QR, ट्रस्ट / 80G, मेनू और सेटिंग, गैलरी, गतिविधियाँ, सुविधाएँ, मंदिर नियम, सूचना / पॉप-अप की सेटिंग।
 
 **कुछ गड़बड़ हो तो वापस (rollback):** Sheet वाला बदलाव शुरू करने से ठीक पहले की वेबसाइट GitHub पर `backup-before-sheet-content` नाम से सुरक्षित है। पूरा वापस जाना हो तो Claude से कहो "backup-before-sheet-content पर वापस करो"। सिर्फ़ Sheet की ग़लती हो तो Sheet में File → Version history से पुराना वापस लाओ।
 

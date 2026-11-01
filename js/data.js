@@ -659,17 +659,17 @@ window.EVENTS = [
 // hidden: true hides an item without deleting it.
 window.CALENDAR = [
   {
-    date: "2026-11-08", type: "parv",
+    id: "sample-parv", date: "2026-11-08", type: "parv",
     title: { hi: "SAMPLE: पर्व का नाम", en: "SAMPLE: Name of the parv" },
     note: { hi: "SAMPLE: तिथि और मंदिर में क्या होगा, यहाँ लिखें।", en: "SAMPLE: Write the tithi and what happens at the mandir." }
   },
   {
-    date: "2026-11-20", type: "kalyanak",
+    id: "sample-kalyanak", date: "2026-11-20", type: "kalyanak",
     title: { hi: "SAMPLE: कल्याणक का नाम", en: "SAMPLE: Name of the kalyanak" },
     note: { hi: "", en: "" }
   },
   {
-    date: "2026-10-01", type: "tithi",
+    id: "sample-tithi", date: "2026-10-01", type: "tithi",
     title: { hi: "SAMPLE: बीती हुई तिथि", en: "SAMPLE: A past tithi" },
     note: { hi: "", en: "" }
   }
@@ -831,6 +831,7 @@ window.ABOUT = [
 // hidden: true  hides a block without deleting it (the Parking block below is hidden for now).
 window.HOWTO = [
   {
+    id: "road",
     title: { hi: "सड़क से", en: "By road" },
     text: {
       hi: "खराडी, पुणे से नगर रोड पर वाघोली की ओर आएं और बकोरी रोड पर मंदिर पहुँचें। खराडी से दूरी लगभग 10 किमी है।",
@@ -838,6 +839,7 @@ window.HOWTO = [
     }
   },
   {
+    id: "rail",
     title: { hi: "रेल से", en: "By rail" },
     text: {
       hi: "सबसे नज़दीकी स्टेशन पुणे रेलवे स्टेशन है, जो लगभग 18 किमी दूर है। हडपसर रेलवे स्टेशन लगभग 14 किमी दूर है।",
@@ -845,6 +847,7 @@ window.HOWTO = [
     }
   },
   {
+    id: "air",
     title: { hi: "हवाई जहाज़ से", en: "By air" },
     text: {
       hi: "सबसे नज़दीकी हवाई अड्डा पुणे अंतरराष्ट्रीय हवाई अड्डा, विमान नगर है, जो लगभग 14 किमी दूर है।",
@@ -852,7 +855,7 @@ window.HOWTO = [
     }
   },
   {
-    hidden: true,
+    id: "parking", hidden: true,
     title: { hi: "पार्किंग और सुविधाएं", en: "Parking and facilities" },
     text: { hi: "SAMPLE: पार्किंग, पीने का पानी आदि की जानकारी लिखें।", en: "SAMPLE: Write about parking, drinking water and other facilities." }
   }
@@ -893,12 +896,12 @@ window.DAILY = [
            Photo HATANE ke liye:  photo: "" ya photos: [] kar do (ya wo line delete kar do).
    NOTE: entries mandir ke asli safar ki hain; nayi ghatna upar bataye tareeke se jodo. */
 window.TIMELINE = [
-  { year: "2024", when: { hi: "1 जुलाई", en: "1 July" }, title: { hi: "नींव और निर्माण की शुरुआत", en: "Foundation and construction begin" }, text: { hi: "मंदिर निर्माण की यात्रा शुरू हुई।", en: "The journey of building the mandir began." }, photo: "" },
-  { year: "2026", when: { hi: "13 अप्रैल", en: "13 April" }, title: { hi: "भूमि पूजन", en: "Bhumi Pujan" }, text: { hi: "श्रावकों के साथ भूमि पूजन संपन्न हुआ।", en: "Bhumi Pujan was held with the shravaks." }, photo: "images/timeline/bhumi-pujan.webp" },
-  { year: "2026", when: { hi: "9 मई", en: "9 May" }, title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" }, text: { hi: "भव्य वेदी प्रतिष्ठा संपन्न हुई।", en: "The grand Vedi Pratishtha was completed." }, photo: "images/timeline/vedi-pratishtha.webp" },
-  { year: "2026", when: { hi: "20 जुलाई", en: "20 July" }, title: { hi: "भगवान नेमिनाथ का मोक्ष कल्याणक", en: "Moksha Kalyanak of Bhagwan Neminath" }, text: { hi: "मंदिर जी में पहली बार निर्वाण लड्डू चढ़ाया गया।", en: "The Nirvan Laddu was offered in the mandir for the first time." }, photo: "images/timeline/moksh-kalyanak-ladoo.webp" },
-  { year: "2026", when: { hi: "16 सितंबर", en: "16 September" }, title: { hi: "पहला दसलक्षण पर्व", en: "First Dashlakshan Parv" }, text: { hi: "मंदिर जी में पहली बार दसलक्षण पर्व मनाया गया।", en: "Dashlakshan Parv was celebrated in the mandir for the first time." }, photo: "images/timeline/dashlakshan.webp" },
-  { year: "2026", when: { hi: "26 सितंबर", en: "26 September" }, title: { hi: "पहली क्षमावाणी", en: "First Kshamavani" }, text: { hi: "मंदिर जी में पहली बार क्षमावाणी मनाई गई।", en: "Kshamavani was celebrated in the mandir for the first time." }, photo: "images/timeline/kshamavani.webp" }
+  { id: "neev-2024", year: "2024", when: { hi: "1 जुलाई", en: "1 July" }, title: { hi: "नींव और निर्माण की शुरुआत", en: "Foundation and construction begin" }, text: { hi: "मंदिर निर्माण की यात्रा शुरू हुई।", en: "The journey of building the mandir began." }, photo: "" },
+  { id: "bhumi-pujan-2026", year: "2026", when: { hi: "13 अप्रैल", en: "13 April" }, title: { hi: "भूमि पूजन", en: "Bhumi Pujan" }, text: { hi: "श्रावकों के साथ भूमि पूजन संपन्न हुआ।", en: "Bhumi Pujan was held with the shravaks." }, photo: "images/timeline/bhumi-pujan.webp" },
+  { id: "vedi-pratishtha-2026", year: "2026", when: { hi: "9 मई", en: "9 May" }, title: { hi: "वेदी प्रतिष्ठा एवं विश्व शांति महायज्ञ", en: "Vedi Pratishtha & Vishv Shanti Mahayagya" }, text: { hi: "भव्य वेदी प्रतिष्ठा संपन्न हुई।", en: "The grand Vedi Pratishtha was completed." }, photo: "images/timeline/vedi-pratishtha.webp" },
+  { id: "moksh-kalyanak-2026", year: "2026", when: { hi: "20 जुलाई", en: "20 July" }, title: { hi: "भगवान नेमिनाथ का मोक्ष कल्याणक", en: "Moksha Kalyanak of Bhagwan Neminath" }, text: { hi: "मंदिर जी में पहली बार निर्वाण लड्डू चढ़ाया गया।", en: "The Nirvan Laddu was offered in the mandir for the first time." }, photo: "images/timeline/moksh-kalyanak-ladoo.webp" },
+  { id: "dashlakshan-2026", year: "2026", when: { hi: "16 सितंबर", en: "16 September" }, title: { hi: "पहला दसलक्षण पर्व", en: "First Dashlakshan Parv" }, text: { hi: "मंदिर जी में पहली बार दसलक्षण पर्व मनाया गया।", en: "Dashlakshan Parv was celebrated in the mandir for the first time." }, photo: "images/timeline/dashlakshan.webp" },
+  { id: "kshamavani-2026", year: "2026", when: { hi: "26 सितंबर", en: "26 September" }, title: { hi: "पहली क्षमावाणी", en: "First Kshamavani" }, text: { hi: "मंदिर जी में पहली बार क्षमावाणी मनाई गई।", en: "Kshamavani was celebrated in the mandir for the first time." }, photo: "images/timeline/kshamavani.webp" }
 ];
 
 /* ---------- 9ख-2. Nearby (Visit > Nearby page): mandirs, tirths, tourist places ... ----------
@@ -1097,7 +1100,12 @@ window.SHEETS = {
   yojana: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1462059264&single=true&output=csv",        // tab "Yojanayein"
   banner: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=296682865&single=true&output=csv",        // tab "Top Banner"
   team: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=947760466&single=true&output=csv",          // tab "Team"
-  niyamitDaan: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=709940025&single=true&output=csv"    // tab "Niyamit Daan" (the regular daan / seva cards on the Daan page)
+  niyamitDaan: "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=709940025&single=true&output=csv",   // tab "Niyamit Daan" (the regular daan / seva cards on the Daan page)
+  about: "",        // tab "Hamare Baare Mein" (About page sections)
+  howto: "",        // tab "Kaise Pahunchein" (Visit page > How to reach cards)
+  timeline: "",     // tab "Timeline"
+  nearby: "",       // tab "Aas-Paas" (Nearby page: mandirs, tirths, places)
+  calendar: ""      // tab "Jain Calendar"
 };
 
 /* Shantidhara punyarjak list. Shown on the Daan page as a calendar-style table, month by month,

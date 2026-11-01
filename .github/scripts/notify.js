@@ -172,7 +172,8 @@ function sheetRows(url) {
     if (t == null || /^\s*<(!doctype|html)/i.test(t)) { console.log("Could not read a Sheet tab:", url.slice(0, 90)); return null; }
     var rows = parseCSV(t).filter(function (r) { return r.some(function (x) { return String(x).trim() !== ""; }); }); if (!rows.length) return [];
     var head = rows[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
-    return rows.slice(1).map(function (cells) { var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(cells[i] == null ? "" : cells[i]); }); return o; });
+    /* the Sheet's own "notification" tick box columns are not content: left out, and a row with nothing else is skipped */
+    return rows.slice(1).map(function (cells) { var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = String(cells[i] == null ? "" : cells[i]); if (o[h].trim()) any = true; } }); return any ? o : null; }).filter(Boolean);
   }).catch(function (e) { console.log("Could not read a Sheet tab:", e && e.message); return null; });
 }
 /* a picture name from the Sheet: "photo.jpg" alone means images/photo.jpg (the same rule as the website) */

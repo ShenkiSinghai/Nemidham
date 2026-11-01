@@ -1259,7 +1259,7 @@
     }).join("") : '<p class="empty">' + esc(t("empty.team")) + "</p>");
   }
   function renderAbout() {
-    var secs = window.ABOUT || [];
+    var secs = vis(window.ABOUT);
     put("about-toc", '<p class="sr">' + esc(t("about.toc")) + "</p>" + secs.map(function (s) { return '<a href="#' + esc(s.id) + '">' + esc(L(s.title)) + "</a>"; }).join(""));
     put("about", secs.map(function (s) {
       return '<section id="' + esc(s.id) + '"><h2>' + esc(L(s.title)) + "</h2>" +
@@ -1313,9 +1313,9 @@
       if (!all.length) return [];
       var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
       return all.slice(1).map(function (r) {
-        var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim(); });   /* also removes hidden marks copied from WhatsApp */
-        return o;
-      });
+        var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = String(r[i] == null ? "" : r[i]).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim(); if (o[h]) any = true; } });   /* also removes hidden marks copied from WhatsApp */
+        return any ? o : null;   /* the Sheet's "notification" tick box columns are not content; a row with only a tick box is skipped */
+      }).filter(Boolean);
     });
   }
   function normDate(v) {
@@ -2246,7 +2246,7 @@
 
   /* ---------- website content from the Google Sheet (README part 5.37) ----------
      Tabs of the same Sheet as the Daan lists: Karyakram, Dainik Karyakram, Mandir Samay, Suchnayein, Yojanayein,
-     Top Banner, Team, Niyamit Daan. Their "Publish to web" CSV links go in window.SHEETS (data.js).
+     Top Banner, Team, Niyamit Daan, Hamare Baare Mein, Kaise Pahunchein, Timeline, Aas-Paas, Jain Calendar. Their "Publish to web" CSV links go in window.SHEETS (data.js).
      - What is written in data.js still shows; a Sheet row with the same id as a data.js card replaces it.
      - hidden = yes hides a row, pinned = yes puts it on the Home page. Delete a row to remove it.
      - Hindi and English columns: if only one is filled, that one shows in both languages.
@@ -2254,14 +2254,16 @@
        the fresh copy is read in the background and the page is redrawn only if something changed. */
   var CS_TABS = {   /* tab key in window.SHEETS : pages that need it */
     banner: "*", samay: "home visit daily", dainik: "daily", karyakram: "home karyakram daily",
-    suchnayein: "home announcements", yojana: "home yojana", team: "team", niyamitDaan: "daan"
+    suchnayein: "home announcements", yojana: "home yojana", team: "team", niyamitDaan: "daan",
+    about: "about", howto: "visit", timeline: "timeline", nearby: "nearby", calendar: "calendar daily"
   };
   var CS_BASE = null, csRows = {}, hashMissed = false;
   function csClone(v) { try { return JSON.parse(JSON.stringify(v)); } catch (e) { return v; } }
   function csBase() {
     if (!CS_BASE) CS_BASE = { EVENTS: csClone(window.EVENTS || []), ANNOUNCEMENTS: csClone(window.ANNOUNCEMENTS || []), YOJANA: csClone(window.YOJANA || []),
       DAILY: csClone(window.DAILY || []), TEAM: csClone(window.TEAM || []), RECURRING: csClone(window.RECURRING || []),
-      BANNER: csClone(window.BANNER || {}), timings: csClone(S.timings || null), timingsNote: csClone(S.timingsNote || null), showTimings: S.showTimings };
+      BANNER: csClone(window.BANNER || {}), ABOUT: csClone(window.ABOUT || []), HOWTO: csClone(window.HOWTO || []), TIMELINE: csClone(window.TIMELINE || []),
+      NEARBY: csClone(window.NEARBY || []), CALENDAR: csClone(window.CALENDAR || []), timings: csClone(S.timings || null), timingsNote: csClone(S.timingsNote || null), showTimings: S.showTimings };
     return CS_BASE;
   }
   function csClean(v) { return String(v == null ? "" : v).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").replace(/\r/g, "").trim(); }
@@ -2355,8 +2357,80 @@
         var x = { id: csClean(r.id), hidden: csYes(r.hidden), title: csTx(r, "title"), amount: csNum(r.amount), when: csTx(r, "when"), text: csTx(r, "text"), how: csTx(r, "how"), contacts: c, fromSheet: true };
         return csHas(x.title) ? x : null;
       }).filter(Boolean);
+    },
+    /* Hamare Baare Mein: one row = one paragraph (type empty / para) or one point (type = point) of a section.
+       Rows with the same section_id make one section; section_id left empty = same section as the row above (or, if the row has a new title, a new section). */
+    about: function (rows) {
+      var secs = [], byId = {}, last = "";
+      rows.forEach(function (r) {
+        var t0 = csTx(r, "title"), id = csClean(r.section_id || r.id);
+        if (!id && csHas(t0) && !(last && byId[last].title.en === t0.en)) id = t0.en.toLowerCase().replace(/[^a-z0-9\u0900-\u097F]+/g, "-").replace(/^-|-$/g, "");   /* no section_id but a new title = a new section */
+        id = id || last; if (!id) return; last = id;
+        var s = byId[id];
+        if (!s) { s = byId[id] = { id: id, title: { hi: "", en: "" }, paragraphs: [], list: [], fromSheet: true }; secs.push(s); }
+        var ti = csTx(r, "title"); if (!csHas(s.title) && csHas(ti)) s.title = ti;
+        var tx = csTx(r, "text"); if (csYes(r.hidden) || !csHas(tx)) return;
+        (/^(point|list|bullet|बिंदु|पॉइंट)/i.test(csClean(r.type)) ? s.list : s.paragraphs).push(tx);
+      });
+      var old = {}; (csBase().ABOUT || []).forEach(function (b) { if (b && b.id) old[b.id] = b; });   /* same id as a data.js section, title left empty = keeps that title */
+      secs.forEach(function (s) { if (!s.list.length) delete s.list; if (!csHas(s.title) && old[s.id] && csHas(old[s.id].title)) s.title = old[s.id].title; if (!csHas(s.title) || (!s.paragraphs.length && !s.list)) s.hidden = true; });
+      return secs;
+    },
+    howto: function (rows) {
+      return rows.map(function (r) {
+        var h = { id: csClean(r.id), hidden: csYes(r.hidden), title: csTx(r, "title"), text: csTx(r, "text"), fromSheet: true };
+        return csHas(h.title) || csHas(h.text) || (h.id && h.hidden) ? h : null;   /* id + hidden = yes alone hides that data.js card */
+      }).filter(Boolean);
+    },
+    timeline: function (rows) {
+      return rows.map(function (r) {
+        var x = { id: csClean(r.id), hidden: csYes(r.hidden), year: csClean(r.year), when: csTx(r, "when"), title: csTx(r, "title"), text: csTx(r, "text"),
+          photos: csList(r.photos).map(csImg), hidePhoto: csYes(r.hide_photo), fromSheet: true };
+        return x.year || csHas(x.title) || (x.id && x.hidden) ? x : null;
+      }).filter(Boolean);
+    },
+    calendar: function (rows) {
+      return rows.map(function (r) {
+        var ty = csClean(r.type).toLowerCase();
+        ty = /^(kalyan|कल्याण)/.test(ty) ? "kalyanak" : /^(parv|पर्व)/.test(ty) ? "parv" : /^(tithi|तिथि)/.test(ty) ? "tithi" : "other";
+        var c = { id: csClean(r.id), hidden: csYes(r.hidden), date: csDate(r.date), type: ty, title: csTx(r, "title"), note: csTx(r, "note"), fromSheet: true };
+        return (c.date && csHas(c.title)) || (c.id && c.hidden) ? c : null;
+      }).filter(Boolean);
+    },
+    /* Aas-Paas: one row = one card. group_id puts it in a tab (button); group_id left empty = same tab as the row above.
+       The tab's name / icon / intro are read from the first row of that tab that has them. */
+    nearby: function (rows) {
+      var gs = [], byId = {}, last = "";
+      rows.forEach(function (r) {
+        var gt = csTx(r, "group"), id = csClean(r.group_id).toLowerCase().replace(/\s+/g, "-") || (csHas(gt) ? "" : last);
+        if (!id && csHas(gt)) id = (gt.en || gt.hi).toLowerCase().replace(/[^a-z0-9\u0900-\u097F]+/g, "-").replace(/^-|-$/g, "");
+        if (!id) return; last = id;
+        var g = byId[id];
+        if (!g) { g = byId[id] = { id: id, icon: "", title: { hi: "", en: "" }, intro: { hi: "", en: "" }, items: [], fromSheet: true }; gs.push(g); }
+        if (!g.icon && csClean(r.group_icon)) g.icon = csClean(r.group_icon);
+        if (!csHas(g.title) && csHas(gt)) g.title = gt;
+        var gi = csTx(r, "group_intro"); if (!csHas(g.intro) && csHas(gi)) g.intro = gi;
+        var mp = csClean(r.map_link || r.map), it = { hidden: csYes(r.hidden), name: csTx(r, "name"), distance: csTx(r, "distance"), address: csTx(r, "address"), text: csTx(r, "text"),
+          phone: csClean(r.phone), photos: csList(r.photos).map(csImg), hidePhoto: csYes(r.hide_photo) };
+        if (/^https?:\/\//i.test(mp)) it.mapLink = mp; else if (mp) it.mapQuery = mp;
+        if (csHas(it.name) && !it.hidden) g.items.push(it);
+      });
+      return gs;
     }
   };
+  /* Aas-Paas: a Sheet tab (group) with the same id as a data.js group takes its place; a tab with no visible card is hidden */
+  function csNearby(base, groups) {
+    if (base && !Array.isArray(base)) base = ["mandirs", "tirths"].map(function (k) { return { id: k, title: { hi: (UIX.hi || {})["nb." + k] || k, en: (UIX.en || {})["nb." + k] || k }, items: base[k] || [] }; });   /* old data.js format { mandirs: [], tirths: [] } */
+    var out = Array.isArray(base) ? base.slice() : [], idx = {};
+    out.forEach(function (g, i) { if (g && g.id) idx[g.id] = i; });
+    groups.forEach(function (g) {
+      var old = idx[g.id] != null ? out[idx[g.id]] : null;
+      if (old) { if (!g.icon) g.icon = old.icon || ""; if (!csHas(g.title)) g.title = old.title; if (!csHas(g.intro)) g.intro = old.intro; }
+      if (!g.items.length || !csHas(g.title)) g.hidden = true;
+      if (old) out[idx[g.id]] = g; else out.push(g);
+    });
+    return out;
+  }
   /* put Sheet content into window.* (the renderers read these), starting each time from the data.js copy */
   function csApply() {
     var B = csBase(), r = csRows, sh = window.SHEETS || {};
@@ -2365,6 +2439,11 @@
     window.ANNOUNCEMENTS = on("suchnayein") ? csMerge(B.ANNOUNCEMENTS, CS_MAP.suchnayein(r.suchnayein)) : csClone(B.ANNOUNCEMENTS);
     window.YOJANA = on("yojana") ? csMerge(B.YOJANA, CS_MAP.yojana(r.yojana)) : csClone(B.YOJANA);
     window.RECURRING = on("niyamitDaan") ? csMerge(B.RECURRING, CS_MAP.niyamitDaan(r.niyamitDaan)) : csClone(B.RECURRING);
+    window.ABOUT = on("about") ? csMerge(B.ABOUT, CS_MAP.about(r.about)) : csClone(B.ABOUT);
+    window.HOWTO = on("howto") ? csMerge(B.HOWTO, CS_MAP.howto(r.howto)) : csClone(B.HOWTO);
+    window.TIMELINE = on("timeline") ? csMerge(B.TIMELINE, CS_MAP.timeline(r.timeline)) : csClone(B.TIMELINE);
+    window.CALENDAR = on("calendar") ? csMerge(B.CALENDAR, CS_MAP.calendar(r.calendar)) : csClone(B.CALENDAR);
+    window.NEARBY = on("nearby") ? csNearby(B.NEARBY, CS_MAP.nearby(r.nearby)) : csClone(B.NEARBY);
     window.DAILY = on("dainik") ? csClone(B.DAILY).concat(CS_MAP.dainik(r.dainik)) : csClone(B.DAILY);
     if (on("team")) {
       var tg = csClone(B.TEAM), byName = {};
@@ -2398,7 +2477,7 @@
     var all = parseCSV(txt).filter(function (r) { return r.some(function (x) { return String(x).trim() !== ""; }); });
     if (!all.length) return [];
     var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
-    return all.slice(1).map(function (r) { var o = {}; head.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]); }); return o; });
+    return all.slice(1).map(function (r) { var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = String(r[i] == null ? "" : r[i]); if (o[h].trim()) any = true; } }); return any ? o : null; }).filter(Boolean);
   }
   /* before the first drawing: use the copies saved in this browser */
   function csFromCache() {
