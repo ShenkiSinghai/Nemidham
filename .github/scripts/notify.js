@@ -266,12 +266,18 @@ function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.
 function famLine(g, l) { var n = g.names[l]; return CFG.bhaktamarNames && n && n.length ? (l === "en" ? "Punyarjak famil" + (n.length > 1 ? "ies" : "y") + ": " : "पुण्यार्जक परिवार: ") + n.join(l === "en" ? "; " : "; ") : ""; }
 /* is it reminder time now? From the set time until 3 hours later (GitHub's timer can run late); repeats are dropped by the fixed id.
    The window stops at midnight (a late time like "23:30" only gets the runs before 12 at night), so "Today" never means the wrong day. */
+/* Reminder time = from the set time until the end of the day. GitHub's timer sometimes skips runs for hours,
+   so the first run after the set time sends the day's reminders; the state file remembers that today's are done
+   (and OneSignal's fixed ids stop any repeat). */
 function reminderTime() {
   var p = CFG.time.split(":"), target = +p[0] * 60 + +p[1], nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();
-  return nowMin >= target && nowMin < Math.min(target + 180, 24 * 60);
+  return nowMin >= target && nowMin < 23 * 60;
 }
+function remDone() { var st = readState() || {}; return st._remDone === TODAY; }
+function markRemDone() { var st = readState() || {}; if (st._remDone !== TODAY) { st._remDone = TODAY; writeState(st); } }
 function onSchedule(force) {
-  if (!force && !reminderTime()) { console.log("Not reminder time yet (set time " + CFG.time + " India time). Nothing sent."); return Promise.resolve(); }
+  if (!force && !reminderTime()) { console.log("Not reminder time (set time " + CFG.time + " India time, until 11 at night). Nothing sent."); return Promise.resolve(); }
+  if (!force && remDone()) { console.log("Today's reminders were already sent."); return Promise.resolve(); }
   var evs = [];
   var bhP = CFG.bhaktamar ? bhaktamarDates(W.SITE || {}, W.SHEETS && W.SHEETS.bhaktamar, W.BHAKTAMBAR) : Promise.resolve([]);
   return allEvents().then(function (list) { evs = list; return bhP; }).then(function (bh) {
@@ -298,12 +304,12 @@ function onSchedule(force) {
       if (month.length) jobs.push({ key: "month|" + THIS_MONTH, page: "karyakram.html", title: { hi: "इस महीने के विशेष कार्यक्रम", en: "This month's special karyakram" },
         text: both(function (l) { return short(month.map(function (x) { return x.t[l] + " (" + +x.d.slice(8) + ")"; }).join(" • "), 170); }) });
     }
-    if (!jobs.length) { console.log("No reminder due today."); return; }
+    if (!jobs.length) { console.log("No reminder due today."); if (!force) markRemDone(); return; }
     if (jobs.length > MAX_PER_RUN) {   /* too many at once: one notification with all of them */
       var all = jobs; jobs = [{ key: "rem-many|" + TODAY + "|" + all.map(function (n) { return n.key; }).join("~"), page: "karyakram.html",
         title: { hi: "आने वाले विशेष कार्यक्रम", en: "Coming special karyakram" }, text: both(function (l) { return short(all.map(function (n) { return n.title[l]; }).join(" • "), 170); }) }];
     }
-    return jobs.reduce(function (p, n) { return p.then(function () { return send(n); }); }, Promise.resolve());
+    return jobs.reduce(function (p, n) { return p.then(function () { return send(n); }); }, Promise.resolve()).then(function () { if (!force && !process.exitCode) markRemDone(); });
   });
 }
 
@@ -332,7 +338,7 @@ function sheetPoll() {
   if (!tabs.some(function (t) { return SH[t]; })) return Promise.resolve();
   if ((W.SITE || {}).bhaktamarKaryakram === false) tabs = tabs.filter(function (t) { return t !== "bhaktamar"; });
   return Promise.all(tabs.map(function (t) { return sheetRows(SH[t]); })).then(function (res) {
-    var prev = readState() || {}, next = {}, jobs = [];
+    var prev = readState() || {}, next = { _remDone: prev._remDone }, jobs = [];
     tabs.forEach(function (t, i) {
       var rows = res[i];
       if (rows == null || (!rows.length && prev[t] && prev[t].length)) { if (prev[t]) next[t] = prev[t]; return; }   /* could not read (or Google gave an empty tab for a moment): keep what we had */
