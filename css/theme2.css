@@ -872,8 +872,9 @@ html.ai-open .ai-btn { display: none; }
 .ai-form input::placeholder { color: var(--muted); opacity: 1; }
 .ai-form button { flex: none; width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--saffron-deep); color: #FAF4E4; font-size: 1rem; cursor: pointer; }
 .ai-form .ai-mic { background: transparent; color: var(--ink-2); border: 1px solid var(--card-bd); display: inline-flex; align-items: center; justify-content: center; }
-.ai-form .ai-mic:hover:not(:disabled) { background: var(--mist); }
+.ai-form .ai-mic:not(.on):not(.talk):hover:not(:disabled) { background: var(--mist); }
 .ai-form .ai-mic:disabled { opacity: .45; cursor: default; }
+.ai-form .ai-mic.talk { background: var(--saffron-deep); border-color: var(--saffron-deep); color: #FAF4E4; }
 .ai-form .ai-mic.on { background: #b3261e; border-color: #b3261e; color: #fff; animation: aiPulse 1.2s ease-in-out infinite; }
 .ai-form button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 @keyframes aiPulse { 50% { box-shadow: 0 0 0 6px rgba(179, 38, 30, .25); } }
