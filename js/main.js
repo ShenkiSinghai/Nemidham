@@ -2154,7 +2154,11 @@
     var p = document.getElementById("ai-panel"), b = document.getElementById("ai-btn"); if (!p || !b) return;
     aiState.open = on; p.hidden = !on; b.setAttribute("aria-expanded", on ? "true" : "false");
     document.documentElement.classList.toggle("ai-open", on);
-    if (on) { aiDraw(); var i = document.getElementById("ai-q"); if (i) setTimeout(function () { i.focus(); }, 30); } else b.focus();
+    if (on) {
+      aiDraw(); var i = document.getElementById("ai-q"); if (i) setTimeout(function () { i.focus(); }, 30);
+      /* wake the Google script while the visitor is still typing, so the real answer comes faster */
+      if (!aiState.woke) { aiState.woke = true; try { fetch(aiCfg().url + "?ping=1", { mode: "no-cors" }).catch(function () {}); } catch (e) {} }
+    } else b.focus();
   }
   function aiBoot() {
     var c = aiCfg(), b = document.getElementById("ai-btn"), p = document.getElementById("ai-panel");
