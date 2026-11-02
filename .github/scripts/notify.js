@@ -10,7 +10,7 @@
 var fs = require("fs"), vm = require("vm"), cp = require("child_process"), crypto = require("crypto");
 
 var EVENT = process.env.EVENT_NAME || "", BEFORE = process.env.BEFORE || "", KEY = (process.env.ONESIGNAL_REST_API_KEY || "").trim();
-var DRY = process.env.DRY_RUN === "1";
+var DRY = process.env.DRY_RUN === "1", AUTH = "Key";
 var REPO = process.env.GITHUB_REPOSITORY || "owner/repo";
 var SITE_URL = (process.env.SITE_URL || ("https://" + REPO.split("/")[0].toLowerCase() + ".github.io/" + REPO.split("/")[1] + "/")).replace(/\/?$/, "/");
 
@@ -64,9 +64,18 @@ function send(n) {
   if (n.key) body.idempotency_key = uuidFor(n.key);   /* OneSignal keeps it 30 days; the same id again = not sent again */
   console.log("Notification:", JSON.stringify({ title: body.headings, text: body.contents, url: body.url, image: body.chrome_web_image || "" }));
   if (DRY) return Promise.resolve();
-  function post(b) {
-    return fetch("https://api.onesignal.com/notifications", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Key " + KEY }, body: JSON.stringify(b) })
-      .then(function (r) { return r.text().then(function (t) { return { ok: r.ok, status: r.status, text: t }; }); });
+  /* new OneSignal keys (os_v2_...) use "Key", older keys "Basic": the other one is tried when the first is refused (same as the Sheet's script) */
+  function post(b, kind) {
+    kind = kind || (/^os_v2_/.test(KEY) ? "Key" : AUTH);
+    return fetch("https://api.onesignal.com/notifications", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": kind + " " + KEY }, body: JSON.stringify(b) })
+      .then(function (r) { return r.text().then(function (t) { return { ok: r.ok, status: r.status, text: t }; }); })
+      .then(function (r) {
+        if ((r.status === 401 || r.status === 403) && /access denied|authorization|api key/i.test(r.text) && !/^os_v2_/.test(KEY) && kind === AUTH) {
+          var other = AUTH === "Key" ? "Basic" : "Key";
+          return post(b, other).then(function (r2) { if (r2.ok) AUTH = other; return r2.ok ? r2 : r; });
+        }
+        return r;
+      });
   }
   return post(body).then(function (r) {
     if (!r.ok && /segment/i.test(r.text)) { body.included_segments = ["Subscribed Users"]; return post(body); }   /* older OneSignal apps use this name */

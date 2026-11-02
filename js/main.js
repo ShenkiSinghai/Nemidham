@@ -939,10 +939,25 @@
     var seg = location.pathname.split("/").filter(Boolean)[0];
     return { user: mt[1], repo: seg && !/\.html?$/i.test(seg) ? seg : mt[1] + ".github.io" };
   }
-  /* The site cannot see inside a folder by itself, so it asks GitHub for the file names. */
+  /* The site cannot see inside a folder by itself. First it reads images/index.json (the list of files in every folder
+     of images/, kept up to date by the Google Sheet's timer); a folder that is not in it yet is asked from GitHub. */
+  var photoIndex = null;
+  function loadPhotoIndex() {
+    if (!photoIndex) photoIndex = window.fetch ? fetch("images/index.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { return j && j.folders && typeof j.folders === "object" ? j.folders : null; }).catch(function () { return null; }) : Promise.resolve(null);
+    return photoIndex;
+  }
+  function byNum(a, b) { return a.localeCompare(b, undefined, { numeric: true }); }
   function listFolder(folder, cb) {
+    var dir = String(folder || "").replace(/^\.?\/+|\/+$/g, "");
+    loadPhotoIndex().then(function (idx) {
+      var names = idx && Object.prototype.hasOwnProperty.call(idx, dir) && Array.isArray(idx[dir]) ? idx[dir] : null;
+      if (names) cb(null, names.map(String).sort(byNum)); else listFolderGh(folder, cb);
+    });
+  }
+  function listFolderGh(folder, cb) {
     var key = "nj-gh:" + folder;
-    try { var c = sessionStorage.getItem(key); if (c) { var o = JSON.parse(c); if (Date.now() - o.t < 600000) { cb(null, o.names); return; } } } catch (e) {}
+    try { var c = sessionStorage.getItem(key); if (c) { var o = JSON.parse(c); if (o.err && Date.now() - o.t < 120000) { cb(o.err); return; } if (!o.err && Date.now() - o.t < 600000) { cb(null, o.names); return; } } } catch (e) {}   /* a failed lookup is not repeated for 2 minutes (GitHub's hourly limit) */
     var g = ghInfo();
     if (!g || !window.fetch) { cb("nogithub"); return; }
     var url = "https://api.github.com/repos/" + encodeURIComponent(g.user) + "/" + encodeURIComponent(g.repo) + "/contents/" +
@@ -952,10 +967,10 @@
       return r.json();
     }).then(function (list) {
       var names = list.filter(function (x) { return x.type === "file"; }).map(function (x) { return x.name; })
-        .sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+        .sort(byNum);
       try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), names: names })); } catch (e) {}
       cb(null, names);
-    }).catch(function (e) { cb(String(e)); });
+    }).catch(function (e) { try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), err: String(e) || "error" })); } catch (x) {} cb(String(e)); });
   }
   function norm(f) { return typeof f === "string" ? { file: f } : f; }
   function usesAuto(a, hasExplicit) { return a.auto === true || (!hasExplicit && a.auto !== false && !!a.folder); }
@@ -1314,8 +1329,8 @@
       if (!all.length) return [];
       var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
       return all.slice(1).map(function (r) {
-        var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = String(r[i] == null ? "" : r[i]).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim(); if (o[h]) any = true; } });   /* also removes hidden marks copied from WhatsApp */
-        return any ? o : null;   /* the Sheet's "notification" tick box columns are not content; a row with only a tick box is skipped */
+        var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = csSafe(r[i]).replace(/[\u200B-\u200D\u2060\uFEFF]/g, "").trim(); if (o[h]) any = true; } });   /* also removes hidden marks copied from WhatsApp */
+        return any && !csYes(o.hidden) ? o : null;   /* hidden = yes: not shown (same as every other list) */   /* the Sheet's "notification" tick box columns are not content; a row with only a tick box is skipped */
       }).filter(Boolean);
     });
   }
@@ -1593,7 +1608,7 @@
       fillMonthSelect(sel, state.o);
       function draw() {
         var res = getRows();
-        if (!res.ok) { box.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; return; }
+        if (!res.ok) { box.innerHTML = '<p class="empty">' + esc(t("cs.fail")) + "</p>"; return; }
         var ym = addMonths(cur, state.o);
         var rows = res.rows.filter(function (p) { return p.ym === ym; });
         box.innerHTML = (res.warn ? '<p class="note">' + esc(t("d.list_part", { name: res.warn })) + "</p>" : "") + (withKind ? shantiTable(rows) : daanTable(rows));
@@ -1642,7 +1657,7 @@
       }
       function dLabel(iso) { return parseDate(iso).toLocaleDateString(loc(), { weekday: "long", day: "numeric", month: "long" }); }
       function drawBh() {
-        if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("d.list_soon")) + "</p>"; allBox.hidden = true; ctl.hidden = true; return; }
+        if (!bres.ok) { one.innerHTML = '<p class="empty">' + esc(t("cs.fail")) + "</p>"; allBox.hidden = true; ctl.hidden = true; return; }
         var ymSel = sel.value;
         one.hidden = all; allBox.hidden = !all; sel.disabled = all; ctl.classList.toggle("is-all", all);
         tog.textContent = t(all ? "d.bh_one" : "d.bh_all"); tog.setAttribute("aria-pressed", all ? "true" : "false");
@@ -2119,9 +2134,13 @@
   function aiSave() { try { sessionStorage.setItem("nemi-ai-h", JSON.stringify(aiHist().slice(-20))); } catch (e) {} }
   function aiVid() { var v = lsGet("nemi-vid"); if (!v) { v = "v" + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); lsSet("nemi-vid", v); } return v; }
   /* plain text answer -> safe HTML (links of this website and https links become clickable) */
+  /* a link of this website itself (not a look-alike such as shenkisinghai.github.io.other.com or other.github.io/Nemidham/) */
+  function aiOwn(u) {
+    try { var x = new URL(String(u).replace(/&amp;/g, "&")); return x.origin === location.origin || (x.hostname === "shenkisinghai.github.io" && x.pathname.indexOf("/Nemidham/") === 0); } catch (e) { return false; }
+  }
   function aiText(s) {
     return esc(s).replace(/(https:\/\/[^\s<]+[^\s<.,;:!?)\u0964])/g, function (u) {
-      var show = u.indexOf(location.origin) === 0 || /github\.io\/Nemidham\//.test(u) ? (u.replace(/^https:\/\/[^\/]+\/(Nemidham\/)?/, "") || "Home") : u.replace(/^https:\/\//, "");
+      var show = aiOwn(u) ? (u.replace(/^https:\/\/[^\/]+\/(Nemidham\/)?/, "") || "Home") : u.replace(/^https:\/\//, "");
       return '<a href="' + u + '">🔗 ' + show + "</a>";
     }).replace(/\n/g, "<br>");
   }
@@ -2132,28 +2151,58 @@
       return '<div class="ai-msg ' + (m.r === "u" ? "u" : "a") + '">' + (m.r === "u" ? esc(m.t) : aiText(m.t)) + "</div>";
     }).join("") + (aiState.busy ? '<div class="ai-msg a ai-typing" aria-live="polite">' + esc(t("ai.typing")) + "</div>" : "");
     var sug = document.getElementById("ai-sug"); if (sug) sug.hidden = h.length > 0;
+    var mic = document.getElementById("ai-mic"); if (mic) mic.disabled = aiState.busy && !aiState.rec;
     box.scrollTop = box.scrollHeight;
-    $$('a[href^="https://"]', box).forEach(function (a) { if (a.href.indexOf(location.origin) !== 0) { a.target = "_blank"; a.rel = "noopener"; } });
+    $$('a[href^="https://"]', box).forEach(function (a) { if (a.origin !== location.origin) { a.target = "_blank"; a.rel = "noopener"; } });
   }
   function aiAsk(q) {
     q = String(q || "").trim(); var c = aiCfg();
     if (!q || aiState.busy || !c.on) return;
     var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiDraw(); aiSave();
     var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 45000) : 0;
-    var body = JSON.stringify({ q: q.slice(0, 500), lang: lang, vid: aiVid(), history: h.slice(-7, -1) });
+    /* only real questions and answers go back as the conversation (not "could not answer" / microphone messages) */
+    var body = JSON.stringify({ q: q.slice(0, 500), lang: lang, vid: aiVid(), history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) });
     fetch(c.url, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        var msg = j && j.ok ? j.answer : t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : "ai.err");
-        h.push({ r: "a", t: msg });
+        if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); return; }
+        h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : "ai.err") });
       })
-      .catch(function () { h.push({ r: "a", t: t("ai.err") }); })
+      .catch(function () { h.push({ r: "a", x: 1, t: t("ai.err") }); })
       .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
+  }
+  /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
+     Hindi page = Hindi (hi-IN), English page = Indian English (en-IN). The spoken words are sent as the question. */
+  function aiSR() { return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
+  function aiMicUi(on) {
+    var m = document.getElementById("ai-mic"), i = document.getElementById("ai-q");
+    if (m) { m.classList.toggle("on", on); m.setAttribute("aria-pressed", on ? "true" : "false"); m.setAttribute("aria-label", t(on ? "ai.micstop" : "ai.mic")); m.title = t(on ? "ai.micstop" : "ai.mic"); }
+    if (i) i.placeholder = t(on ? "ai.listen" : "ai.ph");
+  }
+  function aiMic() {
+    var SR = aiSR(); if (!SR || aiState.busy) return;
+    if (aiState.rec) { try { aiState.rec.stop(); } catch (e) {} return; }
+    var rec = new SR(), got = "", heard = false, stopped = false; aiState.rec = rec;
+    rec.lang = lang === "en" ? "en-IN" : "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    rec.onresult = function (e) {
+      var txt = ""; for (var k = 0; k < e.results.length; k++) txt += e.results[k][0].transcript;
+      heard = true; got = txt; var i = document.getElementById("ai-q"); if (i) i.value = txt;
+    };
+    rec.onerror = function (e) { if (e && e.error === "aborted") stopped = true; else if (e && e.error !== "no-speech") heard = false; };
+    rec.onend = function () {
+      aiState.rec = null; aiMicUi(false);
+      var i = document.getElementById("ai-q");
+      if (stopped || !aiState.open) return;   /* the chat was closed while listening: nothing is sent */
+      if (heard && got.trim()) { if (aiState.busy) { if (i) i.value = got; } else { if (i) i.value = ""; aiAsk(got); } }   /* an answer is still coming: the spoken words wait in the box */
+      else { aiHist().push({ r: "a", x: 1, t: t("ai.micerr") }); aiSave(); aiDraw(); }
+    };
+    try { rec.start(); aiMicUi(true); } catch (e) { aiState.rec = null; aiMicUi(false); }
   }
   function aiOpen(on) {
     var p = document.getElementById("ai-panel"), b = document.getElementById("ai-btn"); if (!p || !b) return;
     aiState.open = on; p.hidden = !on; b.setAttribute("aria-expanded", on ? "true" : "false");
     document.documentElement.classList.toggle("ai-open", on);
+    if (!on && aiState.rec) { try { aiState.rec.abort(); } catch (e) {} }
     if (on) {
       aiDraw(); var i = document.getElementById("ai-q"); if (i) setTimeout(function () { i.focus(); }, 30);
       /* wake the Google script while the visitor is still typing, so the real answer comes faster */
@@ -2175,6 +2224,7 @@
         if (a === "close") aiOpen(false);
         else if (a === "clear") { aiState.hist = []; aiSave(); aiDraw(); }
         else if (a === "sug") aiAsk(x.textContent);
+        else if (a === "mic") aiMic();
       });
       p.addEventListener("submit", function (e) { e.preventDefault(); var i = document.getElementById("ai-q"); var v = i.value; i.value = ""; aiAsk(v); });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape" && aiState.open) aiOpen(false); });
@@ -2187,9 +2237,12 @@
     p.innerHTML = '<div class="ai-head"><b>' + esc(t("ai.title")) + '</b><span><button type="button" class="ai-x" data-ai="clear" title="' + esc(t("ai.clear")) + '" aria-label="' + esc(t("ai.clear")) + '">⟲</button><button type="button" class="ai-x" data-ai="close" aria-label="' + esc(t("ai.close")) + '">✕</button></span></div>' +
       '<div class="ai-log" id="ai-log" aria-live="polite"></div>' +
       '<div class="ai-sug" id="ai-sug">' + ["ai.s1", "ai.s2", "ai.s3", "ai.s4"].map(function (k) { return '<button type="button" data-ai="sug">' + esc(t(k)) + "</button>"; }).join("") + "</div>" +
-      '<form class="ai-form" autocomplete="off"><input id="ai-q" maxlength="500" placeholder="' + esc(t("ai.ph")) + '" aria-label="' + esc(t("ai.ph")) + '"><button type="submit" aria-label="' + esc(t("ai.send")) + '">➤</button></form>' +
+      '<form class="ai-form" autocomplete="off"><input id="ai-q" maxlength="500" placeholder="' + esc(t("ai.ph")) + '" aria-label="' + esc(t("ai.ph")) + '">' +
+      (aiSR() ? '<button type="button" class="ai-mic" id="ai-mic" data-ai="mic" aria-pressed="false" title="' + esc(t("ai.mic")) + '" aria-label="' + esc(t("ai.mic")) + '"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>' : "") +
+      '<button type="submit" aria-label="' + esc(t("ai.send")) + '">➤</button></form>' +
       '<p class="ai-note">' + esc(t("ai.note")) + "</p>";
     var newQ = document.getElementById("ai-q"); if (newQ) { newQ.value = typed; if (hadFocus) newQ.focus(); }
+    if (aiState.rec) { if (aiState.rec.lang !== (lang === "en" ? "en-IN" : "hi-IN")) { try { aiState.rec.abort(); } catch (e) {} } else aiMicUi(true); }   /* language changed while listening: stop (tap 🎤 again) */
     if (aiState.open) aiDraw();
   }
 
@@ -2745,8 +2798,11 @@
     var all = parseCSV(txt).filter(function (r) { return r.some(function (x) { return String(x).trim() !== ""; }); });
     if (!all.length) return [];
     var head = all[0].map(function (h) { return String(h).trim().toLowerCase().replace(/\s+/g, "_"); });
-    return all.slice(1).map(function (r) { var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = String(r[i] == null ? "" : r[i]); if (o[h].trim()) any = true; } }); return any ? o : null; }).filter(Boolean);
+    return all.slice(1).map(function (r) { var o = {}, any = false; head.forEach(function (h, i) { if (h && !/^notification/.test(h)) { o[h] = csSafe(r[i]); if (o[h].trim()) any = true; } }); return any ? o : null; }).filter(Boolean);
   }
+  /* a cell that is a "javascript:" link (typed by mistake or on purpose) would run code when its button is pressed:
+     such a cell is treated as empty. Browsers ignore spaces / tabs inside the "javascript:" word, so they are removed first. */
+  function csSafe(v) { v = String(v == null ? "" : v); return /^(javascript|vbscript):/i.test(v.replace(/[\x00-\x20​-‍⁠﻿]+/g, "")) ? "" : v; }
   /* before the first drawing: use the copies saved in this browser */
   function csFromCache() {
     var sh = window.SHEETS || {}, missing = false;
@@ -2765,20 +2821,28 @@
   }
   /* after the page is drawn: read fresh copies; redraw once if anything changed */
   function csRefresh() {
-    var sh = window.SHEETS || {}, changed = {}, jobs = [];
+    var sh = window.SHEETS || {}, changed = {}, jobs = [], failed = 0;
     Object.keys(CS_TABS).forEach(function (k) {
       if (!sh[k] || !csNeeded(k)) return;
+      function miss() { if (!csRows[k]) failed++; }   /* not loaded and no saved copy either */
       var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 12000) : 0;
       jobs.push(fetch(sh[k], ctl ? { signal: ctl.signal, cache: "no-store" } : { cache: "no-store" }).then(function (res) { return res.ok ? res.text() : ""; }).then(function (txt) {
         clearTimeout(tm);
-        var rows = csParse(txt); if (!rows) return;
+        var rows = csParse(txt); if (!rows) { miss(); return; }
         if (txt !== lsGet(csCacheKey(k))) { lsSet(csCacheKey(k), txt); csRows[k] = rows; changed[k] = true; }
         else if (!csRows[k]) { csRows[k] = rows; changed[k] = true; }
-      }).catch(function () { clearTimeout(tm); }));
+      }).catch(function () { clearTimeout(tm); miss(); }));
     });
     if (!jobs.length) { document.documentElement.classList.remove("cs-loading"); csWarm(); return; }
     Promise.all(jobs).then(function () {
-      document.documentElement.classList.remove("cs-loading");
+      var de = document.documentElement; de.classList.remove("cs-loading");
+      /* the Sheet could not be read (no internet / Google not answering) and nothing was saved before: an empty list then
+         says "could not load" instead of "will be added soon" */
+      if (failed) {
+        de.style.setProperty("--csf", JSON.stringify(t("cs.fail"))); de.classList.add("cs-failed");
+        var mn = document.querySelector("main"), ph = mn && mn.querySelector(".page-head");   /* a page with no empty-list text (like About) still says it */
+        if (ph && !mn.querySelector(".empty")) { var nb = document.createElement("div"); nb.className = "wrap"; nb.innerHTML = '<p class="empty cs-note" role="status">' + esc(t("cs.fail")) + "</p>"; ph.parentNode.insertBefore(nb, ph.nextSibling); }
+      }
       csWarm();
       var ks = Object.keys(changed); if (!ks.length) return;
       csApply();
@@ -2810,6 +2874,7 @@
     buildHeader();
     buildFooter();
     applyStatic();
+    if (document.documentElement.classList.contains("cs-failed")) document.documentElement.style.setProperty("--csf", JSON.stringify(t("cs.fail")));
     switch (page) {
       case "home":
         renderHero(); renderPanel(); timer = setInterval(renderPanel, 60000);
