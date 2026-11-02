@@ -571,6 +571,7 @@
     }
     btn.addEventListener("click", function (ev) {
       ev.stopPropagation();
+      audioState.held = false;   /* the visitor chose play / stop: the AI chat must not resume it later */
       if (au.paused) { off = false; try { localStorage.removeItem("nemi-audio"); } catch (e) {} start(); }
       else { off = true; au.pause(); try { localStorage.setItem("nemi-audio", "off"); } catch (e) {} label(); }
     });
@@ -2124,8 +2125,14 @@
   /* ---------- "मंदिर से पूछें": AI chat (README part 5.38) ----------
      A small button (bottom right) opens a chat. The question goes to the mandir's own Google Apps Script (the owner's
      private Sheet), which answers ONLY from the website's Google Sheet with Google Gemini. Settings: Website Settings
-     ai_chat (yes / no) and ai_chat_url (filled by "AI सेटअप"). Nothing loads until the button is pressed. */
-  function aiCfg() { var a = S.ai || {}; var u = String(a.url || "").trim(); return { on: a.chat !== false && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u), url: u }; }
+     ai_chat (yes / no / test) and ai_chat_url (filled by "AI सेटअप"). Nothing loads until the button is pressed. */
+  /* ai_chat = test: the button is hidden for everyone except a device that opened the site once with ?ai=test
+     (?ai=off takes that device back to normal). Handy for trying the AI before showing it to everyone. */
+  function aiTester() {
+    try { var q = (location.search.match(/[?&]ai=(test|off)\b/) || [])[1]; if (q === "test") lsSet("nemi-ai-test", "1"); else if (q === "off") lsSet("nemi-ai-test", ""); } catch (e) {}
+    return lsGet("nemi-ai-test") === "1";
+  }
+  function aiCfg() { var a = S.ai || {}; var u = String(a.url || "").trim(); return { on: a.chat !== false && (a.chat !== "test" || aiTester()) && /^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u), url: u }; }
   var aiState = { open: false, busy: false, hist: null };
   function aiHist() {
     if (!aiState.hist) { try { aiState.hist = JSON.parse(sessionStorage.getItem("nemi-ai-h") || "[]"); } catch (e) { aiState.hist = []; } }
@@ -2147,17 +2154,47 @@
   function aiDraw() {
     var box = document.getElementById("ai-log"); if (!box) return;
     var h = aiHist();
-    box.innerHTML = '<div class="ai-msg a">' + esc(t("ai.hello")) + "</div>" + h.map(function (m) {
-      return '<div class="ai-msg ' + (m.r === "u" ? "u" : "a") + '">' + (m.r === "u" ? esc(m.t) : aiText(m.t)) + "</div>";
+    box.innerHTML = '<div class="ai-msg a">' + esc(t("ai.hello")) + "</div>" + h.map(function (m, i) {
+      var say = m.r === "a" && !m.x && aiTTS() ? '<button type="button" class="ai-say' + (aiState.saying === i ? " on" : "") + '" data-ai="say" data-i="' + i + '" aria-label="' + esc(t(aiState.saying === i ? "ai.stopsay" : "ai.say")) + '" title="' + esc(t(aiState.saying === i ? "ai.stopsay" : "ai.say")) + '">' + (aiState.saying === i ? "■" : "🔊") + "</button>" : "";
+      return '<div class="ai-msg ' + (m.r === "u" ? "u" : "a") + '">' + (m.r === "u" ? esc(m.t) : aiText(m.t)) + say + "</div>";
     }).join("") + (aiState.busy ? '<div class="ai-msg a ai-typing" aria-live="polite">' + esc(t("ai.typing")) + "</div>" : "");
     var sug = document.getElementById("ai-sug"); if (sug) sug.hidden = h.length > 0;
     var mic = document.getElementById("ai-mic"); if (mic) mic.disabled = aiState.busy && !aiState.rec;
     box.scrollTop = box.scrollHeight;
     $$('a[href^="https://"]', box).forEach(function (a) { if (a.origin !== location.origin) { a.target = "_blank"; a.rel = "noopener"; } });
   }
-  function aiAsk(q) {
+  /* 🔊 answers read aloud: the browser's own voice (free). A question asked by speaking gets its answer spoken
+     at once; every answer also has a 🔊 button. Hindi text = a Hindi voice, English text = an Indian English voice.
+     Links and the "Sources" line are not read. */
+  /* the Home mantra pauses while the visitor speaks / an answer is read, and plays again after (not saved as "off") */
+  function mantraHold(on) {
+    var a = audioState; if (!a || !a.au) return;
+    if (on) { if (!a.au.paused) { a.held = true; a.au.pause(); } }
+    else if (a.held) { a.held = false; if (!a.stop) { var p = a.au.play(); if (p && p.catch) p.catch(function () {}); } }
+  }
+  function aiTTS() { return !!(window.speechSynthesis && window.SpeechSynthesisUtterance); }
+  function aiHush(keep) { if (aiTTS()) { try { speechSynthesis.cancel(); } catch (e) {} } if (!keep) mantraHold(false); if (aiState.saying != null) { aiState.saying = null; aiDraw(); } }
+  function aiSpeak(txt, idx) {
+    if (!aiTTS()) return;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    var plain = String(txt || "").split(/\n\s*(स्रोत|Sources)\s*\/?/)[0].replace(/https?:\/\/\S+/g, "").replace(/🔗|\*/g, "").replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu, "").replace(/\s+\n/g, "\n").trim();
+    if (!plain) return;
+    var hi = /[\u0900-\u097F]/.test(plain), want = hi ? "hi" : "en", vs = speechSynthesis.getVoices() || [];
+    var v = vs.filter(function (x) { return /^hi/i.test(x.lang) && want === "hi"; })[0] || vs.filter(function (x) { return /^en-IN/i.test(x.lang) && want === "en"; })[0] || vs.filter(function (x) { return x.lang && x.lang.toLowerCase().indexOf(want) === 0; })[0] || null;
+    /* short pieces: some browsers stop a long text after about 15 seconds */
+    var parts = plain.replace(/([।.!?\n])\s+/g, "$1\u0000").split("\u0000").reduce(function (a, p) { p = p.trim(); if (!p) return a; if (a.length && (a[a.length - 1] + " " + p).length < 180) a[a.length - 1] += " " + p; else a.push(p); return a; }, []);
+    var my = aiState.sayN = (aiState.sayN || 0) + 1;   /* a late "end" from an earlier, cancelled reading must not stop this one */
+    aiState.saying = idx; aiDraw(); mantraHold(true);
+    parts.forEach(function (p, k) {
+      var u = new SpeechSynthesisUtterance(p); u.lang = v ? v.lang : (hi ? "hi-IN" : "en-IN"); if (v) u.voice = v; u.rate = 1;
+      if (k === parts.length - 1) u.onend = u.onerror = function () { if (aiState.sayN === my && aiState.saying === idx) { aiState.saying = null; aiDraw(); mantraHold(false); } };
+      speechSynthesis.speak(u);
+    });
+  }
+  function aiAsk(q, spoken) {
     q = String(q || "").trim(); var c = aiCfg();
     if (!q || aiState.busy || !c.on) return;
+    aiHush(spoken);
     var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiDraw(); aiSave();
     var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 45000) : 0;
     /* only real questions and answers go back as the conversation (not "could not answer" / microphone messages) */
@@ -2165,10 +2202,11 @@
     fetch(c.url, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); return; }
+        if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); if (spoken && aiState.open && aiTTS()) setTimeout(function () { aiSpeak(String(j.answer), h.length - 1); }, 50); else mantraHold(false); return; }
+        mantraHold(false);
         h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : "ai.err") });
       })
-      .catch(function () { h.push({ r: "a", x: 1, t: t("ai.err") }); })
+      .catch(function () { h.push({ r: "a", x: 1, t: t("ai.err") }); mantraHold(false); })
       .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
   }
   /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
@@ -2182,6 +2220,8 @@
   }
   function aiMic() {
     var SR = aiSR(); if (!SR || aiState.busy) return;
+    aiHush(true); mantraHold(true);
+    if (aiTTS()) { try { speechSynthesis.getVoices(); speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); } catch (e) {} }   /* phones (iPhone) allow the spoken answer later only after a tap like this */
     if (aiState.rec) { try { aiState.rec.stop(); } catch (e) {} return; }
     var rec = new SR(), got = "", heard = false, stopped = false; aiState.rec = rec;
     rec.lang = "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
@@ -2193,17 +2233,18 @@
     rec.onend = function () {
       aiState.rec = null; aiMicUi(false);
       var i = document.getElementById("ai-q");
-      if (stopped || !aiState.open) return;   /* the chat was closed while listening: nothing is sent */
-      if (heard && got.trim()) { if (aiState.busy) { if (i) i.value = got; } else { if (i) i.value = ""; aiAsk(got); } }   /* an answer is still coming: the spoken words wait in the box */
-      else { aiHist().push({ r: "a", x: 1, t: t("ai.micerr") }); aiSave(); aiDraw(); }
+      if (stopped || !aiState.open) { mantraHold(false); return; }   /* the chat was closed while listening: nothing is sent */
+      if (heard && got.trim()) { if (aiState.busy) { if (i) i.value = got; mantraHold(false); } else { if (i) i.value = ""; aiAsk(got, true); } }   /* an answer is still coming: the spoken words wait in the box */
+      else { mantraHold(false); aiHist().push({ r: "a", x: 1, t: t("ai.micerr") }); aiSave(); aiDraw(); }
     };
-    try { rec.start(); aiMicUi(true); } catch (e) { aiState.rec = null; aiMicUi(false); }
+    try { rec.start(); aiMicUi(true); } catch (e) { aiState.rec = null; aiMicUi(false); mantraHold(false); }
   }
   function aiOpen(on) {
     var p = document.getElementById("ai-panel"), b = document.getElementById("ai-btn"); if (!p || !b) return;
     aiState.open = on; p.hidden = !on; b.setAttribute("aria-expanded", on ? "true" : "false");
     document.documentElement.classList.toggle("ai-open", on);
     if (!on && aiState.rec) { try { aiState.rec.abort(); } catch (e) {} }
+    if (!on) aiHush();
     if (on) {
       aiDraw(); var i = document.getElementById("ai-q"); if (i) setTimeout(function () { i.focus(); }, 30);
       /* wake the Google script while the visitor is still typing, so the real answer comes faster */
@@ -2223,9 +2264,10 @@
         var x = e.target.closest && e.target.closest("[data-ai]"); if (!x) return;
         var a = x.getAttribute("data-ai");
         if (a === "close") aiOpen(false);
-        else if (a === "clear") { aiState.hist = []; aiSave(); aiDraw(); }
+        else if (a === "clear") { aiHush(); aiState.hist = []; aiSave(); aiDraw(); }
         else if (a === "sug") aiAsk(x.textContent);
         else if (a === "mic") aiMic();
+        else if (a === "say") { var k = +x.getAttribute("data-i"), m = aiHist()[k]; if (aiState.saying === k) aiHush(); else if (m) aiSpeak(m.t, k); }
       });
       p.addEventListener("submit", function (e) { e.preventDefault(); var i = document.getElementById("ai-q"); var v = i.value; i.value = ""; aiAsk(v); });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape" && aiState.open) aiOpen(false); });
@@ -2684,7 +2726,7 @@
     if ((t2 = csTxKV(kv, "bhaktamar_time", S.bhaktamarTime))) S.bhaktamarTime = t2;
     v = csVal(kv, "youtube_channel_id"); if (v != null) S.youtubeChannelId = v;
     var ai = csClone(S.ai) || {};
-    if ((f = csFlag(kv, "ai_chat")) != null) ai.chat = f;
+    if ((f = csFlag(kv, "ai_chat")) != null) ai.chat = f; else if (/^test$/i.test(csVal(kv, "ai_chat") || "")) ai.chat = "test";
     v = csVal(kv, "ai_chat_url"); if (v != null) ai.url = v;
     S.ai = ai;
   }

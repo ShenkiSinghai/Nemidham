@@ -223,7 +223,7 @@ function applySheetSettings() {
     function flag(k) { var v = val(k); return v == null ? null : isYes(v) ? true : /^(no|n|nahi|nahin|false|0|नहीं|ना)$/i.test(v) ? false : null; }
     [["notify_new_karyakram", "newKaryakram"], ["notify_new_karyakram_only_this_month", "newKaryakramOnlyThisMonth"], ["notify_new_yojana", "newYojana"],
      ["notify_new_sandesh", "newSandesh"], ["notify_new_bhaktamar", "newBhaktamar"], ["notify_on_the_day", "onTheDay"], ["notify_month_start", "monthStart"],
-     ["notify_bhaktamar", "bhaktamar"], ["notify_bhaktamar_names", "bhaktamarNames"]].forEach(function (x) { var f = flag(x[0]); if (f != null) a[x[1]] = f; });
+     ["notify_bhaktamar", "bhaktamar"], ["notify_bhaktamar_names", "bhaktamarNames"], ["notify_jain_calendar", "jainCalendar"]].forEach(function (x) { var f = flag(x[0]); if (f != null) a[x[1]] = f; });
     var v;
     if ((v = val("notify_time")) != null) a.time = v.replace(".", ":");
     if ((v = val("notify_days_before")) != null) a.daysBefore = v.split(/[,\s]+/).filter(Boolean).map(Number);
@@ -244,6 +244,7 @@ function setup() {
     monthStartDay: +AUTO.monthStartDay >= 1 && +AUTO.monthStartDay <= 28 ? +AUTO.monthStartDay : 1,
     bhaktamar: AUTO.bhaktamar !== false,
     bhaktamarNames: AUTO.bhaktamarNames !== false,
+    jainCalendar: AUTO.jainCalendar !== false,   /* on the day: ashtami, chaturdashi, parv, kalyanak from the "Jain Calendar" tab */
     onlyThisMonth: AUTO.newKaryakramOnlyThisMonth !== false,
     maxPerRun: +AUTO.maxPerRun > 0 ? +AUTO.maxPerRun : 3
   };
@@ -317,7 +318,8 @@ function onSchedule(force) {
   if (!force && remDone()) { console.log("Today's reminders were already sent."); return Promise.resolve(); }
   var evs = [];
   var bhP = CFG.bhaktamar ? bhaktamarDates(W.SITE || {}, W.SHEETS && W.SHEETS.bhaktamar, W.BHAKTAMBAR) : Promise.resolve([]);
-  return allEvents().then(function (list) { evs = list; return bhP; }).then(function (bh) {
+  var jcP = CFG.onTheDay && CFG.jainCalendar && W.SHEETS && W.SHEETS.calendar ? sheetRows(W.SHEETS.calendar) : Promise.resolve([]), jc = [];
+  return allEvents().then(function (list) { evs = list; return jcP; }).then(function (rows) { jc = rows || []; return bhP; }).then(function (bh) {
     var jobs = [];
     function evMeta(e, l) { return [niceDate(e.date, l), L(e.time, l), L(e.place, l)].filter(Boolean).join(", "); }
     function dayJobs(day, n) {   /* n = 0 on the day, else days before */
@@ -333,6 +335,13 @@ function onSchedule(force) {
       });
     }
     if (CFG.onTheDay) dayJobs(TODAY, 0);
+    /* Jain calendar on the day (ashtami / chaturdashi / parv / kalyanak); skipped when a special karyakram of the same name is today */
+    jc.forEach(function (r) {
+      var d = sheetDate(r.date), t = tx(r, "title"), nt = tx(r, "note"); if (d !== TODAY || !t.hi || isYes(r.hidden) || placeholder({ title: t })) return;
+      if (evs.some(function (e) { return e.date === TODAY && (L(e.title, "hi") === t.hi || L(e.title, "en") === t.en); })) return;
+      jobs.push({ key: "rem-jc|" + TODAY + "|" + t.hi, page: "calendar.html", title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + t[l], 70); }),
+        text: both(function (l) { return short([niceDate(TODAY, l), nt[l]].filter(Boolean).join(" • "), 170); }) });
+    });
     CFG.daysBefore.forEach(function (n) { dayJobs(addDays(TODAY, n), n); });
     if (CFG.monthStart && +TODAY.slice(8) === CFG.monthStartDay) {
       var month = evs.filter(function (e) { return e.date.slice(0, 7) === THIS_MONTH && e.date >= TODAY; }).map(function (e) { return { d: e.date, t: both(function (l) { return L(e.title, l); }) }; });

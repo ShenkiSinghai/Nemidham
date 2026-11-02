@@ -857,6 +857,10 @@ html.ai-open .ai-btn { display: none; }
 .ai-msg.a { align-self: flex-start; background: var(--mist); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
 .ai-msg.u { align-self: flex-end; background: var(--saffron-deep); color: #FAF4E4; border-bottom-right-radius: 4px; }
 .ai-msg a { color: inherit; text-decoration: underline; word-break: break-all; }
+.ai-say { display: inline-flex; align-items: center; justify-content: center; margin: 2px 0 0 6px; vertical-align: middle; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--card-bd); background: transparent; color: var(--ink-2); font-size: .85rem; cursor: pointer; }
+.ai-say:hover { background: var(--paper); }
+.ai-say.on { background: var(--saffron-deep); border-color: var(--saffron-deep); color: #FAF4E4; }
+.ai-say:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .ai-typing { opacity: .7; font-style: italic; }
 .ai-sug { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 12px 8px; }
 .ai-sug[hidden] { display: none; }
