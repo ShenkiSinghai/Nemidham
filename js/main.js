@@ -2204,7 +2204,7 @@
       .then(function (j) {
         if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); if (spoken && aiState.open && aiTTS()) setTimeout(function () { aiSpeak(String(j.answer), h.length - 1); }, 50); else mantraHold(false); return; }
         mantraHold(false);
-        h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : "ai.err") });
+        h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : j && j.error === "busy" ? "ai.busy" : "ai.err") });
       })
       .catch(function () { h.push({ r: "a", x: 1, t: t("ai.err") }); mantraHold(false); })
       .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });

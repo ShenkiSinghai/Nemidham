@@ -40,6 +40,7 @@
 | मंदिर नियम, सुविधाएँ, गैलरी के एल्बम, फ़ोटो अपलोड | Google Sheet के टैब (Mandir Niyam, Suvidhayein, Gallery) और मेनू "फ़ोटो जोड़ें" | 5.37 |
 | सोशल मीडिया लिंक, बटन / pop-up / slideshow की सेटिंग, UPI / बैंक / 80G | owner की Private Sheet (Website Settings, Daan Details) | 5.37 |
 | AI: "मंदिर से पूछें" (वेबसाइट) और "AI सहायक" (Sheet) | Private Sheet → AI सेटअप; Website Settings `ai_chat`, `ai_daily_limit` | 5.38 |
+| Account (GitHub, Google, OneSignal, Gemini, GoatCounter) किसी और को सौंपना | हर सेवा की Settings | 5.39 |
 | दान: UPI, बैंक, QR | `window.DAAN` | 5.10 |
 | शांतिधारा, द्रव्य दान, भक्तामर के नाम और राशि (Google Sheet से) | Google Sheet + `window.SHEETS` | 5.12, 5.32 |
 | Home का णमोकार मंत्र (audio) | `audio/namokarmantra.mp3` + `window.SITE` → `audio` | 5.33 |
@@ -1036,7 +1037,25 @@ Home खुलने पर मंत्र अपने आप चलता ह
 4. 5-10 मिनट में वेबसाइट पर "मंदिर से पूछें" बटन। Website Settings में `ai_chat`: `yes` = सबको दिखे; `no` = बंद; **`test` = सबसे छुपा, सिर्फ़ आपको दिखे**: अपने फ़ोन / कंप्यूटर पर वेबसाइट एक बार ऐसे खोलो: `https://shenkisinghai.github.io/Nemidham/?ai=test` (उसके बाद उस फ़ोन / कंप्यूटर पर बटन हमेशा दिखेगा; हटाना हो तो `?ai=off` लगाकर खोलो)। सबके लिए चालू करना हो तब `yes` कर दो। AI सेटअप दोबारा चलाने से यह setting नहीं बदलती।
 5. **ज़रूरी:** जब भी Private Sheet में script का नया version paste करो, **Deploy → Manage deployments → ✏️ (Edit) → Version: New version → Deploy** भी करो (लिंक वही रहता है), नहीं तो वेबसाइट का AI पुराना code चलाता रहेगा।
 
+**AI को क्या-क्या पता होता है:** हर सवाल के साथ AI को पूरी Sheet की जानकारी जाती है (पिछले 6 महीने से अगले एक साल तक के कार्यक्रम, भक्तामर, जैन कैलेंडर, टीम, समय, सुविधा...), साथ में एक "तारीख़ वार" सूची, ताकि "13 दिसंबर को क्या है" या "13 सितंबर को क्या था" जैसे सवाल का जवाब मिले। जैन धर्म या पंचांग की तिथि (अष्टमी, चतुर्दशी) Sheet में न हो तो वह इंटरनेट पर ढूँढकर बताता है और कहता है कि यह इंटरनेट से है। AI को कुछ "सिखाना" नहीं पड़ता: Sheet में जो लिखा है वही उसकी जानकारी है; कोई जवाब ग़लत / अधूरा लगे तो पहले देखो कि वह बात Sheet में ठीक से लिखी है या नहीं। एक मिनट में बहुत सवाल आएँ तो वह "एक मिनट बाद पूछें" कहता है (free सीमा)।
+
+**Settings में drop-down:** Private Sheet की **Website Settings** / **Daan Details** और वेबसाइट Sheet के `hidden`, `pinned`, `hide_photo`, `status`, `type`, `kind`, `at` जैसे column में सिर्फ़ list वाले शब्द चल सकते हैं (cell पर क्लिक करके ▾ से चुनो; कुछ और लिखने पर Google मना कर देगा)। हर setting के पास **jaankari** column में लिखा है कि वह क्या करती है। यह script के हर नए version के बाद owner का टाइमर अपने आप लगाता है, या मेनू **नेमिधाम (Owner) → Settings में dropdown और जानकारी लगाएँ** से तुरंत। नई setting (जैसे `notify_weekly`) की row भी अपने आप जुड़ जाती है।
+
 ---
+
+### 5.39 Account बदलना / किसी और को सौंपना (मंदिर का Gmail आने पर)
+
+वेबसाइट इन accounts पर चलती है। सब free हैं और सब किसी दूसरे account को सौंपे जा सकते हैं। सबसे आसान तरीका: **पहले नए account को साथी (editor / admin) बनाओ, सब चलता देखो, फिर पुराना हटाओ**, ताकि बीच में कुछ बंद न हो। हर account में 2-step verification (2FA) चालू रखो।
+
+1. **GitHub (वेबसाइट का code और फ़ोटो):** रिपॉज़िटरी → Settings → **Collaborators** → नया GitHub account जोड़ो (साथ में काम के लिए)। पूरा सौंपना हो: Settings → General → नीचे **Transfer ownership** → नए account का नाम। ध्यान: account का नाम बदलने से वेबसाइट का पता (`नाम.github.io/Nemidham`) बदलता है, इसलिए अपना डोमेन (5.36) पहले ले लो तो पता नहीं बदलेगा। Transfer के बाद: Settings → Secrets → `ONESIGNAL_REST_API_KEY` फिर से डालो, Settings → Pages चालू है जाँचो, और नया **GitHub token** नए account से बनाकर Private Sheet में **Owner सेटअप** दोबारा करो (token किसी account का निजी होता है)।
+2. **Google Sheets (दोनों) और उनकी script:** Sheet → Share → नया Gmail → Editor; पूरा सौंपना हो तो उसके नाम के आगे ▾ → **Transfer ownership** (नया व्यक्ति ईमेल से मंज़ूर करता है)। script Sheet के साथ ही जाती है, पर टाइमर, tick box और AI का Web app उसी के नाम चलते हैं जिसने सेटअप किया था, इसलिए नए owner को Private Sheet में यह करना है: (क) **Owner सेटअप**, (ख) Deploy → **New deployment** → Web app (Execute as: Me, Anyone) → नया लिंक, (ग) **AI सेटअप** (नई Gemini key + नया Web app लिंक; वेबसाइट अपने आप नया लिंक ले लेती है), (घ) पुराने account से Private Sheet में मेनू **बंद करें** (पुराना टाइमर बंद)। Drive का **"Website Photo Upload"** फ़ोल्डर भी Share → Transfer ownership।
+3. **Publish to web वाले लिंक** (`js/data.js` का `window.SHEETS`): Sheet का owner बदलने पर लिंक वही रहते हैं। नई copy बनाई हो तो File → Share → Publish to web से नए लिंक लेकर `data.js` में बदलो।
+4. **Gemini (AI):** नए Gmail से aistudio.google.com → Get API key → नई key → Private Sheet → **AI सेटअप** (Web app लिंक ख़ाली छोड़ो)। पुरानी key AI Studio में Delete।
+5. **OneSignal (सूचनाएँ):** OneSignal → Settings → **Team Members** → नया ईमेल, role Admin। फिर नया व्यक्ति अपनी तरफ़ से नई REST API Key बनाए: GitHub secret `ONESIGNAL_REST_API_KEY`, Private Sheet → **OneSignal चाबी बदलें / जाँचें**, वेबसाइट Sheet → **सेटअप (एक बार)**, तीनों में। App ID नहीं बदलता, इसलिए लोगों की सूचनाएँ चालू रहती हैं (नया app बनाया तो सबको दोबारा "सूचनाएँ चालू करें" दबाना पड़ेगा)। पुराना Admin बाद में हटाओ।
+6. **GoatCounter (विज़िटर गिनती):** GoatCounter → Settings → **Users** → नया ईमेल (admin)। या Settings में अपना ईमेल बदल दो। `data.js` में कुछ नहीं बदलता।
+7. **Google Search Console:** Settings → **Users and permissions** → नया Gmail → Owner।
+8. **YouTube / Facebook / Instagram / WhatsApp ग्रुप:** इन्हें मंदिर के account में रखो; लिंक बदले तो Private Sheet → Website Settings में नया लिंक।
+9. **आख़िर में जाँचो:** वेबसाइट खुलती है; Sheet में कुछ बदलो, 5 मिनट में वेबसाइट पर दिखे; tick box से एक Notification जाए (Notification Log में ✓); AI से एक सवाल पूछो; Sheet की जाँच में "script के दो version" वाली चेतावनी न हो।
 
 ### 5.36 अपना डोमेन (जैसे nemidham.org) आने पर क्या-क्या बदलना है (चेकलिस्ट)
 
