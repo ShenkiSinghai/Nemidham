@@ -2172,7 +2172,8 @@
       .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
   }
   /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
-     Hindi page = Hindi (hi-IN), English page = Indian English (en-IN). The spoken words are sent as the question. */
+     It always listens with "Hindi (India)" (hi-IN), on the Hindi and the English page alike: that listener also understands
+     Hinglish and English sentences, so people can speak in any of them. The spoken words are sent as the question. */
   function aiSR() { return window.SpeechRecognition || window.webkitSpeechRecognition || null; }
   function aiMicUi(on) {
     var m = document.getElementById("ai-mic"), i = document.getElementById("ai-q");
@@ -2183,7 +2184,7 @@
     var SR = aiSR(); if (!SR || aiState.busy) return;
     if (aiState.rec) { try { aiState.rec.stop(); } catch (e) {} return; }
     var rec = new SR(), got = "", heard = false, stopped = false; aiState.rec = rec;
-    rec.lang = lang === "en" ? "en-IN" : "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
+    rec.lang = "hi-IN"; rec.interimResults = true; rec.maxAlternatives = 1; rec.continuous = false;
     rec.onresult = function (e) {
       var txt = ""; for (var k = 0; k < e.results.length; k++) txt += e.results[k][0].transcript;
       heard = true; got = txt; var i = document.getElementById("ai-q"); if (i) i.value = txt;
@@ -2242,7 +2243,7 @@
       '<button type="submit" aria-label="' + esc(t("ai.send")) + '">➤</button></form>' +
       '<p class="ai-note">' + esc(t("ai.note")) + "</p>";
     var newQ = document.getElementById("ai-q"); if (newQ) { newQ.value = typed; if (hadFocus) newQ.focus(); }
-    if (aiState.rec) { if (aiState.rec.lang !== (lang === "en" ? "en-IN" : "hi-IN")) { try { aiState.rec.abort(); } catch (e) {} } else aiMicUi(true); }   /* language changed while listening: stop (tap 🎤 again) */
+    if (aiState.rec) aiMicUi(true);
     if (aiState.open) aiDraw();
   }
 
