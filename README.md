@@ -659,10 +659,10 @@ slideshow: { enabled: true, source: "diwali-2026", shuffle: false, count: "all",
 | `heroInvocation` | सबसे ऊपर की छोटी लाइन ("॥ जय जिनेन्द्र ॥"). न चाहिए तो `{ hi: "", en: "" }` |
 | `heroButtons` | नीचे के दो बटन। हर बटन: `href` (किस पेज पर जाए), `label` (नाम), `style` (`"gold"` सुनहरा या `"ghost"` हल्का)। बटन हटाना हो तो पूरी लाइन `{ ... },` मिटा दो, या `href: ""` कर दो |
 | `heroPetals` | `true` = उड़ती पंखुड़ियाँ और कमल, `false` = बंद |
-| `murti` | भगवान नेमिनाथ की फ़ोटो का रास्ता, जैसे `"images/neminath.webp"` (webp हल्की फ़ाइल है, जल्दी खुलती है) |
+| `murti` | भगवान नेमिनाथ की फ़ोटो का रास्ता, जैसे `"images/murti.webp"` (webp हल्की फ़ाइल है, जल्दी खुलती है) |
 | `mantraLines` | भगवान के नीचे चलती णमोकार की पट्टी। हर लाइन एक quote में, जितनी चाहो |
 
-**भगवान नेमिनाथ की फ़ोटो लगाना:** (फ़ोन पर जल्दी खुलने के लिए उसी फ़ोटो की एक छोटी कॉपी `neminath-520.webp` भी है जो अपने आप इस्तेमाल होती है। नई फ़ोटो लगाओ तो `murti:` में उसका नाम लिख दो, तब वही दिखेगी।) फ़ोटो ऐसी हो जिसका पीछे का हिस्सा पारदर्शी (transparent PNG) हो, ताकि पीछे का भामंडल दिखे। उसका नाम `neminath.webp` (या `.png`) रखकर `images` फ़ोल्डर में अपलोड करो (भाग 4)। जब तक फ़ोटो नहीं है, एक सुनहरी आकृति दिखती है। दूसरा नाम रखना हो तो `murti:` में वही नाम लिखो।
+**भगवान नेमिनाथ की फ़ोटो लगाना:** (फ़ोन पर जल्दी खुलने के लिए उसी फ़ोटो की एक छोटी कॉपी `murti-520.webp` भी है जो अपने आप इस्तेमाल होती है। नई फ़ोटो लगाओ तो `murti:` में उसका नाम लिख दो, तब वही दिखेगी।) फ़ोटो ऐसी हो जिसका पीछे का हिस्सा पारदर्शी (transparent PNG) हो, ताकि पीछे का भामंडल दिखे। उसका नाम `murti.webp` (या `.png`) रखकर `images` फ़ोल्डर में अपलोड करो (भाग 4)। जब तक फ़ोटो नहीं है, एक सुनहरी आकृति दिखती है। दूसरा नाम रखना हो तो `murti:` में वही नाम लिखो।
 
 ### 5.23 दैनिक कार्यक्रम (रोज़ का क्रम और तारीख़ का कैलेंडर)
 
@@ -988,7 +988,7 @@ Home खुलने पर मंत्र अपने आप चलता ह
 
 **Apps Script लगाना (मेनू और HI2EN के लिए, एक बार):**
 1. Sheet खोलो → **Extensions → Apps Script**।
-2. वहाँ जो लिखा है सब मिटाकर रिपॉज़िटरी की फ़ाइल `apps-script/Nemidham.gs` का पूरा text paste करो → Save (💾)।
+2. वहाँ जो लिखा है सब मिटाकर Apps Script फ़ाइल `Nemidham.gs` (जो आपको अलग से दी गई है) का पूरा text paste करो → Save (💾)।
 3. Sheet को reload करो। ऊपर **नेमिधाम** मेनू आएगा → **सेटअप (एक बार)** → OneSignal App ID और REST API Key डालो (OneSignal → Settings → Keys & IDs), तीसरा डिब्बा (वेबसाइट का पता) ख़ाली छोड़ दो। script का नया version paste करने पर सेटअप दोबारा नहीं करना पड़ता; बस Google दोबारा "Allow" माँग सकता है (फ़ोटो के लिए Google Drive की इजाज़त भी)। Google "Authorization required / Allow" पूछे तो अपना account चुनकर Allow करो ("unsafe" लिखा आए तो Advanced → Go to ... दबाओ; यह आपकी अपनी script है)।
 4. **ध्यान:** REST API Key script की settings में रहती है। जो Sheet edit कर सकता है वह इसे देख सकता है, इसलिए edit access सिर्फ़ भरोसेमंद लोगों को दो।
 
@@ -998,7 +998,7 @@ Home खुलने पर मंत्र अपने आप चलता ह
 
 1. **Private Sheet बनाना:** `Nemidham-Private-Settings.xlsx` Google Drive में (उसी `Nemidham` फ़ोल्डर में) upload करो → उस पर double-click → ऊपर **"Open with Google Sheets"** → खुलने पर **File → Save as Google Sheets** (यह ज़रूरी है, xlsx में script नहीं चलती)। नई Google Sheet का नाम `Nemidham Private Settings` रखो। पुरानी .xlsx फ़ाइल Drive से मिटा सकते हो।
 2. **File → Settings → Locale: India** → Save।
-3. **Extensions → Apps Script** → जो लिखा है मिटाओ → रिपॉज़िटरी की `apps-script/Nemidham.gs` का पूरा text paste (यही फ़ाइल वेबसाइट Sheet में भी है) → Save → Sheet reload करो। ऊपर मेनू **नेमिधाम (Owner)** आएगा।
+3. **Extensions → Apps Script** → जो लिखा है मिटाओ → Apps Script फ़ाइल `Nemidham.gs` (जो आपको अलग से दी गई है) का पूरा text paste (यही फ़ाइल वेबसाइट Sheet में भी है) → Save → Sheet reload करो। ऊपर मेनू **नेमिधाम (Owner)** आएगा।
 4. **GitHub token** (एक बार): GitHub → ऊपर दाएँ फ़ोटो → **Settings → Developer settings → Personal access tokens → Fine-grained tokens** → `Nemidham timer` (पहले से है तो उसी पर क्लिक → **Edit**; नया हो तो **Generate new token**: Expiration **No expiration**, Repository access **Only select repositories → Nemidham**)। **Permissions → + Add permissions** से **Actions** और **Contents** दोनों जोड़ो और दोनों को **Read and write** करो (Metadata अपने आप आता है, रहने दो) → **Update / Generate token**। नया token बना हो तो copy कर लो (एक ही बार दिखता है, किसी को न दें)। Edit करने पर token वही रहता है।
 5. मेनू **नेमिधाम (Owner) → Owner सेटअप (एक बार)**: (1) वेबसाइट वाली Sheet का पूरा लिंक (वह Sheet खोलकर address bar से copy), (2) OneSignal App ID, (3) OneSignal REST API Key, (4) GitHub token। Google "Allow" माँगे तो Advanced → Go to … → Select all → Continue, फिर यही मेनू दोबारा। "Owner सेटअप हो गया" आना चाहिए। दोबारा चलाने पर ख़ाली छोड़ा डिब्बा पहले वाला रखता है।
    - **"Access denied … valid API key" वाली ग़लती** (tick box / AI सहायक से Notification न जाए): Private Sheet में रखी OneSignal चाबी ग़लत या पुरानी है। मेनू **नेमिधाम (Owner) → OneSignal चाबी बदलें / जाँचें** → बताता है कि अभी की चाबी चल रही है या नहीं → OneSignal.com → App → Settings → Keys & IDs → **Add Key** से नई चाबी (os_v2_ से शुरू) बनाकर डालो → वह पहले जाँचता है, सही हो तभी रखता है। GitHub वाली चाबी (`ONESIGNAL_REST_API_KEY` secret) अलग है; पुरानी चाबी OneSignal में मिटाई हो तो वहाँ भी नई डालो।

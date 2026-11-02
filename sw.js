@@ -8,8 +8,8 @@
    everything else still works. */
 try { importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js"); } catch (e) {}
 
-var CACHE = "nemidham-v5";
-var SHELL = ["./", "index.html", "css/style.css", "css/theme2.css", "css/fonts.css", "js/data.js", "js/i18n.js", "js/main.js", "images/mandir-logo.webp", "images/icon-192.png", "images/icon-512.png"];
+var CACHE = "nemidham-v6";
+var SHELL = ["./", "index.html", "css/style.css", "css/theme2.css", "css/brand.css", "css/fonts.css", "js/data.js", "js/i18n.js", "js/main.js", "images/mandir-logo.webp", "images/icon-192.png", "images/icon-512.png"];
 var WAIT_MS = 2500;
 /* when a page had to be shown from the saved copy (slow network), its styles and scripts are also taken from the saved copy
    at once for a short while, instead of waiting 2.5 seconds again for each one (they are still refreshed for next time) */

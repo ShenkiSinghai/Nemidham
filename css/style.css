@@ -1,6 +1,6 @@
 /* Neminath Jinalay, Nemidham — site styles
-   Colours come from Bhagwan Neminath's traditional deep-blue complexion
-   and the gold of temple lamps. Change them once, here, in :root. */
+   Colours: deep blue and the gold of temple lamps (Theme 1 base; Theme 2 is in theme2.css).
+   Change them once, here, in :root. */
 
 :root {
   --ink: #12203a;

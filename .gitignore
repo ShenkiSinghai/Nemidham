@@ -1,1 +1,4 @@
 .notify-state/
+__pycache__/
+*.pyc
+tools/old-names.txt

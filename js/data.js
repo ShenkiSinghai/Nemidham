@@ -187,10 +187,10 @@ window.SITE = {
   heroImage: "",
 
   // THEME 2 HOME: Bhagwan Neminath ki murti ki photo, jo bhamandal ke andar dikhti hai.
-  // Photo ko images/ folder mein daalo aur uska naam yahan likho. Hum "neminath.webp" use karte hain (halki file, jaldi khulti hai,
+  // Photo ko images/ folder mein daalo aur uska naam yahan likho. Hum "murti.webp" use karte hain (halki file, jaldi khulti hai,
   // quality wahi). Jab tak photo load nahi hoti tab tak wahan kuch nahi dikhta.
   // Best: transparent background wali WEBP ya PNG, lagbhag 900 x 1100 pixel.
-  murti: "images/neminath.webp",
+  murti: "images/murti.webp",
   // Namokar mantra (home ke hero ke niche chalta hai). Badalna ho to yahan likho.
   mantraLines: [
     "णमो अरिहंताणं", "णमो सिद्धाणं", "णमो आयरियाणं", "णमो उवज्झायाणं", "णमो लोए सव्वसाहूणं",

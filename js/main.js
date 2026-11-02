@@ -529,7 +529,7 @@
     if (fig && img && S.murti) {
       img.onload = function () { fig.classList.add("ok"); };
       img.onerror = function () { fig.classList.remove("ok"); fig.classList.add("fail"); img.removeAttribute("src"); };
-      /* the built-in smaller copy (neminath-520.webp) is used only for the default photo; a different photo in SITE.murti is shown as it is */
+      /* the built-in smaller copy (murti-520.webp) is used only for the default photo; a different photo in SITE.murti is shown as it is */
       if (img.getAttribute("src") !== S.murti) { img.removeAttribute("srcset"); img.src = S.murti; }
       if (img.complete && img.naturalWidth) fig.classList.add("ok");
     }
@@ -2141,13 +2141,15 @@
   function aiSave() { try { sessionStorage.setItem("nemi-ai-h", JSON.stringify(aiHist().slice(-20))); } catch (e) {} }
   function aiVid() { var v = lsGet("nemi-vid"); if (!v) { v = "v" + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); lsSet("nemi-vid", v); } return v; }
   /* plain text answer -> safe HTML (links of this website and https links become clickable) */
-  /* a link of this website itself (not a look-alike such as shenkisinghai.github.io.other.com or other.github.io/Nemidham/) */
+  /* a link of this website itself (not a look-alike such as owner.github.io.other.com or other.github.io/repo/):
+     the same address as this page, or the GitHub Pages address of SITE.github (user, repo) */
+  function aiHome() { var g = S.github || {}; return g.user && g.repo ? { host: String(g.user).toLowerCase() + ".github.io", path: "/" + g.repo + "/" } : null; }
   function aiOwn(u) {
-    try { var x = new URL(String(u).replace(/&amp;/g, "&")); return x.origin === location.origin || (x.hostname === "shenkisinghai.github.io" && x.pathname.indexOf("/Nemidham/") === 0); } catch (e) { return false; }
+    try { var x = new URL(String(u).replace(/&amp;/g, "&")), h = aiHome(); return x.origin === location.origin || (!!h && x.hostname === h.host && x.pathname.indexOf(h.path) === 0); } catch (e) { return false; }
   }
   function aiText(s) {
     return esc(s).replace(/(https:\/\/[^\s<]+[^\s<.,;:!?)\u0964])/g, function (u) {
-      var show = aiOwn(u) ? (u.replace(/^https:\/\/[^\/]+\/(Nemidham\/)?/, "") || "Home") : u.replace(/^https:\/\//, "");
+      var h = aiHome(), show = aiOwn(u) ? (u.replace(/^https:\/\/[^\/]+/, "").replace(h && u.indexOf(h.path) > 0 ? h.path : "/", "") || "Home") : u.replace(/^https:\/\//, "");
       return '<a href="' + u + '">🔗 ' + show + "</a>";
     }).replace(/\n/g, "<br>");
   }

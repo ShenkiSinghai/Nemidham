@@ -1,0 +1,117 @@
+{
+  "_help": "Is mandir ki saari pehchaan. Naye mandir ke liye README-TEMPLATE.md dekhen. slug / storagePrefix sirf chhote angrezi akshar.",
+  "slug": "nemidham",
+  "storagePrefix": "nemi",
+  "name": {
+    "hi": "श्री 1008 नेमिनाथ दिगंबर जैन मंदिर",
+    "en": "Shri 1008 Neminath Digambar Jain Mandir"
+  },
+  "short": {
+    "hi": "नेमिधाम",
+    "en": "Nemidham"
+  },
+  "moolnayak": {
+    "hi": "नेमिनाथ",
+    "en": "Neminath"
+  },
+  "jinalay": {
+    "hi": "नेमिनाथ जिनालय",
+    "en": "Neminath Jinalay"
+  },
+  "tradition": {
+    "hi": "दिगंबर",
+    "en": "Digambar"
+  },
+  "road": {
+    "hi": "बकोरी रोड",
+    "en": "Bakori Road"
+  },
+  "area": {
+    "hi": "वाघोली",
+    "en": "Wagholi"
+  },
+  "city": {
+    "hi": "पुणे",
+    "en": "Pune"
+  },
+  "state": {
+    "hi": "महाराष्ट्र",
+    "en": "Maharashtra"
+  },
+  "pin": "412207",
+  "address": [
+    {
+      "hi": "श्री 1008 नेमिनाथ दिगंबर जैन मंदिर, नेमिधाम",
+      "en": "Shri 1008 Neminath Digambar Jain Mandir, Nemidham"
+    },
+    {
+      "hi": "बकोरी रोड, वाघोली",
+      "en": "Bakori Road, Wagholi"
+    },
+    {
+      "hi": "पुणे, महाराष्ट्र, 412207",
+      "en": "Pune, Maharashtra, 412207"
+    }
+  ],
+  "tagline": {
+    "hi": "नेमिधाम में रोज़ दर्शन, अभिषेक और आरती। आपके सहयोग से मंदिर का विकास आगे बढ़ रहा है।",
+    "en": "Daily darshan, abhishek and aarti at Nemidham. The mandir is growing with your support."
+  },
+  "heroLine": {
+    "hi": "जैन संस्कारों के बीजारोपण का एक नया केंद्र",
+    "en": "A New Center for the Sowing of Jain Values"
+  },
+  "siteUrl": "https://shenkisinghai.github.io/Nemidham/",
+  "github": {
+    "user": "shenkisinghai",
+    "owner": "ShenkiSinghai",
+    "repo": "Nemidham"
+  },
+  "mapLink": "https://maps.app.goo.gl/hmgaJF2hrvdnN2jf8",
+  "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3781.6979918312923!2d74.00815587372229!3d18.587649567124686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c3005211eeaf%3A0x258f5a756ded4252!2sShri%201008%20Neminath%20Jinalay%2C%20Nemidham!5e0!3m2!1sen!2sin!4v1793055390325!5m2!1sen!2sin",
+  "geo": {
+    "latitude": 18.587649,
+    "longitude": 74.008156
+  },
+  "analyticsId": "G-BWWJVYC4Q4",
+  "goatcounter": "nemidham",
+  "onesignal": {
+    "appId": "85660e76-85ad-47b2-97de-a6390ce031cb",
+    "safariWebId": "web.onesignal.auto.5f8d50ad-7ec3-4f1c-a2de-134e8949294e"
+  },
+  "social": {
+    "whatsappGroup": "https://chat.whatsapp.com/IECu8XuP7dLFaWeDHTsHMW?s=cl&p=a&mlu=4&ilr=4&iam=2",
+    "facebook": "https://www.facebook.com/share/19mUVVu8pS/",
+    "instagram": "https://www.instagram.com/neminathjinalay",
+    "youtube": "https://youtube.com/@neminathjinalay"
+  },
+  "sheetLinks": {
+    "saptahik": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1603045792&single=true&output=csv",
+    "masik": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=947962969&single=true&output=csv",
+    "dravya": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=2001759128&single=true&output=csv",
+    "bhaktamar": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=700086573&single=true&output=csv",
+    "karyakram": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=400287793&single=true&output=csv",
+    "dainik": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=509144334&single=true&output=csv",
+    "samay": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1120313963&single=true&output=csv",
+    "suchnayein": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=701218416&single=true&output=csv",
+    "yojana": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1462059264&single=true&output=csv",
+    "banner": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=296682865&single=true&output=csv",
+    "team": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=947760466&single=true&output=csv",
+    "niyamitDaan": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=709940025&single=true&output=csv",
+    "about": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=18569743&single=true&output=csv",
+    "howto": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=191292584&single=true&output=csv",
+    "timeline": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1180701047&single=true&output=csv",
+    "nearby": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1201238355&single=true&output=csv",
+    "calendar": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1932071733&single=true&output=csv",
+    "niyam": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=903434888&single=true&output=csv",
+    "suvidha": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1038943295&single=true&output=csv",
+    "gallery": "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2RB8Ve6iNKPI_c_cx-fnDBqCfQcYbz5__4fBh1xMLn3j0CsP97RCHfFOZAXcudrcbAG1Ohre8XdrN/pub?gid=1406422390&single=true&output=csv",
+    "settings": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvGS8p85Vf7NU4JA97DyXB3b4uepKO2M8zgTgxwLBMB953u9sAQ9ol2t4bi788Gs9lAu0zJrN30_f5/pub?gid=1563301521&single=true&output=csv",
+    "daanDetails": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSvGS8p85Vf7NU4JA97DyXB3b4uepKO2M8zgTgxwLBMB953u9sAQ9ol2t4bi788Gs9lAu0zJrN30_f5/pub?gid=848661276&single=true&output=csv"
+  },
+  "palette": {},
+  "keep": {
+    "activities": true,
+    "mantraAudio": true
+  }
+}
