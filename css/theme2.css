@@ -21,9 +21,10 @@
   --card-bg: linear-gradient(180deg, #FFFDF8 0%, #FAF4E4 100%);
   --card-bd: rgba(201, 169, 97, .38);
   --display: "Cinzel", "Tiro Devanagari Hindi", "Noto Serif Devanagari", Georgia, serif;
-  --serif: "Cormorant Garamond", "Noto Serif Devanagari", "Tiro Devanagari Hindi", Georgia, serif;
+  --serif: "Digits", "Cormorant Garamond", "Noto Serif Devanagari", "Tiro Devanagari Hindi", Georgia, serif;
   --wrap: 1180px;
 }
+html[lang="en"] { --serif: "DigitsEn", "Cormorant Garamond", "Noto Serif Devanagari", "Tiro Devanagari Hindi", Georgia, serif; }
 :root[data-theme="dark"] {
   --paper: #0C0816; --surface: #1A1330; --surface-2: #1A1330; --mist: #130D24; --line: #3a2d5c;
   --text: #EDE3CF; --muted: #B5A78F; --ink-2: #E8D5A0; --gold-ink: #E8D5A0; --ink-text: #FAF4E4;
@@ -34,7 +35,7 @@
 }
 
 /* ---------- Base type ---------- */
-body { font-family: var(--serif); font-size: 1.16rem; font-weight: 500; line-height: 1.7; background: var(--paper); color: var(--text); }
+body { font-family: var(--serif); font-variant-numeric: lining-nums; font-size: 1.16rem; font-weight: 500; line-height: 1.7; background: var(--paper); color: var(--text); }
 html[lang="hi"] body { font-size: 1.04rem; line-height: 1.8; font-weight: 400; }
 h1, h2, h3, h4 { font-family: var(--display); font-weight: 500; color: var(--ink-text); letter-spacing: .02em; }
 html[lang="hi"] h1, html[lang="hi"] h2, html[lang="hi"] h3, html[lang="hi"] h4 { font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif; letter-spacing: 0; font-weight: 400; }
@@ -43,7 +44,13 @@ a { color: var(--ink-2); }
 a:hover { color: var(--gold-ink); }
 ::selection { background: var(--gold); color: #2B1810; }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-.rows dt, .rows dd, .meta, .fine, .status, .tbl, .timeline, input, select, textarea, .tag, .chip { font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans", "Noto Sans Devanagari", Roboto, Arial, sans-serif; }
+/* one reading font everywhere (lists, tables, timings, small lines): the same as the paragraphs, never a plain system font */
+.rows dt, .rows dd, .meta, .fine, .status, .tbl, .timeline, input, select, textarea, .tag, .chip { font-family: var(--serif); }
+/* Cormorant (English) is small for its size and thin at 400: data lines get a little more size and weight so they read as easily as before */
+html[lang="en"] :is(.rows dt, .rows dd, .meta, .fine, .status, .timeline, .tag, .chip, .dw, input, select, textarea) { font-size-adjust: .46; }
+html[lang="en"] .dc { font-size: 1.12rem; font-weight: 500; }
+html[lang="en"] .dsched time { font-weight: 600; }
+html[lang="en"] #daan :is(.rows dt, .rows dd, .fine), .rows dd code { font-size-adjust: none; }   /* the Daan page's English lines were already in this font and size; codes keep their own size */
 .rows dd, .rows dt { font-size: .95rem; }
 
 /* ---------- Top gold strip ---------- */
@@ -298,8 +305,8 @@ html[lang="hi"] .dcal-h { font-family: "Tiro Devanagari Hindi", serif; letter-sp
 .dnav { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--card-bd); background: var(--surface); color: var(--gold-ink); font-size: 1.3rem; cursor: pointer; line-height: 1; transition: all .3s; }
 .dnav:hover { background: var(--gold); color: #2B1810; border-color: var(--gold); }
 .dgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.dw { text-align: center; font-size: .74rem; color: var(--muted); padding: 4px 0 8px; font-family: system-ui, "Noto Sans Devanagari", sans-serif; text-transform: uppercase; letter-spacing: .06em; }
-.dc { aspect-ratio: 1; border: 1px solid transparent; background: none; border-radius: 12px; cursor: pointer; color: var(--text); font-family: system-ui, "Noto Sans Devanagari", sans-serif; font-size: .95rem; position: relative; transition: all .3s var(--ease); }
+.dw { text-align: center; font-size: .74rem; color: var(--muted); padding: 4px 0 8px; font-family: var(--serif); text-transform: uppercase; letter-spacing: .06em; }
+.dc { aspect-ratio: 1; border: 1px solid transparent; background: none; border-radius: 12px; cursor: pointer; color: var(--ink-text); font-family: var(--serif); font-size: .95rem; position: relative; transition: all .3s var(--ease); }
 .dc:hover { background: color-mix(in srgb, var(--gold) 18%, var(--surface)); border-color: var(--gold); }
 .dc.is-today { border-color: var(--gold); font-weight: 700; }
 .dc.is-sel { background: linear-gradient(135deg, #EBDAA8, #D2B26A 55%, #B8934A); color: #2B1810; border-color: transparent; font-weight: 700; box-shadow: 0 8px 18px -8px rgba(201, 169, 97, .8); }
@@ -317,7 +324,7 @@ html[lang="hi"] .dh { text-transform: none; letter-spacing: .02em; font-size: 1.
 .dsched { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; }
 .dsched::before { content: ""; position: absolute; left: 112px; top: 8px; bottom: 8px; width: 1px; background: linear-gradient(var(--gold), rgba(201, 169, 97, .15)); }
 .dsched li { display: grid; grid-template-columns: 96px 34px 1fr; gap: 12px; align-items: start; padding: 12px 0; position: relative; }
-.dsched time { text-align: right; font-family: system-ui, "Noto Sans Devanagari", sans-serif; font-size: .9rem; font-weight: 700; color: var(--gold-ink); padding-top: 6px; }
+.dsched time { text-align: right; font-family: var(--serif); font-size: .9rem; font-weight: 700; color: var(--gold-ink); padding-top: 6px; }
 .dic { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--gold); z-index: 1; font-size: 1rem; }
 .dsched h4 { margin: 0; font-size: 1.1rem; }
 .dsched p { margin: .15em 0 0; color: var(--muted); font-size: 1rem; }
@@ -617,7 +624,7 @@ body[data-page="home"] .section { overflow: hidden; }
 
 /* ---------- Daan lists: month buttons, Shantidhara / Dravya table, Bhaktamar month chooser ---------- */
 .mtabs .pf, .bh-chips .pf { flex-direction: column; gap: 2px; align-items: center; line-height: 1.25; }
-.mtabs .pf small { font-size: .74rem; opacity: .85; text-transform: none; letter-spacing: 0; font-family: system-ui, "Noto Sans", "Noto Sans Devanagari", sans-serif; }
+.mtabs .pf small { font-size: .74rem; opacity: .85; text-transform: none; letter-spacing: 0; font-family: var(--serif); }
 .kfilter { margin-bottom: 10px; }
 .bh-chips .pf { flex-direction: row; padding: 7px 14px; min-width: 3.4em; justify-content: center; }
 .dtbl th, .dtbl td { text-align: left; padding: 10px 14px; vertical-align: top; }
@@ -735,7 +742,7 @@ body[data-page="home"] .section { overflow: hidden; }
 html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td { font-size: 1.04rem; line-height: 1.5; }
 .dtbl td .num, .bmtbl td .num, .btbl td .num { font-size: 1em; }
 .dtbl .dd, .dtbl .dn, .bmtbl .bd, .bmtbl .bn, .btbl .bm, .btbl .bd, .bfn { font-weight: 500; }
-.dtbl .dm, .bmtbl .dm, .bfa { font-weight: 500; }
+.dtbl .dm, .bmtbl .dm, .bfa { font-weight: 600; color: var(--ink-text); }
 .dtbl .dy, .dtbl .dk { font-size: .88rem; }
 html[lang="en"] .dtbl .dy, html[lang="en"] .dtbl .dk { font-size: .96rem; }
 .dnote { font-size: .82rem; }
@@ -749,7 +756,7 @@ html[lang="en"] .bfam { font-size: 1.04rem; }
 /* English mode: Daan tables use the same serif body font and weight as the rest of the English pages */
 html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td, html[lang="en"] .bfam, html[lang="en"] .bfn, html[lang="en"] .bfa { font-family: var(--serif); font-size: 1.1rem; font-weight: 500; line-height: 1.45; }
 html[lang="en"] .dtbl .dy, html[lang="en"] .dtbl .dk, html[lang="en"] .dtbl .dk .pd-in { font-size: 1.04rem; }
-html[lang="en"] .dtbl .dm, html[lang="en"] .bmtbl .dm, html[lang="en"] .bfa { font-weight: 500; }
+html[lang="en"] .dtbl .dm, html[lang="en"] .bmtbl .dm, html[lang="en"] .bfa { font-weight: 600; }
 html[lang="en"] .dnote { font-family: var(--serif); font-size: .95rem; }
 @media (max-width: 560px) {
   html[lang="en"] .dtbl td, html[lang="en"] .bmtbl td, html[lang="en"] .btbl td, html[lang="en"] .bfam, html[lang="en"] .bfn, html[lang="en"] .bfa { font-size: 1.04rem; }

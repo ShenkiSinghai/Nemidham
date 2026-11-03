@@ -114,7 +114,7 @@ window.UI = {
     "social.instagram": "इंस्टाग्राम पेज", "social.youtube": "यूट्यूब चैनल",
 
     "f.timings": "रोज़ का समय", "f.pages": "पेज",
-    "f.legal": "जय जिनेन्द्र। © {year} {name}, {place}।",
+    "f.legal": "जय जिनेन्द्र। © {year} {name}, {place}। सर्वाधिकार सुरक्षित।",
     "f.visitors": "वेबसाइट विज़िटर संख्या", "f.by": "वेबसाइट संयोजक: {name}"
   },
 
@@ -230,7 +230,7 @@ window.UI = {
     "social.instagram": "Instagram page", "social.youtube": "YouTube channel",
 
     "f.timings": "Daily timings", "f.pages": "Pages",
-    "f.legal": "Jai Jinendra. © {year} {name}, {place}.",
+    "f.legal": "Jai Jinendra. © {year} {name}, {place}. All rights reserved.",
     "f.visitors": "Website visitor count", "f.by": "Website by: {name}"
   }
 };
