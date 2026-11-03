@@ -66,8 +66,9 @@ def make(lat, lon, y_from, y_to, krules, prules, place="", disp=None):
     for r in krules:
         for d in tithi_days(days, r["pm"], r["paksha"], r["tn"]):
             if inr(d):
-                evs.append(ev(d, "kalyanak", "%s-%s-%s" % (r["slug"], r["k"], d[:4]), "भगवान %s %s कल्याणक" % (r["tir_hi"], KN_HI[r["k"]]),
-                              "Bhagwan %s %s Kalyanak" % (r["tir_en"], KN_EN[r["k"]])))
+                th, te = "भगवान %s %s कल्याणक" % (r["tir_hi"], KN_HI[r["k"]]), "Bhagwan %s %s Kalyanak" % (r["tir_en"], KN_EN[r["k"]])
+                if r["slug"] == "mahavir" and r["k"] == "moksh": th, te = "भगवान महावीर स्वामी निर्वाणोत्सव (मोक्ष कल्याणक)", "Bhagwan Mahavir Swami Nirvanotsav (Moksh Kalyanak)"
+                evs.append(ev(d, "kalyanak", "%s-%s-%s" % (r["slug"], r["k"], d[:4]), th, te))
     for r in prules:
         for d in tithi_days(days, r["pm"], r["paksha"], r["tn"]):
             if inr(d):

@@ -920,6 +920,8 @@ html[lang="hi"] .jc-ht strong { font-family: "Tiro Devanagari Hindi", serif; let
 .jt-s { display: none; }
 .jc-chips2 { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .jc-chipx { display: block; font-size: .78rem; line-height: 1.3; padding: 2px 7px; border-radius: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid; }
+.cx-s { display: none; }
+@media (max-width: 1279px) { .cx-l { display: none; } .cx-s { display: inline; } }
 .jx-kalyanak { background: #FDF0D2; color: #5E3A04; border-color: #C27A0E; }
 .jx-parv { background: #E4ECFA; color: #1D3560; border-color: #3558A8; }
 .jx-vrat { background: #DFF2E6; color: #1B5E37; border-color: #2E8B57; }
@@ -931,17 +933,23 @@ html[lang="hi"] .jc-ht strong { font-family: "Tiro Devanagari Hindi", serif; let
 .jd { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
 .jd-kalyanak { background: #C27A0E; } .jd-parv { background: #3558A8; } .jd-vrat { background: #2E8B57; } .jd-other { background: #8A6E5A; }
 :root[data-theme="dark"] .jd-parv { background: #7FA2F0; } :root[data-theme="dark"] .jd-kalyanak { background: #F0B54A; } :root[data-theme="dark"] .jd-vrat { background: #5FCB8E; }
-.jc-c.is-pt { background: color-mix(in srgb, var(--gold) 14%, var(--surface)); border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
-.jc-c.is-pt .jc-t { color: var(--gold-ink); font-weight: 600; }
+.jc-c.is-pt { border-color: #D98EA1; box-shadow: inset 0 3px 0 #B03A57; }
+.jc-c.is-pt .jc-t { color: #7A1E35; background: #F7E4E8; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+:root[data-theme="dark"] .jc-c.is-pt { border-color: #8E4058; box-shadow: inset 0 3px 0 #E07A94; }
+:root[data-theme="dark"] .jc-c.is-pt .jc-t { color: #FFDCE5; background: #4A1F2C; }
 .jc-c.is-pur .jc-t, .jc-c.is-ama .jc-t { color: var(--saffron-deep); font-weight: 600; }
 :root[data-theme="dark"] .jc-c.is-pur .jc-t, :root[data-theme="dark"] .jc-c.is-ama .jc-t { color: var(--gold-l); }
 .jc-c.is-today { border: 2px solid var(--saffron); }
 .jc-c.is-sel { background: linear-gradient(135deg, #EBDAA8, #D2B26A 55%, #B8934A); border-color: transparent; color: #2B1810; box-shadow: 0 10px 22px -12px rgba(122, 90, 30, .8); }
 .jc-c.is-sel .jc-t { color: #3B2410; }
-.jc-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; margin-top: 16px; }
+.jc-c.is-sel.is-pt .jc-t { color: #7A1E35; background: #FFF3F5; }
+.jc-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 20px; margin-top: 16px; }
 .jc-legend { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; font-size: .95rem; color: var(--muted); }
 .jc-legend li { display: inline-flex; align-items: center; gap: 7px; }
-.jl-pt { width: 16px; height: 12px; border-radius: 4px; background: color-mix(in srgb, var(--gold) 22%, var(--surface)); border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); }
+.jl-pt { font-size: .78rem; font-weight: 700; padding: 0 7px; border-radius: 999px; color: #7A1E35; background: #F7E4E8; border-top: 2px solid #B03A57; }
+:root[data-theme="dark"] .jl-pt { color: #FFDCE5; background: #4A1F2C; border-top-color: #E07A94; }
+.jl { display: inline-block; width: 18px; height: 12px; border-radius: 3px; border-left: 3px solid; }
+.jc-legend { margin: 0 0 14px !important; justify-content: center; }
 .jc-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .jc-side { display: grid; gap: 20px; margin-top: 24px; align-items: start; }
 @media (min-width: 900px) { .jc-side { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -981,15 +989,17 @@ html[lang="hi"] .jc-ht strong { font-family: "Tiro Devanagari Hindi", serif; let
 .jc-about-b p { margin: 0 0 10px; font-size: 1rem; line-height: 1.7; }
 .jc-note { margin-top: 18px; text-align: center; }
 :root[data-theme="dark"] .dday-tithi a { color: var(--gold-l); }
-/* "Today" line: page top on inner pages, under the invocation on Home, and in the footer */
-.jt-chip { margin: 0 0 12px; font-size: .98rem; }
-.jt-chip a { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px; padding: 5px 14px; border-radius: 999px; text-decoration: none; color: #FAF4E4; background: rgba(255, 255, 255, .08); border: 1px solid rgba(232, 213, 160, .35); }
-.jt-chip a:hover { background: rgba(232, 213, 160, .18); color: #FFFFFF; }
+/* "Today" line: a small pill under the language / appearance buttons of the menu bar, and in the footer */
+.jt-bar { position: absolute; top: 100%; right: clamp(14px, 2.4vw, 32px); margin-top: 8px; z-index: 2; transition: opacity .3s var(--ease); }
+header.site.scrolled .jt-bar, header.site:has(.nav-toggle[aria-expanded="true"]) .jt-bar, header.site:has(.appearance-menu:not([hidden])) .jt-bar { opacity: 0; visibility: hidden; }
+.jt-chip { margin: 0; font-size: .92rem; }
+.jt-chip a { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px; padding: 4px 13px; border-radius: 999px; text-decoration: none; color: #FAF4E4; background: rgba(12, 8, 22, .55); border: 1px solid rgba(232, 213, 160, .4); backdrop-filter: blur(6px); max-width: min(92vw, 520px); }
+.jt-chip a:hover { background: rgba(26, 19, 48, .8); border-color: var(--gold-l); color: #FFFFFF; }
 .jt-k { color: var(--gold-l); font-weight: 600; }
 .jt-ev { color: #F1E3C0; }
-.jt-hero { margin: 0 auto clamp(.4rem, 1.4vh, 1rem); text-align: center; }
 .jt-foot { margin: 18px 0 0; font-size: .95rem; }
-.jt-foot a { color: #F3EAD3; text-decoration: none; } .jt-foot a:hover { color: var(--gold-l); }
+.jt-foot a { display: inline; padding: 0; border: 0; background: none; color: #F3EAD3; text-decoration: none; } .jt-foot a:hover { color: var(--gold-l); }
+@media (max-width: 480px) { .jt-chip { font-size: .82rem; } .jt-chip a { padding: 3px 10px; } .jt-ev { display: none; } }
 @media (max-width: 979px) {
   .jc-c { min-height: 92px; }
   .jc-chipx { font-size: .72rem; padding: 1px 5px; }
@@ -1011,4 +1021,18 @@ html[lang="hi"] .jc-ht strong { font-family: "Tiro Devanagari Hindi", serif; let
   .jc-facts { gap: 6px; } .jc-facts div { padding: 7px 8px; }
   .jc-foot { flex-direction: column; align-items: stretch; }
   .jc-ctl { justify-content: space-between; }
+}
+
+/* inner page title band: slimmer */
+.page-head { padding: 2.1rem 0 1.9rem; }
+.page-head h1 { font-size: clamp(1.6rem, 3.6vw, 2.4rem); margin-bottom: .2em; }
+.page-head p { margin: 0; }
+@media (max-width: 600px) { .page-head { padding: 1.6rem 0 1.4rem; } }
+.jc-sel { font: inherit; font-size: 1rem; padding: 9px 34px 9px 14px; border-radius: 999px; border: 1px solid var(--card-bd); background: var(--surface); color: var(--ink-text); cursor: pointer; }
+.jc-sel:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+@media (max-width: 700px) { .jc-ctl { display: grid; grid-template-columns: 1fr 1fr; } .jc-ctl .btn { grid-column: 1 / -1; justify-content: center; } }
+@media (max-width: 700px) {   /* on phones the boxes show dots, so the legend shows the same dots */
+  .jl { width: 9px; height: 9px; border-radius: 50%; border: 0; }
+  .jl.jx-kalyanak { background: #C27A0E; } .jl.jx-parv { background: #3558A8; } .jl.jx-vrat { background: #2E8B57; }
+  :root[data-theme="dark"] .jl.jx-kalyanak { background: #F0B54A; } :root[data-theme="dark"] .jl.jx-parv { background: #7FA2F0; } :root[data-theme="dark"] .jl.jx-vrat { background: #5FCB8E; }
 }

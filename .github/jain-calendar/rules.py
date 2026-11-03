@@ -22,7 +22,7 @@ PARV = [
  P(B,"S",14,"anant-chaturdashi","अनंत चतुर्दशी","Anant Chaturdashi"),
  P(Asw,"K",1,"kshamavani","क्षमावाणी पर्व","Kshamavani Parv"),
  P(K,"K",13,"dhanya-teras","धन्य तेरस (योग निरोध)","Dhanya Teras (Yog Nirodh)"),
- P(K,"K",15,"deepavali","दीपावली (भगवान महावीर निर्वाणोत्सव)","Deepavali (Bhagwan Mahavir Nirvan)"),
+ P(K,"K",15,"deepavali","दीपावली","Deepavali"),
  P(K,"S",1,"vir-nirvan-samvat","वीर निर्वाण संवत प्रारंभ","Vir Nirvan Samvat begins"),
  P(K,"S",8,"ashtahnika-kartik","अष्टाह्निका पर्व (कार्तिक)","Ashtahnika Parv (Kartik)","parv",8),
  P(Mh,"S",5,"dashlakshan-magh","दशलक्षण व्रत (माघ)","Dashlakshan Vrat (Magh)","vrat",10),

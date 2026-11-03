@@ -949,13 +949,11 @@
   }
   function injectToday() {
     var td = jtToday(); if (!td) return;
-    var lab = t("cal.today_is"), href = "calendar.html?date=" + todayISO();
-    var html = '<a href="' + href + '"><span class="jt-k">' + esc(lab) + "</span> " + esc(td.tithi) + (td.ev.length ? '<span class="jt-ev"> · ' + esc(td.ev.slice(0, 2).join(" · ")) + "</span>" : "") + "</a>";
-    var ph = document.querySelector(".page-head .wrap");
-    if (ph) { var el = ph.querySelector(".jt-chip"); if (!el) { el = document.createElement("p"); el.className = "jt-chip"; ph.insertBefore(el, ph.firstChild); } el.innerHTML = html; }
-    var hp = document.getElementById("hero-today");
-    if (!hp) { var inv = document.querySelector(".hero2 .h2-invoc"); if (inv) { hp = document.createElement("p"); hp.id = "hero-today"; hp.className = "jt-chip jt-hero"; inv.parentNode.insertBefore(hp, inv.nextSibling); } }
-    if (hp) hp.innerHTML = html;
+    var href = "calendar.html?date=" + todayISO(), full = t("cal.today_is") + " " + td.tithi + (td.ev.length ? " · " + td.ev.join(" · ") : "");
+    var html = '<a href="' + href + '" title="' + esc(full) + '"><span class="jt-k">' + esc(t("cal.today_is")) + "</span> " + esc(td.tithi) + (td.ev.length ? '<span class="jt-ev"> · ' + esc(td.ev.slice(0, 2).join(" · ")) + "</span>" : "") + "</a>";
+    /* under the language / appearance buttons of the menu bar (hidden once the bar turns solid on scrolling, or the menu is open) */
+    var hdr = document.querySelector("header.site");
+    if (hdr && !hdr.querySelector(".jt-bar")) { var bar = document.createElement("div"); bar.className = "jt-bar"; bar.innerHTML = '<p class="jt-chip">' + html + "</p>"; hdr.appendChild(bar); }
     var lg = document.querySelector("footer.site .legal");
     var fb = lg && lg.closest(".foot-bottom");
     if (fb && !document.querySelector("footer.site .jt-foot")) { var f = document.createElement("p"); f.className = "jt-foot"; f.innerHTML = html; fb.parentNode.insertBefore(f, fb); }
@@ -977,10 +975,10 @@
     var merged = csCalMerge(extra, sheet).filter(function (c) { return c.calc && !c.hidden; });
     return all.concat(merged);
   }
-  function calShort(c) {   /* short words inside a calendar box */
-    var x = L(c.title);
-    if (c.type === "kalyanak") x = x.replace(/^(भगवान|Bhagwan)\s+/, "").replace(/\s*(कल्याणक|Kalyanak)$/, "").replace(/\s*\([^)]*\)/, "");
-    return x.replace(/\s*\((कार्तिक|फाल्गुन|आषाढ़|माघ|चैत्र|भाद्रपद|Kartik|Phalgun|Ashadh|Magh|Chaitra|Bhadrapad)\)/, "");
+  function calShort(c, abbr) {   /* words inside a calendar box: kalyanak keeps its type ("... जन्म कल्याणक", or "... जन्म क." when short) */
+    var x = L(c.title).replace(/^(भगवान|Bhagwan)\s+/, "").replace(/\s*\((कार्तिक|फाल्गुन|आषाढ़|माघ|चैत्र|भाद्रपद|Kartik|Phalgun|Ashadh|Magh|Chaitra|Bhadrapad)\)/, "").replace(/\s+\((मोक्ष कल्याणक|Moksh Kalyanak)\)$/, "").replace(/\s+(स्वामी|Swami)\b/, "").replace(/\s*\((आदिनाथ|Adinath)\)/, "");
+    if (abbr) x = x.replace(/\s*कल्याणक$/, " क.").replace(/\s*Kalyanak$/, " K.").replace(/\s*(प्रारंभ)$/, "").replace(/\s*begins$/, "");
+    return x;
   }
   var calDay = "", calMonth = "", calDrawn = false;
   function calItemHtml(c, withDate) {
@@ -1013,12 +1011,12 @@
         else { short = (lang === "en" ? (pd.k ? "K " : "S ") : (pd.k ? "कृ " : "शु ")) + pd.tn; long = (lang === "en" ? (pd.k ? "K " : "S ") : (pd.k ? "कृ. " : "शु. ")) + pd.name; }
       }
       var chips = list.filter(function (c) { return c.type !== "tithi"; }), shown = chips.slice(0, 3);
-      var chipHtml = shown.map(function (c) { return '<span class="jc-chipx jx-' + esc(c.type || "other") + '">' + esc(calShort(c)) + "</span>"; }).join("") + (chips.length > 3 ? '<span class="jc-more">+' + (chips.length - 3) + "</span>" : "");
+      var chipHtml = shown.map(function (c) { return '<span class="jc-chipx jx-' + esc(c.type || "other") + '" title="' + esc(L(c.title)) + '"><span class="cx-l">' + esc(calShort(c)) + '</span><span class="cx-s">' + esc(calShort(c, true)) + "</span></span>"; }).join("") + (chips.length > 3 ? '<span class="jc-more">+' + (chips.length - 3) + "</span>" : "");
       var dots = ["kalyanak", "parv", "vrat", "other"].filter(function (k) { return kinds[k]; }).map(function (k) { return '<i class="jd jd-' + k + '"></i>'; }).join("");
       var lab = fullDate(iso) + (pd ? ", " + pd.full : "") + (list.length ? ", " + list.map(function (c) { return L(c.title); }).join(", ") : "");
       cells += '<button type="button" class="jc-c' + (iso === today ? " is-today" : "") + (iso === calDay ? " is-sel" : "") + (parvT ? " is-pt" : "") + (pd && pd.n === 15 ? " is-pur" : "") + (pd && pd.n === 30 ? " is-ama" : "") +
         '" data-d="' + iso + '" aria-label="' + esc(lab) + '" aria-pressed="' + (iso === calDay ? "true" : "false") + '"><span class="jc-top"><span class="jc-n">' + d + "</span>" +
-        (pd ? '<span class="jc-t"><span class="jt-s">' + esc(short) + '</span><span class="jt-l">' + esc(long) + "</span></span>" : "") + "</span>" +
+        (pd ? '<span class="jc-t" title="' + esc(pd.full) + '"><span class="jt-s">' + esc(short) + '</span><span class="jt-l">' + esc(long) + "</span></span>" : "") + "</span>" +
         (chipHtml ? '<span class="jc-chips2">' + chipHtml + "</span>" : "") + (dots ? '<span class="jc-dots" aria-hidden="true">' + dots + "</span>" : "") + "</button>";
     }
     var title = new Date(y, m, 1).toLocaleDateString(loc(), { month: "long", year: "numeric" });
@@ -1042,12 +1040,15 @@
     ptCard += pks.length ? '<h3 class="jc-h3b">' + esc(t("cal.panchak")) + '</h3><ul class="jc-pk-list">' + pks.map(function (p) { return "<li>" + esc(jpWhen(p[0])) + " – " + esc(jpWhen(p[1])) + "</li>"; }).join("") + '</ul><p class="jc-sub">' + esc(t("cal.panchak_what")) + "</p>" : "";
     ptCard += "</div>";
     var J = window.JAIN_PANCHANG, place = J && J.place ? L(J.place) : "", tplace = J && J.tithiPlace ? L(J.tithiPlace) : place;
-    var legend = '<ul class="jc-legend"><li><i class="jd jd-kalyanak"></i>' + esc(t("cal.kalyanak")) + '</li><li><i class="jd jd-parv"></i>' + esc(t("cal.parv")) + '</li><li><i class="jd jd-vrat"></i>' + esc(t("cal.vrat")) + '</li><li><span class="jl-pt"></span>' + esc(t("cal.lg_pt")) + "</li></ul>";
+    var legend = '<ul class="jc-legend"><li><span class="jl jx-kalyanak"></span>' + esc(t("cal.kalyanak")) + '</li><li><span class="jl jx-parv"></span>' + esc(t("cal.parv")) + '</li><li><span class="jl jx-vrat"></span>' + esc(t("cal.vrat")) + '</li><li><span class="jl-pt">' + esc(lang === "en" ? "Ashtami" : "अष्टमी") + "</span>" + esc(t("cal.lg_pt")) + "</li></ul>";
+    var mopts = "", yopts = "";
+    for (var mm = 0; mm < 12; mm++) mopts += '<option value="' + mm + '"' + (mm === m ? " selected" : "") + ">" + esc(new Date(2026, mm, 1).toLocaleDateString(loc(), { month: "long" })) + "</option>";
+    for (var yy = 2026; yy <= 2099; yy++) yopts += '<option value="' + yy + '"' + (yy === y ? " selected" : "") + ">" + yy + "</option>";
     var about = J ? '<details class="card jc-about"><summary>' + esc(t("cal.about_h")) + '</summary><div class="jc-about-b">' +
       ["cal.about1", "cal.about2", "cal.about3", "cal.about4", "cal.about5", "cal.about6"].map(function (k) { return "<p>" + esc(t(k, { tplace: tplace, place: place })) + "</p>"; }).join("") + "</div></details>" : "";
     host.innerHTML = '<div class="card jc-cal"><div class="jc-h"><button type="button" class="dnav" data-mv="-1" aria-label="' + esc(t("daily.prev")) + '">&#8249;</button><div class="jc-ht"><strong>' + esc(title) + "</strong><span>" + esc(sub) + '</span></div><button type="button" class="dnav" data-mv="1" aria-label="' + esc(t("daily.next")) + '">&#8250;</button></div>' +
-      '<div class="jc-wd" aria-hidden="true">' + wd.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + '</div><div class="jc-days">' + cells + "</div>" +
-      '<div class="jc-foot">' + legend + '<div class="jc-ctl"><button type="button" class="btn btn-line" id="jc-today">' + esc(t("daily.today")) + '</button><label class="dpick"><span class="sr">' + esc(t("daily.pick")) + '</span><input type="date" id="jc-pick" min="2026-01-01" max="2099-12-31" value="' + calDay + '"></label></div></div></div>' +
+      legend + '<div class="jc-wd" aria-hidden="true">' + wd.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + '</div><div class="jc-days">' + cells + "</div>" +
+      '<div class="jc-foot"><div class="jc-ctl"><label class="sr" for="jc-m">' + esc(t("cal.month")) + '</label><select id="jc-m" class="jc-sel">' + mopts + '</select><label class="sr" for="jc-y">' + esc(t("cal.year")) + '</label><select id="jc-y" class="jc-sel">' + yopts + '</select><button type="button" class="btn btn-line" id="jc-today">' + esc(t("daily.today")) + "</button></div></div></div>" +
       '<div class="jc-side">' + dayCard + upCard + ptCard + "</div>" + about +
       '<p class="fine jc-note">' + esc(J ? t("cal.note_calc", { place: tplace }) : t("cal.note")) + "</p>";
     if (calDrawn) $$(".card", host).forEach(function (c) { c.classList.add("in"); });   /* redrawn after a tap: no fade-in again */
@@ -1055,9 +1056,12 @@
     function go(iso, scroll) { calDay = iso; calMonth = iso.slice(0, 7); renderCalendar(); if (scroll) { var el = $(".jc-day", host); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); } }
     $$(".jc-c[data-d]", host).forEach(function (bt) { bt.addEventListener("click", function () { go(bt.getAttribute("data-d"), window.matchMedia("(max-width: 979px)").matches); }); });
     $$(".jc-chip", host).forEach(function (bt) { bt.addEventListener("click", function () { go(bt.getAttribute("data-d"), true); }); });
-    $$(".jc-cal .dnav", host).forEach(function (bt) { bt.addEventListener("click", function () { var mv = +bt.getAttribute("data-mv"), nd = new Date(y, m + mv, 1); calMonth = nd.getFullYear() + "-" + pad2(nd.getMonth() + 1); renderCalendar(); var nb = $('.jc-cal .dnav[data-mv="' + mv + '"]'); if (nb) nb.focus(); }); });
+    $$(".jc-cal .dnav", host).forEach(function (bt) { bt.addEventListener("click", function () { var mv = +bt.getAttribute("data-mv"), nd = new Date(y, m + mv, 1); if (nd.getFullYear() < 2026 || nd.getFullYear() > 2099) return; calMonth = nd.getFullYear() + "-" + pad2(nd.getMonth() + 1); calDay = calMonth === today.slice(0, 7) ? today : calMonth + "-01"; renderCalendar(); var nb = $('.jc-cal .dnav[data-mv="' + mv + '"]'); if (nb) nb.focus(); }); });
     var tb = $("#jc-today", host); if (tb) tb.addEventListener("click", function () { go(today, false); });
-    var pkr = $("#jc-pick", host); if (pkr) pkr.addEventListener("change", function () { if (/^\d{4}-\d{2}-\d{2}$/.test(pkr.value)) go(pkr.value, true); });
+    /* month / year chooser: shows that month (the page does not move) */
+    ["#jc-m", "#jc-y"].forEach(function (sel) { var el = $(sel, host); if (el) el.addEventListener("change", function () {
+      var nm = +$("#jc-m", host).value, ny = +$("#jc-y", host).value; calMonth = ny + "-" + pad2(nm + 1); calDay = calMonth === today.slice(0, 7) ? today : calMonth + "-01";
+      renderCalendar(); var e2 = $(sel, host); if (e2) e2.focus(); }); });
   }
 
   /* ---------- gallery ---------- */
