@@ -226,6 +226,7 @@ function applySheetSettings() {
      ["notify_bhaktamar", "bhaktamar"], ["notify_bhaktamar_names", "bhaktamarNames"], ["notify_jain_calendar", "jainCalendar"]].forEach(function (x) { var f = flag(x[0]); if (f != null) a[x[1]] = f; });
     var v;
     if ((v = val("notify_time")) != null) a.time = v.replace(".", ":");
+    if ((v = val("notify_jain_types")) != null) a.jainTypes = v;
     if ((v = val("notify_days_before")) != null) a.daysBefore = v.split(/[,\s]+/).filter(Boolean).map(Number);
     if ((v = val("notify_month_start_day")) != null) a.monthStartDay = +v;
     if ((v = val("notify_max_per_run")) != null) a.maxPerRun = +v;
@@ -244,7 +245,8 @@ function setup() {
     monthStartDay: +AUTO.monthStartDay >= 1 && +AUTO.monthStartDay <= 28 ? +AUTO.monthStartDay : 1,
     bhaktamar: AUTO.bhaktamar !== false,
     bhaktamarNames: AUTO.bhaktamarNames !== false,
-    jainCalendar: AUTO.jainCalendar !== false,   /* on the day: ashtami, chaturdashi, parv, kalyanak from the "Jain Calendar" tab */
+    jainCalendar: AUTO.jainCalendar !== false,   /* on the day: items of the Jain calendar (which kinds: jainTypes) */
+    jainTypes: jainTypes(AUTO.jainTypes),
     onlyThisMonth: AUTO.newKaryakramOnlyThisMonth !== false,
     maxPerRun: +AUTO.maxPerRun > 0 ? +AUTO.maxPerRun : 3
   };
@@ -300,6 +302,20 @@ function onChange() {
   return list.reduce(function (p, n) { return p.then(function () { return send(n); }); }, Promise.resolve());
 }
 
+/* which kinds of Jain calendar items get a notification on the day (Website Settings: notify_jain_types).
+   Words: kalyanak, parv, ashtami, chaturdashi, vrat, rohini, panchak, other (Hindi words too). Empty = the default. */
+var JAIN_DEFAULT = ["kalyanak", "parv", "ashtami", "chaturdashi", "other"];
+function jainTypes(v) {
+  var map = { "कल्याणक": "kalyanak", "पर्व": "parv", "अष्टमी": "ashtami", "चतुर्दशी": "chaturdashi", "व्रत": "vrat", "रोहिणी": "rohini", "पंचक": "panchak", "अन्य": "other", "सब": "all", all: "all" };
+  var out = String(v || "").toLowerCase().split(/[,\s]+/).map(function (w) { return map[w] || w; }).filter(function (w) { return /^(kalyanak|parv|ashtami|chaturdashi|vrat|rohini|panchak|other|all)$/.test(w); });
+  if (out.indexOf("all") >= 0) return ["kalyanak", "parv", "ashtami", "chaturdashi", "vrat", "rohini", "panchak", "other"];
+  return out.length ? out : JAIN_DEFAULT;
+}
+function jainKind(c) {
+  if (c.type === "tithi") return /चतुर्दशी|Chaturdashi|चौदस/i.test(c.title.hi + " " + c.title.en) ? "chaturdashi" : "ashtami";
+  if (c.type === "vrat") return /^rohini/.test(c.id || "") || /रोहिणी|Rohini/i.test(c.title.hi + c.title.en) ? "rohini" : "vrat";
+  return c.type === "kalyanak" || c.type === "parv" ? c.type : "other";
+}
 /* today's Jain calendar items: js/jain-calendar.js (calculated) + the Sheet tab (a row with the same id, or date + name, changes it;
    hidden = yes hides it; other rows are added) */
 function jainToday(rows) {
@@ -315,8 +331,15 @@ function jainToday(rows) {
     if (d === TODAY && t.hi && !hid && !placeholder({ title: t })) out.push({ id: id, date: d, type: clean(r.type), title: t, note: nt });
   });
   /* order: kalyanak and parv first, then ashtami / chaturdashi, then vrat */
-  var rank = { kalyanak: 0, parv: 1, tithi: 2, vrat: 3 };
-  return out.filter(function (c) { return !c.hidden && c.date === TODAY; }).sort(function (a, b) { return (rank[a.type] == null ? 1 : rank[a.type]) - (rank[b.type] == null ? 1 : rank[b.type]); });
+  var rank = { kalyanak: 0, parv: 1, tithi: 2, vrat: 3, panchak: 4 };
+  /* panchak starting today (only when "panchak" is chosen) */
+  if (CFG.jainTypes.indexOf("panchak") >= 0 && J && J.panchak) J.panchak.forEach(function (p) {
+    if (p[0].slice(0, 10) !== TODAY) return;
+    function hm(x, l) { var h = +x.slice(0, 2), m = x.slice(3, 5); return l === "en" ? ((h % 12) || 12) + ":" + m + " " + (h < 12 ? "AM" : "PM") : (h < 4 ? "रात" : h < 12 ? "सुबह" : h < 16 ? "दोपहर" : h < 20 ? "शाम" : "रात") + " " + ((h % 12) || 12) + ":" + m; }
+    out.push({ id: "panchak-" + TODAY, date: TODAY, type: "panchak", title: { hi: "पंचक शुरू", en: "Panchak begins" },
+      note: { hi: hm(p[0].slice(11), "hi") + " से " + niceDate(p[1].slice(0, 10), "hi") + " " + hm(p[1].slice(11), "hi") + " तक", en: hm(p[0].slice(11), "en") + " till " + niceDate(p[1].slice(0, 10), "en") + " " + hm(p[1].slice(11), "en") } });
+  });
+  return out.filter(function (c) { return !c.hidden && c.date === TODAY && (c.type === "panchak" || CFG.jainTypes.indexOf(jainKind(c)) >= 0); }).sort(function (a, b) { return (rank[a.type] == null ? 1 : rank[a.type]) - (rank[b.type] == null ? 1 : rank[b.type]); });
 }
 function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
 function famLine(g, l) { var n = g.names[l]; return CFG.bhaktamarNames && n && n.length ? (l === "en" ? "Punyarjak famil" + (n.length > 1 ? "ies" : "y") + ": " : "पुण्यार्जक परिवार: ") + n.join(l === "en" ? "; " : "; ") : ""; }

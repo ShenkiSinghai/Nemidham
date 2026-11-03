@@ -5,5 +5,12 @@
     "hi": "वाघोली, पुणे",
     "en": "Wagholi, Pune"
   },
-  "firstYear": 2026
+  "firstYear": 2026,
+  "tithiLatitude": 23.1765,
+  "tithiLongitude": 75.7885,
+  "tithiPlace": {
+    "hi": "उज्जैन",
+    "en": "Ujjain"
+  },
+  "lastYear": 2099
 }

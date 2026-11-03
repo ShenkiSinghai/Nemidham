@@ -1,0 +1,5 @@
+[
+ {
+  "_help": "Fixed corrections to the calculated calendar (same as a Sheet row, but kept in GitHub). Examples: {\"id\": \"rohini-2026-12-23\", \"hidden\": true}  |  {\"id\": \"padmaprabh-janm-2026\", \"note_hi\": \"...\"}  |  {\"id\": \"my-vidhan-2027\", \"date\": \"2027-02-10\", \"type\": \"parv\", \"title_hi\": \"...\", \"title_en\": \"...\"}"
+ }
+]

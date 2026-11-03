@@ -1,5 +1,7 @@
-# Jain calendar: makes js/jain-calendar.js again on the 1st of every month (so next year's calendar is always ready).
-# Also runs when the calendar rules change, and by hand: Actions → Jain Calendar → Run workflow. See README part 5.40.
+# Jain calendar: makes js/jain-calendar.js + js/jain-today.js again on the 1st of every month (next year is always ready).
+# When the calendar rules change (or by hand: Actions → Jain Calendar → Run workflow) it also makes every year
+# file data/jain-calendar/YYYY.json (2026 .. 2099). See README part 5.40.
+# Runs only in the mandir's public website repository (not in a private template copy).
 name: Jain Calendar
 on:
   schedule:
@@ -15,6 +17,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   make:
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +25,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Make the calendar
-        run: python3 .github/jain-calendar/generate.py
+        run: python3 -B .github/jain-calendar/generate.py ${{ github.event_name != 'schedule' && '--all' || '' }}
       - name: Save it (only if something changed)
         run: |
-          if git diff --quiet -- js/jain-calendar.js; then echo "No change."; exit 0; fi
+          git add js/jain-calendar.js js/jain-today.js data/jain-calendar
+          if git diff --cached --quiet; then echo "No change."; exit 0; fi
           git config user.name "Jain Calendar"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add js/jain-calendar.js
           git commit -m "Jain calendar updated"
           for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
           exit 1

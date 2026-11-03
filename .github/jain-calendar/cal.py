@@ -7,8 +7,8 @@ KN_EN = {"garbh": "Garbh", "janm": "Janm", "tap": "Tap", "gyan": "Gyan", "moksh"
 MONTH_HI, MONTH_EN = E.MONTH_HI, E.MONTH_EN
 
 
-def prepare(lat, lon, d0, d1, place=""):
-    P = E.build(lat, lon, d0 - dt.timedelta(days=40), d1 + dt.timedelta(days=40), place)
+def prepare(lat, lon, d0, d1, place="", disp=None):
+    P = E.build(lat, lon, d0 - dt.timedelta(days=40), d1 + dt.timedelta(days=40), place, disp)
     days = P["days"]
     for x in days:
         t = x["tithi"]; m = x["month"]; k = t > 15
@@ -44,9 +44,9 @@ def ev(date, typ, eid, hi, en, note_hi="", note_en=""):
     return {"date": date, "type": typ, "id": eid, "title_hi": hi, "title_en": en, "note_hi": note_hi, "note_en": note_en}
 
 
-def make(lat, lon, y_from, y_to, krules, prules, place=""):
+def make(lat, lon, y_from, y_to, krules, prules, place="", disp=None):
     d0, d1 = dt.date(y_from, 1, 1), dt.date(y_to, 12, 31)
-    P = prepare(lat, lon, d0, d1, place); days = P["days"]
+    P = prepare(lat, lon, d0, d1, place, disp); days = P["days"]
     lo, hi_ = d0.isoformat(), d1.isoformat()
     inr = lambda d: lo <= d <= hi_
     evs = []

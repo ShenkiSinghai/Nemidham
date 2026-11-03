@@ -44,8 +44,9 @@ def new_moons(start, end):
     return out
 
 
-def build(lat, lon, d0, d1, place):
-    obs = A.Observer(lat, lon, 0)
+def build(lat, lon, d0, d1, place, disp=None):
+    """tithi at sunrise of (lat, lon); sunrise / sunset shown for disp = (lat, lon) of the mandir (default: the same place)"""
+    obs = A.Observer(lat, lon, 0); dob = A.Observer(disp[0], disp[1], 0) if disp else obs
     t_start = ist_to_time(dt.datetime(d0.year, d0.month, d0.day, tzinfo=IST)); t_end = ist_to_time(dt.datetime(d1.year, d1.month, d1.day, tzinfo=IST))
     # lunar months (amant): new moon to new moon; name by sidereal sign of the Sun at the starting new moon
     nms = new_moons(t_start, t_end); months = []
@@ -57,14 +58,15 @@ def build(lat, lon, d0, d1, place):
     while d <= d1:
         mid = ist_to_time(dt.datetime(d.year, d.month, d.day, 0, 0, tzinfo=IST))
         sr = A.SearchRiseSet(A.Body.Sun, obs, A.Direction.Rise, mid, 1.0)
-        ss = A.SearchRiseSet(A.Body.Sun, obs, A.Direction.Set, sr, 1.0)
+        dsr = A.SearchRiseSet(A.Body.Sun, dob, A.Direction.Rise, mid, 1.0) if disp else sr
+        ss = A.SearchRiseSet(A.Body.Sun, dob, A.Direction.Set, dsr, 1.0)
         tn = tithi_no(sr); ph = phase(sr)
         end = next_phase_cross(tn * 12, sr)   # when this tithi ends
         msid = moon_sid(sr); nak = int(msid // (360 / 27))
         nak_end = None
         mi = next((i for i, x in enumerate(months) if x["start"].ut <= sr.ut < x["end"].ut), None); m = months[mi] if mi is not None else None
         nxt = months[mi + 1] if mi is not None and mi + 1 < len(months) else None
-        days.append({"date": d.isoformat(), "sunrise": to_ist(sr).strftime("%H:%M"), "sunset": to_ist(ss).strftime("%H:%M"),
+        days.append({"date": d.isoformat(), "sunrise": to_ist(dsr).strftime("%H:%M"), "sunset": to_ist(ss).strftime("%H:%M"),
                      "tithi": tn, "tithi_end": to_ist(end).strftime("%Y-%m-%d %H:%M") if end else "", "phase": round(ph, 3),
                      "nak": nak, "moon_sid": round(msid, 3), "month": m["idx"] if m else None, "adhik": m["adhik"] if m else False, "next_adhik": nxt["adhik"] if nxt else False,
                      "_sr": sr.ut})

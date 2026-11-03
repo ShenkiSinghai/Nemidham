@@ -902,85 +902,129 @@
       '<span class="tag tag-' + esc(type) + '">' + esc(t("cal." + type)) + "</span>" +
       "<h3>" + esc(L(c.title)) + '</h3><p class="meta">' + esc(fullDate(c.date)) + "</p>" + (L(c.note) ? "<p>" + esc(L(c.note)) + "</p>" : "") + "</div></article>";
   }
-  /* ---------- Jain calendar: calculated panchang (js/jain-calendar.js, made every month by GitHub) + the Sheet tab ---------- */
-  function jpEvents() {
-    var J = window.JAIN_PANCHANG; if (!J || !J.events) return [];
-    return J.events.map(function (e) { return { id: e[2], date: e[0], type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] }, calc: true }; });
-  }
-  function jpIdx(iso) {
-    var J = window.JAIN_PANCHANG; if (!J || !J.days || iso < J.from || iso > J.to) return -1;
-    return Math.round((parseDate(iso) - parseDate(J.from)) / 864e5);
-  }
-  function jpTithiName(n, l) {   /* n = 1..30 */
+  /* ---------- Jain calendar: calculated panchang (js/jain-calendar.js = last / this / next year, made every month by GitHub;
+     other years 2026-2099 are read when needed from data/jain-calendar/YYYY.json) + the Sheet tab ---------- */
+  var jpYears = {}, jpWant = {};
+  function jpConv(e) { return { id: e[2], date: e[0], type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] }, calc: true }; }
+  function jpEvents() { var J = window.JAIN_PANCHANG; return J && J.events ? J.events.map(jpConv) : []; }
+  function jpSrc(iso) {   /* the data (main file or a loaded year file) that holds this date */
     var J = window.JAIN_PANCHANG;
+    if (J && J.days && iso >= J.from && iso <= J.to) return J;
+    var Y = jpYears[iso.slice(0, 4)]; return Y && Y.days ? Y : null;
+  }
+  function jpLoadYear(y, done) {   /* calendar page: a year outside the main file */
+    y = String(y); if (jpYears[y] || jpWant[y] || +y < 2026 || +y > 2099) return;
+    var J = window.JAIN_PANCHANG; if (J && J.from <= y + "-06-30" && J.to >= y + "-06-30") return;
+    jpWant[y] = 1;
+    fetch("data/jain-calendar/" + y + ".json").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) { if (d && d.days) { jpYears[y] = d; if (done) done(); } }).catch(function () {});
+  }
+  function jpNames() { return window.JAIN_PANCHANG || window.JAIN_TODAY || null; }
+  function jpTithiName(n, l) {   /* n = 1..30 */
     if (n === 15) return l === "en" ? "Purnima" : "पूर्णिमा";
     if (n === 30) return l === "en" ? "Amavasya" : "अमावस्या";
-    return J.tithi[l === "en" ? "en" : "hi"][(n - 1) % 15];
+    return jpNames().tithi[l === "en" ? "en" : "hi"][(n - 1) % 15];
   }
+  function jpMonthName(code, l) { var mi = code % 12, pre = Math.floor(code / 12); return (pre ? (l === "en" ? (pre === 1 ? "Pratham " : "Dwitiya ") : (pre === 1 ? "प्रथम " : "द्वितीय ")) : "") + jpNames().months[l][mi]; }
   function jpDay(iso) {
-    var J = window.JAIN_PANCHANG, i = jpIdx(iso); if (i < 0 || !J.days[i]) return null;
-    var r = J.days[i], l = lang === "en" ? "en" : "hi", mi = r[0] % 12, pre = Math.floor(r[0] / 12), k = r[1] === 1, n = r[2] + (k ? 15 : 0);
-    var month = (pre ? (l === "en" ? (pre === 1 ? "Pratham " : "Dwitiya ") : (pre === 1 ? "प्रथम " : "द्वितीय ")) : "") + J.months[l][mi];
-    var paksha = l === "en" ? (k ? "Krishna" : "Shukla") : (k ? "कृष्ण" : "शुक्ल");
+    var J = jpSrc(iso); if (!J) return null;
+    var r = J.days[Math.round((parseDate(iso) - parseDate(J.from)) / 864e5)]; if (!r) return null;
+    var N = jpNames(), l = lang === "en" ? "en" : "hi", k = r[1] === 1, n = r[2] + (k ? 15 : 0);
+    var month = jpMonthName(r[0], l), paksha = l === "en" ? (k ? "Krishna" : "Shukla") : (k ? "कृष्ण" : "शुक्ल");
     var name = jpTithiName(n, l), endTxt = "";
     if (r[3]) { var nx = r[3].charAt(0) === "+", tm = fmtTime(r[3].replace("+", "")); endTxt = l === "en" ? "till " + tm + (nx ? " (next day)" : "") : (nx ? "अगले दिन " : "") + tm + " तक"; }
-    return { iso: iso, n: n, k: k, tn: r[2], month: month, paksha: paksha, name: name, full: month + " " + paksha + " " + (n === 15 || n === 30 ? name.replace(/^/, "") : name),
-      end: endTxt, nak: J.nak[l][r[4]], sr: r[5], ss: r[6], vr: r[7] === 1, ks: (r[8] || []).map(function (x) { return jpTithiName(x, l); }) };
+    return { iso: iso, n: n, k: k, tn: r[2], month: month, paksha: paksha, name: name, full: month + " " + paksha + " " + name,
+      end: endTxt, nak: N.nak ? N.nak[l][r[4]] : "", sr: r[5], ss: r[6], vr: r[7] === 1, ks: (r[8] || []).map(function (x) { return jpTithiName(x, l); }) };
+  }
+  /* the "today" line (every page): tithi + the day's kalyanak / parv, from the small js/jain-today.js (or the full file) */
+  function jtToday() {
+    var iso = todayISO(), l = lang === "en" ? "en" : "hi", T = window.JAIN_TODAY, txt = "", ev = [];
+    if (T && T.rows) {
+      var r = T.rows[Math.round((parseDate(iso) - parseDate(T.d0)) / 864e5)];
+      if (r) { var k = r[1] === 1, n = r[2] + (k ? 15 : 0); txt = jpMonthName(r[0], l) + " " + (l === "en" ? (k ? "Krishna" : "Shukla") : (k ? "कृष्ण" : "शुक्ल")) + " " + jpTithiName(n, l);
+        if (n === 8 || n === 14 || n === 23 || n === 29) ev.push(l === "en" ? "Parv tithi" : "पर्व तिथि");
+        ((T.ev || {})[iso] || []).forEach(function (e) { ev.push(l === "en" ? e[2] : e[1]); }); }
+    }
+    if (!txt) { var d = jpDay(iso); if (d) txt = d.full; }
+    return txt ? { tithi: txt, ev: ev } : null;
+  }
+  function injectToday() {
+    var td = jtToday(); if (!td) return;
+    var lab = t("cal.today_is"), href = "calendar.html?date=" + todayISO();
+    var html = '<a href="' + href + '"><span class="jt-k">' + esc(lab) + "</span> " + esc(td.tithi) + (td.ev.length ? '<span class="jt-ev"> · ' + esc(td.ev.slice(0, 2).join(" · ")) + "</span>" : "") + "</a>";
+    var ph = document.querySelector(".page-head .wrap");
+    if (ph) { var el = ph.querySelector(".jt-chip"); if (!el) { el = document.createElement("p"); el.className = "jt-chip"; ph.insertBefore(el, ph.firstChild); } el.innerHTML = html; }
+    var hp = document.getElementById("hero-today");
+    if (!hp) { var inv = document.querySelector(".hero2 .h2-invoc"); if (inv) { hp = document.createElement("p"); hp.id = "hero-today"; hp.className = "jt-chip jt-hero"; inv.parentNode.insertBefore(hp, inv.nextSibling); } }
+    if (hp) hp.innerHTML = html;
+    var lg = document.querySelector("footer.site .legal");
+    var fb = lg && lg.closest(".foot-bottom");
+    if (fb && !document.querySelector("footer.site .jt-foot")) { var f = document.createElement("p"); f.className = "jt-foot"; f.innerHTML = html; fb.parentNode.insertBefore(f, fb); }
   }
   function jpSamvat(iso) {   /* Vir Nirvan Samvat changes on Kartik Shukla 1, Vikram Samvat on Chaitra Shukla 1 */
-    var y = +iso.slice(0, 4), J = window.JAIN_PANCHANG, ev = (J && J.events) || [];
+    var y = +iso.slice(0, 4), J = jpSrc(iso) || window.JAIN_PANCHANG, ev = (J && J.events) || [];
     function startOn(id, yy) { for (var i = 0; i < ev.length; i++) if (ev[i][2] === id + "-" + yy) return ev[i][0]; return id === "vikram-samvat" ? yy + "-03-25" : yy + "-11-05"; }
     return { vns: y + (iso >= startOn("vir-nirvan-samvat", y) ? 527 : 526), vs: y + (iso >= startOn("vikram-samvat", y) ? 57 : 56) };
   }
-  function jpPanchakOn(iso) {
-    var J = window.JAIN_PANCHANG; if (!J || !J.panchak) return null;
-    for (var i = 0; i < J.panchak.length; i++) { var p = J.panchak[i]; if (p[0].slice(0, 10) <= iso && p[1].slice(0, 10) >= iso) return p; }
-    return null;
+  function jpPanchak() { var out = [], J = window.JAIN_PANCHANG; if (J && J.panchak) out = out.concat(J.panchak); Object.keys(jpYears).forEach(function (y) { out = out.concat(jpYears[y].panchak || []); }); return out; }
+  function jpPanchakOn(iso) { var P = jpPanchak(); for (var i = 0; i < P.length; i++) if (P[i][0].slice(0, 10) <= iso && P[i][1].slice(0, 10) >= iso) return P[i]; return null; }
+  function jpWhen(dtStr) { var d = parseDate(dtStr.slice(0, 10)); return d.toLocaleDateString(loc(), { day: "numeric", month: "short" }) + ", " + fmtTime(dtStr.slice(11, 16)); }
+  /* all items for the calendar: window.CALENDAR (main file + Sheet) + items of a loaded extra year (with the Sheet's changes) */
+  function calAll() {
+    var all = vis(window.CALENDAR), J = window.JAIN_PANCHANG, extra = [];
+    Object.keys(jpYears).forEach(function (y) { if (!J || !(J.from <= y + "-06-30" && J.to >= y + "-06-30")) extra = extra.concat(jpYears[y].events.map(jpConv)); });
+    if (!extra.length) return all;
+    var sheet = csRows.calendar ? CS_MAP.calendar(csRows.calendar) : [];
+    var merged = csCalMerge(extra, sheet).filter(function (c) { return c.calc && !c.hidden; });
+    return all.concat(merged);
   }
-  function jpWhen(dtStr) {   /* "2026-11-17 15:30" -> "17 नवंबर, दोपहर 3:30" */
-    var d = parseDate(dtStr.slice(0, 10));
-    return d.toLocaleDateString(loc(), { day: "numeric", month: "short" }) + ", " + fmtTime(dtStr.slice(11, 16));
+  function calShort(c) {   /* short words inside a calendar box */
+    var x = L(c.title);
+    if (c.type === "kalyanak") x = x.replace(/^(भगवान|Bhagwan)\s+/, "").replace(/\s*(कल्याणक|Kalyanak)$/, "").replace(/\s*\([^)]*\)/, "");
+    return x.replace(/\s*\((कार्तिक|फाल्गुन|आषाढ़|माघ|चैत्र|भाद्रपद|Kartik|Phalgun|Ashadh|Magh|Chaitra|Bhadrapad)\)/, "");
   }
-  var CAL_ICON = { kalyanak: "✦", parv: "❖", tithi: "◆", vrat: "●", other: "•" };
   var calDay = "", calMonth = "", calDrawn = false;
   function calItemHtml(c, withDate) {
     var type = c.type || "other";
     return '<li class="jc-item jc-' + esc(type) + '">' + (withDate ? '<div class="jc-d">' + dateBadge(c.date) + "</div>" : "") +
-      '<div><span class="tag tag-' + esc(type) + '">' + esc(t("cal." + type)) + "</span><b>" + esc(L(c.title)) + "</b>" +
+      '<div class="jc-b"><span class="tag tag-' + esc(type) + '">' + esc(t("cal." + type)) + '</span><b>' + esc(L(c.title)) + "</b>" +
       (withDate ? '<span class="jc-sub">' + esc(fullDate(c.date)) + "</span>" : "") + (L(c.note) ? '<span class="jc-sub">' + esc(L(c.note)) + "</span>" : "") + "</div></li>";
   }
   function renderCalendar() {
     var host = document.getElementById("calendar"); if (!host) return;
-    var all = vis(window.CALENDAR), today = todayISO();
-    if (!calDay) { var q = ""; try { q = new URLSearchParams(location.search).get("date") || ""; } catch (e) {} calDay = /^\d{4}-\d{2}-\d{2}$/.test(q) ? q : today; }
+    var today = todayISO();
+    if (!calDay) { var q = ""; try { q = new URLSearchParams(location.search).get("date") || ""; } catch (e) {} calDay = /^\d{4}-\d{2}-\d{2}$/.test(q) && !isNaN(parseDate(q)) ? q : today; }
     if (!calMonth) calMonth = calDay.slice(0, 7);
     var y = +calMonth.slice(0, 4), m = +calMonth.slice(5, 7) - 1;
+    jpLoadYear(y, renderCalendar); if (calDay.slice(0, 4) !== String(y)) jpLoadYear(calDay.slice(0, 4), renderCalendar);
+    var all = calAll();
     var first = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate();
     var byDate = {}; all.forEach(function (c) { (byDate[c.date] = byDate[c.date] || []).push(c); });
     var wd = []; for (var w = 0; w < 7; w++) wd.push(new Date(2023, 0, 1 + w).toLocaleDateString(loc(), { weekday: "short" }));
-    var cells = "", jm = [];
+    var cells = "", jm = [], ORDER = { kalyanak: 0, parv: 1, vrat: 2, other: 3, tithi: 4 };
     for (var b = 0; b < first; b++) cells += '<span class="jc-c jc-empty" aria-hidden="true"></span>';
     for (var d = 1; d <= dim; d++) {
-      var iso = isoOf(y, m, d), pd = jpDay(iso), list = byDate[iso] || [], kinds = {};
+      var iso = isoOf(y, m, d), pd = jpDay(iso), list = (byDate[iso] || []).slice().sort(function (a, c2) { return (a.type in ORDER ? ORDER[a.type] : 3) - (c2.type in ORDER ? ORDER[c2.type] : 3); }), kinds = {};
       list.forEach(function (c) { kinds[c.type || "other"] = 1; });
       if (pd && jm.indexOf(pd.month) < 0) jm.push(pd.month);
-      var parvT = pd && (pd.n === 8 || pd.n === 14 || pd.n === 23 || pd.n === 29 || pd.ks.some(function (x) { return /अष्टमी|चतुर्दशी|Ashtami|Chaturdashi/.test(x); }));
+      var parvT = pd && (pd.n === 8 || pd.n === 14 || pd.n === 23 || pd.n === 29 || kinds.tithi);
       var short = "", long = "";
       if (pd) {
         if (pd.n === 15 || pd.n === 30) { short = lang === "en" ? (pd.n === 15 ? "Purnima" : "Amavas") : (pd.n === 15 ? "पूनम" : "अमावस"); long = pd.name; }
         else { short = (lang === "en" ? (pd.k ? "K " : "S ") : (pd.k ? "कृ " : "शु ")) + pd.tn; long = (lang === "en" ? (pd.k ? "K " : "S ") : (pd.k ? "कृ. " : "शु. ")) + pd.name; }
       }
+      var chips = list.filter(function (c) { return c.type !== "tithi"; }), shown = chips.slice(0, 3);
+      var chipHtml = shown.map(function (c) { return '<span class="jc-chipx jx-' + esc(c.type || "other") + '">' + esc(calShort(c)) + "</span>"; }).join("") + (chips.length > 3 ? '<span class="jc-more">+' + (chips.length - 3) + "</span>" : "");
       var dots = ["kalyanak", "parv", "vrat", "other"].filter(function (k) { return kinds[k]; }).map(function (k) { return '<i class="jd jd-' + k + '"></i>'; }).join("");
       var lab = fullDate(iso) + (pd ? ", " + pd.full : "") + (list.length ? ", " + list.map(function (c) { return L(c.title); }).join(", ") : "");
       cells += '<button type="button" class="jc-c' + (iso === today ? " is-today" : "") + (iso === calDay ? " is-sel" : "") + (parvT ? " is-pt" : "") + (pd && pd.n === 15 ? " is-pur" : "") + (pd && pd.n === 30 ? " is-ama" : "") +
-        '" data-d="' + iso + '" aria-label="' + esc(lab) + '"' + (iso === calDay ? ' aria-pressed="true"' : ' aria-pressed="false"') + '><span class="jc-n">' + d + "</span>" +
-        (pd ? '<span class="jc-t"><span class="jt-s">' + esc(short) + '</span><span class="jt-l">' + esc(long) + "</span></span>" : "") + (dots ? '<span class="jc-dots" aria-hidden="true">' + dots + "</span>" : "") + "</button>";
+        '" data-d="' + iso + '" aria-label="' + esc(lab) + '" aria-pressed="' + (iso === calDay ? "true" : "false") + '"><span class="jc-top"><span class="jc-n">' + d + "</span>" +
+        (pd ? '<span class="jc-t"><span class="jt-s">' + esc(short) + '</span><span class="jt-l">' + esc(long) + "</span></span>" : "") + "</span>" +
+        (chipHtml ? '<span class="jc-chips2">' + chipHtml + "</span>" : "") + (dots ? '<span class="jc-dots" aria-hidden="true">' + dots + "</span>" : "") + "</button>";
     }
     var title = new Date(y, m, 1).toLocaleDateString(loc(), { month: "long", year: "numeric" });
     var sv = jpSamvat(isoOf(y, m, 15));
     var sub = (jm.length ? jm.join(" – ") + " · " : "") + (lang === "en" ? "Vir Nirvan Samvat " + sv.vns + " · Vikram Samvat " + sv.vs : "वीर निर्वाण संवत " + sv.vns + " · विक्रम संवत " + sv.vs);
-    /* selected day */
-    var pd0 = jpDay(calDay), sel = byDate[calDay] || [], pk = jpPanchakOn(calDay);
+    var pd0 = jpDay(calDay), sel = (byDate[calDay] || []).slice().sort(function (a, c2) { return (a.type in ORDER ? ORDER[a.type] : 3) - (c2.type in ORDER ? ORDER[c2.type] : 3); }), pk = jpPanchakOn(calDay);
     var dayCard = '<div class="card jc-card jc-day"><p class="jc-kick">' + esc(calDay === today ? t("daily.today") : t("cal.sel")) + "</p><h2>" + esc(fullDate(calDay)) + "</h2>" +
       (pd0 ? '<p class="jc-tithi">' + esc(pd0.full) + "</p>" + (pd0.end ? '<p class="jc-sub">' + esc(t("cal.tithi_end", { t: pd0.name, when: pd0.end })) + "</p>" : "") +
         (pd0.ks.length ? '<p class="jc-flag">' + esc(t("cal.kshaya", { t: pd0.ks.join(", ") })) + "</p>" : "") + (pd0.vr ? '<p class="jc-flag">' + esc(t("cal.vriddhi")) + "</p>" : "") +
@@ -988,31 +1032,32 @@
         : '<p class="jc-sub">' + esc(t("cal.no_tithi")) + "</p>") +
       (pk ? '<p class="jc-flag jc-pk">' + esc(t("cal.panchak_on", { a: jpWhen(pk[0]), b: jpWhen(pk[1]) })) + "</p>" : "") +
       (sel.length ? '<ul class="jc-list">' + sel.map(function (c) { return calItemHtml(c, false); }).join("") + "</ul>" : '<p class="jc-sub">' + esc(t("cal.none_day")) + "</p>") + "</div>";
-    /* coming parv / kalyanak / vrat (not the plain ashtami / chaturdashi) */
-    var up = all.filter(function (c) { return c.date >= today && c.type !== "tithi"; }).sort(function (a, b2) { return a.date < b2.date ? -1 : a.date > b2.date ? 1 : 0; }).slice(0, 6);
+    var from = calMonth + "-01" > today ? calMonth + "-01" : today;
+    var up = all.filter(function (c) { return c.date >= from && c.type !== "tithi"; }).sort(function (a, b2) { return a.date < b2.date ? -1 : a.date > b2.date ? 1 : 0; }).slice(0, 6);
     var upCard = '<div class="card jc-card"><h3>' + esc(t("cal.coming")) + "</h3>" + (up.length ? '<ul class="jc-list jc-up">' + up.map(function (c) { return calItemHtml(c, true); }).join("") + "</ul>" : '<p class="empty">' + esc(t("empty.cal.up")) + "</p>") + "</div>";
-    /* parv tithis of this month */
     var pts = all.filter(function (c) { return c.type === "tithi" && c.date.slice(0, 7) === calMonth; });
-    var ptCard = pts.length ? '<div class="card jc-card"><h3>' + esc(t("cal.parvtithi")) + '</h3><div class="jc-chips">' + pts.map(function (c) {
-      return '<button type="button" class="jc-chip" data-d="' + c.date + '"><b>' + +c.date.slice(8) + "</b> " + esc(L(c.title)) + "</button>"; }).join("") + "</div></div>" : "";
-    /* panchak of this month */
-    var J = window.JAIN_PANCHANG, pks = J && J.panchak ? J.panchak.filter(function (p) { return p[0].slice(0, 7) === calMonth || p[1].slice(0, 7) === calMonth; }) : [];
-    var pkCard = pks.length ? '<div class="card jc-card"><h3>' + esc(t("cal.panchak")) + '</h3><ul class="jc-pk-list">' + pks.map(function (p) { return "<li>" + esc(jpWhen(p[0])) + " – " + esc(jpWhen(p[1])) + "</li>"; }).join("") + '</ul><p class="jc-sub">' + esc(t("cal.panchak_what")) + "</p></div>" : "";
-    var place = J && J.place ? L(J.place) : "";
+    var ptCard = '<div class="card jc-card"><h3>' + esc(t("cal.parvtithi")) + "</h3>" + (pts.length ? '<div class="jc-chips">' + pts.map(function (c) {
+      return '<button type="button" class="jc-chip" data-d="' + c.date + '"><b>' + +c.date.slice(8) + "</b> " + esc(L(c.title)) + "</button>"; }).join("") + "</div>" : '<p class="jc-sub">' + esc(t("cal.no_tithi")) + "</p>");
+    var pks = jpPanchak().filter(function (p) { return p[0].slice(0, 7) === calMonth || p[1].slice(0, 7) === calMonth; });
+    ptCard += pks.length ? '<h3 class="jc-h3b">' + esc(t("cal.panchak")) + '</h3><ul class="jc-pk-list">' + pks.map(function (p) { return "<li>" + esc(jpWhen(p[0])) + " – " + esc(jpWhen(p[1])) + "</li>"; }).join("") + '</ul><p class="jc-sub">' + esc(t("cal.panchak_what")) + "</p>" : "";
+    ptCard += "</div>";
+    var J = window.JAIN_PANCHANG, place = J && J.place ? L(J.place) : "", tplace = J && J.tithiPlace ? L(J.tithiPlace) : place;
     var legend = '<ul class="jc-legend"><li><i class="jd jd-kalyanak"></i>' + esc(t("cal.kalyanak")) + '</li><li><i class="jd jd-parv"></i>' + esc(t("cal.parv")) + '</li><li><i class="jd jd-vrat"></i>' + esc(t("cal.vrat")) + '</li><li><span class="jl-pt"></span>' + esc(t("cal.lg_pt")) + "</li></ul>";
-    host.innerHTML = '<div class="jc-grid"><div class="card jc-cal"><div class="jc-h"><button type="button" class="dnav" data-mv="-1" aria-label="' + esc(t("daily.prev")) + '">&#8249;</button><div class="jc-ht"><strong>' + esc(title) + "</strong><span>" + esc(sub) + '</span></div><button type="button" class="dnav" data-mv="1" aria-label="' + esc(t("daily.next")) + '">&#8250;</button></div>' +
-      '<div class="jc-wd" aria-hidden="true">' + wd.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + '</div><div class="jc-days">' + cells + "</div>" + legend +
-      '<div class="dcal-f"><button type="button" class="btn btn-line" id="jc-today">' + esc(t("daily.today")) + '</button><label class="dpick"><span class="sr">' + esc(t("daily.pick")) + '</span><input type="date" id="jc-pick" value="' + calDay + '"></label></div></div>' +
-      '<div class="jc-side">' + dayCard + upCard + ptCard + pkCard + "</div></div>" +
-      '<p class="fine jc-note">' + esc(window.JAIN_PANCHANG ? t("cal.note_calc", { place: place }) : t("cal.note")) + "</p>";
+    var about = J ? '<details class="card jc-about"><summary>' + esc(t("cal.about_h")) + '</summary><div class="jc-about-b">' +
+      ["cal.about1", "cal.about2", "cal.about3", "cal.about4", "cal.about5", "cal.about6"].map(function (k) { return "<p>" + esc(t(k, { tplace: tplace, place: place })) + "</p>"; }).join("") + "</div></details>" : "";
+    host.innerHTML = '<div class="card jc-cal"><div class="jc-h"><button type="button" class="dnav" data-mv="-1" aria-label="' + esc(t("daily.prev")) + '">&#8249;</button><div class="jc-ht"><strong>' + esc(title) + "</strong><span>" + esc(sub) + '</span></div><button type="button" class="dnav" data-mv="1" aria-label="' + esc(t("daily.next")) + '">&#8250;</button></div>' +
+      '<div class="jc-wd" aria-hidden="true">' + wd.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + '</div><div class="jc-days">' + cells + "</div>" +
+      '<div class="jc-foot">' + legend + '<div class="jc-ctl"><button type="button" class="btn btn-line" id="jc-today">' + esc(t("daily.today")) + '</button><label class="dpick"><span class="sr">' + esc(t("daily.pick")) + '</span><input type="date" id="jc-pick" min="2026-01-01" max="2099-12-31" value="' + calDay + '"></label></div></div></div>' +
+      '<div class="jc-side">' + dayCard + upCard + ptCard + "</div>" + about +
+      '<p class="fine jc-note">' + esc(J ? t("cal.note_calc", { place: tplace }) : t("cal.note")) + "</p>";
     if (calDrawn) $$(".card", host).forEach(function (c) { c.classList.add("in"); });   /* redrawn after a tap: no fade-in again */
     calDrawn = true;
-    function go(iso, scroll) { calDay = iso; calMonth = iso.slice(0, 7); renderCalendar(); if (scroll) { var el = $(".jc-day", host); if (el && window.matchMedia("(max-width: 900px)").matches) el.scrollIntoView({ behavior: "smooth", block: "start" }); } }
-    $$(".jc-c[data-d]", host).forEach(function (bt) { bt.addEventListener("click", function () { go(bt.getAttribute("data-d"), true); }); });
+    function go(iso, scroll) { calDay = iso; calMonth = iso.slice(0, 7); renderCalendar(); if (scroll) { var el = $(".jc-day", host); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); } }
+    $$(".jc-c[data-d]", host).forEach(function (bt) { bt.addEventListener("click", function () { go(bt.getAttribute("data-d"), window.matchMedia("(max-width: 979px)").matches); }); });
     $$(".jc-chip", host).forEach(function (bt) { bt.addEventListener("click", function () { go(bt.getAttribute("data-d"), true); }); });
-    $$(".dnav", host).forEach(function (bt) { bt.addEventListener("click", function () { var mv = +bt.getAttribute("data-mv"), nd = new Date(y, m + mv, 1); calMonth = nd.getFullYear() + "-" + pad2(nd.getMonth() + 1); renderCalendar(); var nb = $('.jc-cal .dnav[data-mv="' + mv + '"]'); if (nb) nb.focus(); }); });
+    $$(".jc-cal .dnav", host).forEach(function (bt) { bt.addEventListener("click", function () { var mv = +bt.getAttribute("data-mv"), nd = new Date(y, m + mv, 1); calMonth = nd.getFullYear() + "-" + pad2(nd.getMonth() + 1); renderCalendar(); var nb = $('.jc-cal .dnav[data-mv="' + mv + '"]'); if (nb) nb.focus(); }); });
     var tb = $("#jc-today", host); if (tb) tb.addEventListener("click", function () { go(today, false); });
-    var pkr = $("#jc-pick", host); if (pkr) pkr.addEventListener("change", function () { if (pkr.value) go(pkr.value, true); });
+    var pkr = $("#jc-pick", host); if (pkr) pkr.addEventListener("change", function () { if (/^\d{4}-\d{2}-\d{2}$/.test(pkr.value)) go(pkr.value, true); });
   }
 
   /* ---------- gallery ---------- */
@@ -2771,6 +2816,7 @@
         var ty = csClean(r.type).toLowerCase();
         ty = /^(kalyan|कल्याण)/.test(ty) ? "kalyanak" : /^(parv|पर्व)/.test(ty) ? "parv" : /^(tithi|तिथि)/.test(ty) ? "tithi" : /^(vrat|व्रत)/.test(ty) ? "vrat" : ty ? "other" : "";
         var c = { id: csClean(r.id), hidden: csYes(r.hidden), date: csDate(r.date), type: ty, title: csTx(r, "title"), note: csTx(r, "note"), fromSheet: true };
+        if (/^SAMPLE/i.test(c.title.hi || "") || /^SAMPLE/i.test(c.title.en || "")) return null;   /* the Sheet's example row */
         return c.date || c.id ? c : null;
       }).filter(Boolean);
     },
@@ -3102,6 +3148,7 @@
     buildHeader();
     buildFooter();
     applyStatic();
+    injectToday();
     if (document.documentElement.classList.contains("cs-failed")) document.documentElement.style.setProperty("--csf", JSON.stringify(t("cs.fail")));
     switch (page) {
       case "home":
