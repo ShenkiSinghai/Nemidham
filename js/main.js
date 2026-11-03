@@ -2148,18 +2148,22 @@
     try { var x = new URL(String(u).replace(/&amp;/g, "&")), h = aiHome(); return x.origin === location.origin || (!!h && x.hostname === h.host && x.pathname.indexOf(h.path) === 0); } catch (e) { return false; }
   }
   function aiText(s) {
+    var md = [];   /* [text](link) written by the AI: shown as the text, as a link */
+    s = String(s || "").replace(/\[([^\]\n]{1,100})\]\((https:\/\/[^\s)]+)\)/g, function (a, x, u) { md.push([x, u]); return "\u0001" + (md.length - 1) + "\u0001"; });
     return esc(s).replace(/(https:\/\/[^\s<]+[^\s<.,;:!?)\u0964])/g, function (u) {
       var h = aiHome(), show = aiOwn(u) ? (u.replace(/^https:\/\/[^\/]+/, "").replace(h && u.indexOf(h.path) > 0 ? h.path : "/", "") || "Home") : u.replace(/^https:\/\//, "");
       return '<a href="' + u + '">🔗 ' + show + "</a>";
-    }).replace(/\n/g, "<br>");
+    }).replace(/\u0001(\d+)\u0001/g, function (a, i) { var m = md[+i]; return '<a href="' + esc(m[1]) + '">🔗 ' + esc(m[0]) + "</a>"; }).replace(/\n/g, "<br>");
   }
+  /* while waiting: how many seconds so far (from 3 seconds on), so the visitor sees it is still working */
+  function aiSecs() { var n = aiState.busy && aiState.t0 ? Math.floor((Date.now() - aiState.t0) / 1000) : 0; return n >= 3 ? " · " + n + (document.documentElement.lang === "en" ? " sec" : " सेकंड") : ""; }
   function aiDraw() {
     var box = document.getElementById("ai-log"); if (!box) return;
     var h = aiHist();
     box.innerHTML = '<div class="ai-msg a">' + esc(t("ai.hello")) + "</div>" + h.map(function (m, i) {
       var say = m.r === "a" && !m.x && aiTTS() ? '<button type="button" class="ai-say' + (aiState.saying === i ? " on" : "") + '" data-ai="say" data-i="' + i + '" aria-label="' + esc(t(aiState.saying === i ? "ai.stopsay" : "ai.say")) + '" title="' + esc(t(aiState.saying === i ? "ai.stopsay" : "ai.say")) + '">' + (aiState.saying === i ? "■" : "🔊") + "</button>" : "";
       return '<div class="ai-msg ' + (m.r === "u" ? "u" : "a") + '">' + (m.r === "u" ? esc(m.t) : aiText(m.t)) + say + "</div>";
-    }).join("") + (aiState.busy ? '<div class="ai-msg a ai-typing" aria-live="polite">' + esc(t("ai.typing")) + "</div>" : "");
+    }).join("") + (aiState.busy ? '<div class="ai-msg a ai-typing" aria-live="polite">' + esc(t("ai.typing")) + '<span class="ai-sec" aria-hidden="true">' + aiSecs() + "</span></div>" : "");
     var sug = document.getElementById("ai-sug"); if (sug) sug.hidden = h.length > 0;
     var mic = document.getElementById("ai-mic"); if (mic) mic.disabled = aiState.busy && !aiState.rec && !aiState.talk;
     box.scrollTop = box.scrollHeight;
@@ -2184,12 +2188,20 @@
     var mon = hi ? AI_MON.hi : AI_MON.en;
     function day(d, m, y) { m = +m; return m >= 1 && m <= 12 && +d >= 1 && +d <= 31 ? (+d) + " " + mon[m - 1] + (y ? " " + y : "") : null; }
     return String(t || "")
+      .replace(/\[([^\]\n]{1,100})\]\((?:https?:\/\/)?[^\s)]*\)/g, "$1")
       .replace(/https?:\/\/\S+/g, "").replace(/🔗|\*|#/g, "").replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]/gu, "")
       .replace(/^[ \t]*[-–—•·▪●◦]+[ \t]*/gm, "").replace(/^[ \t]*\d+[.)][ \t]+/gm, "")
       .replace(/॥|\|\||।।/g, "।").replace(/\|/g, hi ? "।" : ",")
       .replace(/₹\s?([\d,]+)(?:\.\d+)?\s*\/-?/g, function (a, n) { return n + (hi ? " रुपये" : " rupees"); }).replace(/₹\s?([\d,]+)/g, function (a, n) { return n + (hi ? " रुपये" : " rupees"); })
       .replace(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})\b/g, function (a, d, m, y) { return day(d, m, y) || a; })
       .replace(/\b(\d{1,2}:\d{2})\s*(AM|PM)?\s*[-–]\s*(\d{1,2}:\d{2})/gi, function (a, x, ap, y) { return x + (ap ? " " + ap : "") + (hi ? " से " : " to ") + y; })
+      /* Hindi: "सुबह 7:30 AM" was read as "सुबह सुबह के 7:30" (the voice says AM itself as सुबह). AM/PM becomes one
+         सुबह / दोपहर / शाम / रात word before the time, and a repeated one is dropped */
+      .replace(hi ? /((?:सुबह|प्रातः|दोपहर|शाम|सायं|रात)[^\n\d]{0,6}\d{1,2}(?::\d{2})?)\s*(?:AM|PM)\b/gi : /(?!)/, "$1")
+      .replace(hi ? /((?:सुबह|प्रातः|दोपहर|शाम|सायं|रात)[^\n\d]{0,6}\d{1,2}(?::\d{2})?\s+से\s+\d{1,2}(?::\d{2})?)\s*(?:AM|PM)\b/gi : /(?!)/, "$1")
+      .replace(hi ? /(\d{1,2})(:\d{2})?\s*(AM|PM|a\.m\.|p\.m\.)(?![a-z])/gi : /(?!)/, function (a, h, m, ap) { h = +h; var pm = /^p/i.test(ap); return (pm ? (h === 12 || h < 4 ? "दोपहर" : h < 7 ? "शाम" : "रात") : (h === 12 || h < 4 ? "रात" : "सुबह")) + " " + h + (m || ""); })
+      .replace(hi ? /(सुबह|प्रातः|दोपहर|शाम|सायं|रात)(\s+(?:के|को|में)?\s*)(सुबह|दोपहर|शाम|रात)\s+(?=\d)/g : /(?!)/, function (a, w, sp, w2) { return w === w2 || (w === "प्रातः" && w2 === "सुबह") || (w === "सायं" && w2 === "शाम") ? w + sp : a; })
+      .replace(hi ? /(सुबह|दोपहर|शाम|रात)(\s+\d{1,2}(?::\d{2})?\s+से\s+)\1\s+(?=\d)/g : /(?!)/, "$1$2")
       .replace(/\s[-–—]\s/g, ", ").replace(/\s\/\s/g, ", ")
       .replace(/[ \t]+\n/g, "\n").replace(/\n{2,}/g, "\n").trim()
       .replace(/([^।.!?,:;\n])\n/g, "$1" + (hi ? "।" : ".") + "\n");   /* a short pause at the end of every line */
@@ -2223,7 +2235,8 @@
     q = String(q || "").trim(); var c = aiCfg();
     if (!q || aiState.busy || !c.on) return;
     aiHush(spoken);
-    var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiDraw(); aiSave();
+    var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiState.t0 = Date.now(); aiDraw(); aiSave();
+    clearInterval(aiState.tick); aiState.tick = setInterval(function () { if (!aiState.busy) { clearInterval(aiState.tick); return; } var e = document.querySelector("#ai-log .ai-sec"); if (e) e.textContent = aiSecs(); }, 1000);
     var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 45000) : 0;
     /* only real questions and answers go back as the conversation (not "could not answer" / microphone messages) */
     var body = JSON.stringify({ q: q.slice(0, 500), lang: lang, vid: aiVid(), history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) });
