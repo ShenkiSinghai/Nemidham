@@ -1036,3 +1036,23 @@ header.site.scrolled .jt-bar, header.site:has(.nav-toggle[aria-expanded="true"])
   .jl.jx-kalyanak { background: #C27A0E; } .jl.jx-parv { background: #3558A8; } .jl.jx-vrat { background: #2E8B57; }
   :root[data-theme="dark"] .jl.jx-kalyanak { background: #F0B54A; } :root[data-theme="dark"] .jl.jx-parv { background: #7FA2F0; } :root[data-theme="dark"] .jl.jx-vrat { background: #5FCB8E; }
 }
+/* compact calendar (all details stay; less scrolling) */
+.jc-cal { padding: 16px 20px; }
+.jc-h { margin-bottom: 8px; }
+.jc-ht strong { font-size: 1.3rem; } html[lang="hi"] .jc-ht strong { font-size: 1.4rem; }
+.jc-legend { margin: 0 0 8px !important; font-size: .9rem; }
+.jc-wd span { padding: 0 0 4px; font-size: .88rem; }
+.jc-wd, .jc-days { gap: 6px; }
+.jc-c { min-height: 84px; padding: 6px 7px 5px; gap: 3px; border-radius: 12px; }
+.jc-n { font-size: 1.15rem; }
+.jc-chips2 { gap: 2px; }
+.jc-chipx { font-size: .74rem; line-height: 1.25; padding: 1px 6px; }
+.jc-foot { margin-top: 10px; }
+.jc-side { margin-top: 18px; gap: 16px; }
+.jc-card { padding: 16px 18px; }
+.jc-list { gap: 9px; margin-top: 8px; }
+.jc-up .jc-item { padding-bottom: 9px; }
+.jc-about { margin-top: 16px; }
+@media (max-width: 979px) { .jc-c { min-height: 74px; } }
+@media (max-width: 700px) { .jc-c { min-height: 54px; padding: 4px 2px 3px; } .jc-cal { padding: 12px 8px; } }
+@media (max-width: 700px) { .jc-up .jc-item:nth-child(n+5) { display: none; } }

@@ -1010,8 +1010,8 @@
         if (pd.n === 15 || pd.n === 30) { short = lang === "en" ? (pd.n === 15 ? "Purnima" : "Amavas") : (pd.n === 15 ? "पूनम" : "अमावस"); long = pd.name; }
         else { short = (lang === "en" ? (pd.k ? "K " : "S ") : (pd.k ? "कृ " : "शु ")) + pd.tn; long = (lang === "en" ? (pd.k ? "K " : "S ") : (pd.k ? "कृ. " : "शु. ")) + pd.name; }
       }
-      var chips = list.filter(function (c) { return c.type !== "tithi"; }), shown = chips.slice(0, 3);
-      var chipHtml = shown.map(function (c) { return '<span class="jc-chipx jx-' + esc(c.type || "other") + '" title="' + esc(L(c.title)) + '"><span class="cx-l">' + esc(calShort(c)) + '</span><span class="cx-s">' + esc(calShort(c, true)) + "</span></span>"; }).join("") + (chips.length > 3 ? '<span class="jc-more">+' + (chips.length - 3) + "</span>" : "");
+      var chips = list.filter(function (c) { return c.type !== "tithi"; }), shown = chips.length > 3 ? chips.slice(0, 2) : chips;
+      var chipHtml = shown.map(function (c) { return '<span class="jc-chipx jx-' + esc(c.type || "other") + '" title="' + esc(L(c.title)) + '"><span class="cx-l">' + esc(calShort(c)) + '</span><span class="cx-s">' + esc(calShort(c, true)) + "</span></span>"; }).join("") + (chips.length > 3 ? '<span class="jc-more">+' + (chips.length - 2) + "</span>" : "");
       var dots = ["kalyanak", "parv", "vrat", "other"].filter(function (k) { return kinds[k]; }).map(function (k) { return '<i class="jd jd-' + k + '"></i>'; }).join("");
       var lab = fullDate(iso) + (pd ? ", " + pd.full : "") + (list.length ? ", " + list.map(function (c) { return L(c.title); }).join(", ") : "");
       cells += '<button type="button" class="jc-c' + (iso === today ? " is-today" : "") + (iso === calDay ? " is-sel" : "") + (parvT ? " is-pt" : "") + (pd && pd.n === 15 ? " is-pur" : "") + (pd && pd.n === 30 ? " is-ama" : "") +
