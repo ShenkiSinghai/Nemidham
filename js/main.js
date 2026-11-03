@@ -2175,21 +2175,47 @@
     else if (a.held) { a.held = false; if (!a.stop) { var p = a.au.play(); if (p && p.catch) p.catch(function () {}); } }
   }
   function aiTTS() { return !!(window.speechSynthesis && window.SpeechSynthesisUtterance); }
-  function aiHush(keep) { if (aiTTS()) { try { speechSynthesis.cancel(); } catch (e) {} } if (!keep) mantraHold(false); if (aiState.saying != null) { aiState.saying = null; aiDraw(); } }
+  function aiHush(keep) { if (aiTTS()) { try { speechSynthesis.cancel(); } catch (e) {} } if (!keep) mantraHold(false); if (!aiState.talk) aiWake(false); if (aiState.saying != null) { aiState.saying = null; aiDraw(); } }
+  /* text as it should be read aloud: no links, emoji or bullet dashes ("-" would be read as "minus"), ॥ / || read as a
+     full stop, ₹1022/- as "1022 रुपये", 08-11-2026 as "8 नवंबर 2026", 7:00-8:00 as "7:00 से 8:00" */
+  var AI_MON = { hi: ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"],
+    en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] };
+  function aiSayable(t, hi) {
+    var mon = hi ? AI_MON.hi : AI_MON.en;
+    function day(d, m, y) { m = +m; return m >= 1 && m <= 12 && +d >= 1 && +d <= 31 ? (+d) + " " + mon[m - 1] + (y ? " " + y : "") : null; }
+    return String(t || "")
+      .replace(/https?:\/\/\S+/g, "").replace(/🔗|\*|#/g, "").replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF\uFE0F]/gu, "")
+      .replace(/^[ \t]*[-–—•·▪●◦]+[ \t]*/gm, "").replace(/^[ \t]*\d+[.)][ \t]+/gm, "")
+      .replace(/॥|\|\||।।/g, "।").replace(/\|/g, hi ? "।" : ",")
+      .replace(/₹\s?([\d,]+)(?:\.\d+)?\s*\/-?/g, function (a, n) { return n + (hi ? " रुपये" : " rupees"); }).replace(/₹\s?([\d,]+)/g, function (a, n) { return n + (hi ? " रुपये" : " rupees"); })
+      .replace(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})\b/g, function (a, d, m, y) { return day(d, m, y) || a; })
+      .replace(/\b(\d{1,2}:\d{2})\s*(AM|PM)?\s*[-–]\s*(\d{1,2}:\d{2})/gi, function (a, x, ap, y) { return x + (ap ? " " + ap : "") + (hi ? " से " : " to ") + y; })
+      .replace(/\s[-–—]\s/g, ", ").replace(/\s\/\s/g, ", ")
+      .replace(/[ \t]+\n/g, "\n").replace(/\n{2,}/g, "\n").trim()
+      .replace(/([^।.!?,:;\n])\n/g, "$1" + (hi ? "।" : ".") + "\n");   /* a short pause at the end of every line */
+  }
+  /* the screen stays on while the AI is talking / listening (a phone that locks itself would stop the voice) */
+  function aiWake(on) {
+    try {
+      if (on) { if (!aiState.wake && navigator.wakeLock && document.visibilityState === "visible") navigator.wakeLock.request("screen").then(function (w) { aiState.wake = w; w.addEventListener("release", function () { if (aiState.wake === w) aiState.wake = null; }); }).catch(function () {}); }
+      else if (aiState.wake) { var w = aiState.wake; aiState.wake = null; w.release().catch(function () {}); }
+    } catch (e) {}
+  }
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && (aiState.talk || aiState.saying != null)) aiWake(true); });
   function aiSpeak(txt, idx, done) {
     if (!aiTTS()) { if (done) done(); return; }
     try { speechSynthesis.cancel(); } catch (e) {}
-    var plain = String(txt || "").split(/\n\s*(स्रोत|Sources)\s*\/?/)[0].replace(/https?:\/\/\S+/g, "").replace(/🔗|\*/g, "").replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu, "").replace(/\s+\n/g, "\n").trim();
+    var raw = String(txt || "").split(/\n\s*(स्रोत|Sources)\s*\/?/)[0], hi = /[\u0900-\u097F]/.test(raw), plain = aiSayable(raw, hi);
     if (!plain) { if (done) done(); return; }
-    var hi = /[\u0900-\u097F]/.test(plain), want = hi ? "hi" : "en", vs = speechSynthesis.getVoices() || [];
+    var want = hi ? "hi" : "en", vs = speechSynthesis.getVoices() || [];
     var v = vs.filter(function (x) { return /^hi/i.test(x.lang) && want === "hi"; })[0] || vs.filter(function (x) { return /^en-IN/i.test(x.lang) && want === "en"; })[0] || vs.filter(function (x) { return x.lang && x.lang.toLowerCase().indexOf(want) === 0; })[0] || null;
     /* short pieces: some browsers stop a long text after about 15 seconds */
     var parts = plain.replace(/([।.!?\n])\s+/g, "$1\u0000").split("\u0000").reduce(function (a, p) { p = p.trim(); if (!p) return a; if (a.length && (a[a.length - 1] + " " + p).length < 180) a[a.length - 1] += " " + p; else a.push(p); return a; }, []);
     var my = aiState.sayN = (aiState.sayN || 0) + 1;   /* a late "end" from an earlier, cancelled reading must not stop this one */
-    aiState.saying = idx; aiDraw(); mantraHold(true); if (aiState.talk) aiMicUi("talk");
+    aiState.saying = idx; aiDraw(); mantraHold(true); aiWake(true); if (aiState.talk) aiMicUi("talk");
     parts.forEach(function (p, k) {
       var u = new SpeechSynthesisUtterance(p); u.lang = v ? v.lang : (hi ? "hi-IN" : "en-IN"); if (v) u.voice = v; u.rate = 1;
-      if (k === parts.length - 1) u.onend = u.onerror = function () { if (aiState.sayN === my && aiState.saying === idx) { aiState.saying = null; aiDraw(); if (done) done(); else mantraHold(false); } };
+      if (k === parts.length - 1) u.onend = u.onerror = function () { if (aiState.sayN === my && aiState.saying === idx) { aiState.saying = null; aiDraw(); if (done) done(); else mantraHold(false); if (!aiState.talk) aiWake(false); } };
       speechSynthesis.speak(u);
     });
   }
@@ -2232,13 +2258,13 @@
     if (aiState.talk) { aiTalkEnd(); return; }
     if (aiState.busy) return;
     if (aiTTS()) { try { speechSynthesis.getVoices(); speechSynthesis.speak(new SpeechSynthesisUtterance(" ")); } catch (e) {} }   /* phones (iPhone) allow the spoken answer later only after a tap like this */
-    aiState.talk = true; aiState.miss = 0; aiHush(true); mantraHold(true);
+    aiState.talk = true; aiState.miss = 0; aiHush(true); mantraHold(true); aiWake(true);
     aiListen();
   }
   function aiTalkEnd(msg) {
     aiState.talk = false;
     if (aiState.rec) { try { aiState.rec.abort(); } catch (e) {} aiState.rec = null; }
-    aiHush(); aiMicUi(false);
+    aiHush(); aiMicUi(false); aiWake(false);
     if (msg) { aiHist().push({ r: "a", x: 1, t: msg }); aiSave(); }
     aiDraw();
   }
