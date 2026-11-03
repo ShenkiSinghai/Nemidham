@@ -1,0 +1,906 @@
+[
+{
+"tirthankar": "rishabh",
+"kalyanak": "garbh",
+"month": 3,
+"paksha": "K",
+"tithi": 2,
+"source": "panchang-2026:2026-07-02"
+},
+{
+"tirthankar": "rishabh",
+"kalyanak": "janm",
+"month": 0,
+"paksha": "K",
+"tithi": 9,
+"source": "panchang-2026:2026-03-12"
+},
+{
+"tirthankar": "rishabh",
+"kalyanak": "tap",
+"month": 0,
+"paksha": "K",
+"tithi": 9,
+"source": "panchang-2026:2026-03-12"
+},
+{
+"tirthankar": "rishabh",
+"kalyanak": "gyan",
+"month": 11,
+"paksha": "K",
+"tithi": 11,
+"source": "panchang-2026:2026-02-13"
+},
+{
+"tirthankar": "rishabh",
+"kalyanak": "moksh",
+"month": 10,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-01-17"
+},
+{
+"tirthankar": "ajit",
+"kalyanak": "garbh",
+"month": 2,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-06-15"
+},
+{
+"tirthankar": "ajit",
+"kalyanak": "janm",
+"month": 10,
+"paksha": "S",
+"tithi": 10,
+"source": "panchang-2026:2026-01-28"
+},
+{
+"tirthankar": "ajit",
+"kalyanak": "tap",
+"month": 10,
+"paksha": "S",
+"tithi": 10,
+"source": "panchang-2026:2026-01-28"
+},
+{
+"tirthankar": "ajit",
+"kalyanak": "moksh",
+"month": 0,
+"paksha": "S",
+"tithi": 5,
+"source": "panchang-2026:2026-03-23"
+},
+{
+"tirthankar": "sambhav",
+"kalyanak": "garbh",
+"month": 11,
+"paksha": "S",
+"tithi": 7,
+"source": "panchang-2026:2026-02-24"
+},
+{
+"tirthankar": "sambhav",
+"kalyanak": "janm",
+"month": 7,
+"paksha": "S",
+"tithi": 15,
+"source": "panchang-2026:2026-11-24"
+},
+{
+"tirthankar": "sambhav",
+"kalyanak": "tap",
+"month": 8,
+"paksha": "S",
+"tithi": 15,
+"source": "panchang-2026:2026-12-24"
+},
+{
+"tirthankar": "sambhav",
+"kalyanak": "gyan",
+"month": 7,
+"paksha": "K",
+"tithi": 4,
+"source": "panchang-2026:2026-10-29"
+},
+{
+"tirthankar": "sambhav",
+"kalyanak": "moksh",
+"month": 0,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-03-24"
+},
+{
+"tirthankar": "abhinandan",
+"kalyanak": "garbh",
+"month": 1,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-04-22"
+},
+{
+"tirthankar": "abhinandan",
+"kalyanak": "janm",
+"month": 10,
+"paksha": "S",
+"tithi": 12,
+"source": "panchang-2026:2026-01-30"
+},
+{
+"tirthankar": "abhinandan",
+"kalyanak": "tap",
+"month": 10,
+"paksha": "S",
+"tithi": 12,
+"source": "panchang-2026:2026-01-30"
+},
+{
+"tirthankar": "abhinandan",
+"kalyanak": "gyan",
+"month": 9,
+"paksha": "S",
+"tithi": 14,
+"source": "panchang-2026:2026-01-02"
+},
+{
+"tirthankar": "abhinandan",
+"kalyanak": "moksh",
+"month": 1,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-04-22"
+},
+{
+"tirthankar": "sumati",
+"kalyanak": "garbh",
+"month": 4,
+"paksha": "S",
+"tithi": 2,
+"source": "panchang-2026:2026-08-14"
+},
+{
+"tirthankar": "sumati",
+"kalyanak": "janm",
+"month": 0,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-03-29"
+},
+{
+"tirthankar": "sumati",
+"kalyanak": "tap",
+"month": 0,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-03-29"
+},
+{
+"tirthankar": "sumati",
+"kalyanak": "gyan",
+"month": 0,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-03-29"
+},
+{
+"tirthankar": "sumati",
+"kalyanak": "moksh",
+"month": 0,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-03-29"
+},
+{
+"tirthankar": "padmaprabh",
+"kalyanak": "garbh",
+"month": 10,
+"paksha": "K",
+"tithi": 6,
+"source": "panchang-2026:2026-01-09"
+},
+{
+"tirthankar": "padmaprabh",
+"kalyanak": "janm",
+"month": 7,
+"paksha": "S",
+"tithi": 13,
+"source": "panchang-2026:2026-11-22"
+},
+{
+"tirthankar": "padmaprabh",
+"kalyanak": "tap",
+"month": 7,
+"paksha": "S",
+"tithi": 13,
+"source": "panchang-2026:2026-11-22"
+},
+{
+"tirthankar": "padmaprabh",
+"kalyanak": "gyan",
+"month": 0,
+"paksha": "S",
+"tithi": 15,
+"source": "panchang-2026:2026-04-02"
+},
+{
+"tirthankar": "padmaprabh",
+"kalyanak": "moksh",
+"month": 11,
+"paksha": "K",
+"tithi": 4,
+"source": "panchang-2026:2026-02-05"
+},
+{
+"tirthankar": "suparshva",
+"kalyanak": "garbh",
+"month": 5,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-09-17"
+},
+{
+"tirthankar": "suparshva",
+"kalyanak": "janm",
+"month": 2,
+"paksha": "S",
+"tithi": 12,
+"source": "panchang-2026:2026-06-26"
+},
+{
+"tirthankar": "suparshva",
+"kalyanak": "tap",
+"month": 2,
+"paksha": "S",
+"tithi": 12,
+"source": "panchang-2026:2026-06-26"
+},
+{
+"tirthankar": "suparshva",
+"kalyanak": "gyan",
+"month": 11,
+"paksha": "K",
+"tithi": 6,
+"source": "panchang-2026:2026-02-07"
+},
+{
+"tirthankar": "suparshva",
+"kalyanak": "moksh",
+"month": 11,
+"paksha": "K",
+"tithi": 7,
+"source": "panchang-2026:2026-02-08"
+},
+{
+"tirthankar": "chandraprabh",
+"kalyanak": "garbh",
+"month": 0,
+"paksha": "K",
+"tithi": 5,
+"source": "panchang-2026:2026-03-08"
+},
+{
+"tirthankar": "chandraprabh",
+"kalyanak": "gyan",
+"month": 11,
+"paksha": "K",
+"tithi": 7,
+"source": "panchang-2026:2026-02-08"
+},
+{
+"tirthankar": "chandraprabh",
+"kalyanak": "moksh",
+"month": 11,
+"paksha": "S",
+"tithi": 7,
+"source": "panchang-2026:2026-02-24"
+},
+{
+"tirthankar": "pushpadant",
+"kalyanak": "garbh",
+"month": 11,
+"paksha": "K",
+"tithi": 9,
+"source": "panchang-2026:2026-02-11"
+},
+{
+"tirthankar": "pushpadant",
+"kalyanak": "janm",
+"month": 8,
+"paksha": "S",
+"tithi": 1,
+"source": "panchang-2026:2026-12-10"
+},
+{
+"tirthankar": "pushpadant",
+"kalyanak": "tap",
+"month": 8,
+"paksha": "S",
+"tithi": 1,
+"source": "panchang-2026:2026-12-10"
+},
+{
+"tirthankar": "pushpadant",
+"kalyanak": "gyan",
+"month": 7,
+"paksha": "S",
+"tithi": 2,
+"source": "panchang-2026:2026-11-11"
+},
+{
+"tirthankar": "pushpadant",
+"kalyanak": "moksh",
+"month": 5,
+"paksha": "S",
+"tithi": 8,
+"source": "panchang-2026:2026-09-19"
+},
+{
+"tirthankar": "sheetal",
+"kalyanak": "garbh",
+"month": 0,
+"paksha": "K",
+"tithi": 8,
+"source": "panchang-2026:2026-03-11"
+},
+{
+"tirthankar": "sheetal",
+"kalyanak": "janm",
+"month": 10,
+"paksha": "K",
+"tithi": 12,
+"source": "panchang-2026:2026-01-15"
+},
+{
+"tirthankar": "sheetal",
+"kalyanak": "tap",
+"month": 10,
+"paksha": "K",
+"tithi": 12,
+"source": "panchang-2026:2026-01-15"
+},
+{
+"tirthankar": "sheetal",
+"kalyanak": "moksh",
+"month": 6,
+"paksha": "S",
+"tithi": 8,
+"source": "panchang-2026:2026-10-19"
+},
+{
+"tirthankar": "shreyans",
+"kalyanak": "garbh",
+"month": 2,
+"paksha": "K",
+"tithi": 8,
+"source": "panchang-2026:2026-06-08"
+},
+{
+"tirthankar": "shreyans",
+"kalyanak": "janm",
+"month": 11,
+"paksha": "K",
+"tithi": 11,
+"source": "panchang-2026:2026-02-13"
+},
+{
+"tirthankar": "shreyans",
+"kalyanak": "tap",
+"month": 11,
+"paksha": "K",
+"tithi": 11,
+"source": "panchang-2026:2026-02-13"
+},
+{
+"tirthankar": "shreyans",
+"kalyanak": "gyan",
+"month": 10,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-01-18"
+},
+{
+"tirthankar": "shreyans",
+"kalyanak": "moksh",
+"month": 4,
+"paksha": "S",
+"tithi": 15,
+"source": "panchang-2026:2026-08-28"
+},
+{
+"tirthankar": "vasupujya",
+"kalyanak": "garbh",
+"month": 3,
+"paksha": "K",
+"tithi": 6,
+"source": "panchang-2026:2026-07-06"
+},
+{
+"tirthankar": "vasupujya",
+"kalyanak": "janm",
+"month": 11,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-02-16"
+},
+{
+"tirthankar": "vasupujya",
+"kalyanak": "tap",
+"month": 11,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-02-16"
+},
+{
+"tirthankar": "vasupujya",
+"kalyanak": "gyan",
+"month": 5,
+"paksha": "S",
+"tithi": 2,
+"source": "panchang-2026:2026-09-13"
+},
+{
+"tirthankar": "vasupujya",
+"kalyanak": "moksh",
+"month": 5,
+"paksha": "S",
+"tithi": 14,
+"source": "panchang-2026:2026-09-25"
+},
+{
+"tirthankar": "vimal",
+"kalyanak": "garbh",
+"month": 2,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-06-10"
+},
+{
+"tirthankar": "vimal",
+"kalyanak": "janm",
+"month": 10,
+"paksha": "S",
+"tithi": 4,
+"source": "panchang-2026:2026-01-22"
+},
+{
+"tirthankar": "vimal",
+"kalyanak": "tap",
+"month": 10,
+"paksha": "S",
+"tithi": 4,
+"source": "panchang-2026:2026-01-22"
+},
+{
+"tirthankar": "vimal",
+"kalyanak": "gyan",
+"month": 10,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-01-24"
+},
+{
+"tirthankar": "vimal",
+"kalyanak": "moksh",
+"month": 3,
+"paksha": "K",
+"tithi": 8,
+"source": "panchang-2026:2026-07-08"
+},
+{
+"tirthankar": "anant",
+"kalyanak": "garbh",
+"month": 7,
+"paksha": "K",
+"tithi": 1,
+"source": "panchang-2026:2026-10-27"
+},
+{
+"tirthankar": "anant",
+"kalyanak": "janm",
+"month": 2,
+"paksha": "K",
+"tithi": 12,
+"source": "panchang-2026:2026-06-12"
+},
+{
+"tirthankar": "anant",
+"kalyanak": "tap",
+"month": 2,
+"paksha": "K",
+"tithi": 12,
+"source": "panchang-2026:2026-06-12"
+},
+{
+"tirthankar": "anant",
+"kalyanak": "gyan",
+"month": 0,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-03-19"
+},
+{
+"tirthankar": "anant",
+"kalyanak": "moksh",
+"month": 0,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-03-19"
+},
+{
+"tirthankar": "dharm",
+"kalyanak": "garbh",
+"month": 1,
+"paksha": "S",
+"tithi": 8,
+"source": "panchang-2026:2026-04-24"
+},
+{
+"tirthankar": "dharm",
+"kalyanak": "janm",
+"month": 10,
+"paksha": "S",
+"tithi": 13,
+"source": "panchang-2026:2026-01-31"
+},
+{
+"tirthankar": "dharm",
+"kalyanak": "tap",
+"month": 10,
+"paksha": "S",
+"tithi": 13,
+"source": "panchang-2026:2026-01-31"
+},
+{
+"tirthankar": "dharm",
+"kalyanak": "gyan",
+"month": 9,
+"paksha": "S",
+"tithi": 15,
+"source": "panchang-2026:2026-01-03"
+},
+{
+"tirthankar": "dharm",
+"kalyanak": "moksh",
+"month": 2,
+"paksha": "S",
+"tithi": 4,
+"source": "panchang-2026:2026-06-18"
+},
+{
+"tirthankar": "shanti",
+"kalyanak": "garbh",
+"month": 5,
+"paksha": "K",
+"tithi": 7,
+"source": "panchang-2026:2026-09-03"
+},
+{
+"tirthankar": "shanti",
+"kalyanak": "janm",
+"month": 2,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-06-14"
+},
+{
+"tirthankar": "shanti",
+"kalyanak": "tap",
+"month": 2,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-06-14"
+},
+{
+"tirthankar": "shanti",
+"kalyanak": "moksh",
+"month": 2,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-06-14"
+},
+{
+"tirthankar": "kunthu",
+"kalyanak": "garbh",
+"month": 4,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-08-08"
+},
+{
+"tirthankar": "kunthu",
+"kalyanak": "janm",
+"month": 1,
+"paksha": "S",
+"tithi": 1,
+"source": "panchang-2026:2026-04-18"
+},
+{
+"tirthankar": "kunthu",
+"kalyanak": "tap",
+"month": 1,
+"paksha": "S",
+"tithi": 1,
+"source": "panchang-2026:2026-04-18"
+},
+{
+"tirthankar": "kunthu",
+"kalyanak": "gyan",
+"month": 0,
+"paksha": "S",
+"tithi": 3,
+"source": "panchang-2026:2026-03-21"
+},
+{
+"tirthankar": "kunthu",
+"kalyanak": "moksh",
+"month": 1,
+"paksha": "S",
+"tithi": 1,
+"source": "panchang-2026:2026-04-18"
+},
+{
+"tirthankar": "arah",
+"kalyanak": "garbh",
+"month": 11,
+"paksha": "S",
+"tithi": 3,
+"source": "panchang-2026:2026-02-20"
+},
+{
+"tirthankar": "arah",
+"kalyanak": "janm",
+"month": 8,
+"paksha": "S",
+"tithi": 14,
+"source": "panchang-2026:2026-12-23"
+},
+{
+"tirthankar": "arah",
+"kalyanak": "tap",
+"month": 8,
+"paksha": "S",
+"tithi": 10,
+"source": "panchang-2026:2026-12-19"
+},
+{
+"tirthankar": "arah",
+"kalyanak": "gyan",
+"month": 7,
+"paksha": "S",
+"tithi": 12,
+"source": "panchang-2026:2026-11-21"
+},
+{
+"tirthankar": "arah",
+"kalyanak": "moksh",
+"month": 0,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-03-19"
+},
+{
+"tirthankar": "malli",
+"kalyanak": "garbh",
+"month": 0,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-03-19"
+},
+{
+"tirthankar": "malli",
+"kalyanak": "janm",
+"month": 8,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-12-20"
+},
+{
+"tirthankar": "malli",
+"kalyanak": "tap",
+"month": 8,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-12-20"
+},
+{
+"tirthankar": "malli",
+"kalyanak": "gyan",
+"month": 9,
+"paksha": "K",
+"tithi": 2,
+"source": "panchang-2026:2026-12-25"
+},
+{
+"tirthankar": "malli",
+"kalyanak": "moksh",
+"month": 11,
+"paksha": "S",
+"tithi": 5,
+"source": "panchang-2026:2026-02-22"
+},
+{
+"tirthankar": "munisuvrat",
+"kalyanak": "garbh",
+"month": 4,
+"paksha": "K",
+"tithi": 2,
+"source": "panchang-2026:2026-07-31"
+},
+{
+"tirthankar": "munisuvrat",
+"kalyanak": "janm",
+"month": 1,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-04-12"
+},
+{
+"tirthankar": "munisuvrat",
+"kalyanak": "tap",
+"month": 1,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-04-12"
+},
+{
+"tirthankar": "munisuvrat",
+"kalyanak": "gyan",
+"month": 1,
+"paksha": "K",
+"tithi": 9,
+"source": "panchang-2026:2026-04-11"
+},
+{
+"tirthankar": "munisuvrat",
+"kalyanak": "moksh",
+"month": 11,
+"paksha": "K",
+"tithi": 12,
+"source": "panchang-2026:2026-02-14"
+},
+{
+"tirthankar": "nami",
+"kalyanak": "garbh",
+"month": 6,
+"paksha": "K",
+"tithi": 2,
+"source": "panchang-2026:2026-09-28"
+},
+{
+"tirthankar": "nami",
+"kalyanak": "janm",
+"month": 3,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-07-10"
+},
+{
+"tirthankar": "nami",
+"kalyanak": "tap",
+"month": 3,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-07-10"
+},
+{
+"tirthankar": "nami",
+"kalyanak": "gyan",
+"month": 8,
+"paksha": "S",
+"tithi": 11,
+"source": "panchang-2026:2026-12-20"
+},
+{
+"tirthankar": "nami",
+"kalyanak": "moksh",
+"month": 1,
+"paksha": "K",
+"tithi": 14,
+"source": "panchang-2026:2026-04-16"
+},
+{
+"tirthankar": "nemi",
+"kalyanak": "garbh",
+"month": 7,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-11-15"
+},
+{
+"tirthankar": "nemi",
+"kalyanak": "janm",
+"month": 4,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-08-18"
+},
+{
+"tirthankar": "nemi",
+"kalyanak": "tap",
+"month": 4,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-08-18"
+},
+{
+"tirthankar": "nemi",
+"kalyanak": "gyan",
+"month": 6,
+"paksha": "S",
+"tithi": 1,
+"source": "panchang-2026:2026-10-11"
+},
+{
+"tirthankar": "nemi",
+"kalyanak": "moksh",
+"month": 3,
+"paksha": "S",
+"tithi": 8,
+"source": "panchang-2026:2026-07-21"
+},
+{
+"tirthankar": "parshva",
+"kalyanak": "garbh",
+"month": 1,
+"paksha": "K",
+"tithi": 2,
+"source": "panchang-2026:2026-04-04"
+},
+{
+"tirthankar": "parshva",
+"kalyanak": "gyan",
+"month": 0,
+"paksha": "K",
+"tithi": 4,
+"source": "panchang-2026:2026-03-07"
+},
+{
+"tirthankar": "parshva",
+"kalyanak": "moksh",
+"month": 4,
+"paksha": "S",
+"tithi": 7,
+"source": "panchang-2026:2026-08-19"
+},
+{
+"tirthankar": "mahavir",
+"kalyanak": "garbh",
+"month": 3,
+"paksha": "S",
+"tithi": 6,
+"source": "panchang-2026:2026-07-19"
+},
+{
+"tirthankar": "mahavir",
+"kalyanak": "janm",
+"month": 0,
+"paksha": "S",
+"tithi": 13,
+"source": "panchang-2026:2026-03-31"
+},
+{
+"tirthankar": "mahavir",
+"kalyanak": "tap",
+"month": 8,
+"paksha": "K",
+"tithi": 10,
+"source": "panchang-2026:2026-12-03"
+},
+{
+"tirthankar": "mahavir",
+"kalyanak": "gyan",
+"month": 1,
+"paksha": "S",
+"tithi": 10,
+"source": "panchang-2026:2026-04-26"
+},
+{
+"tirthankar": "mahavir",
+"kalyanak": "moksh",
+"month": 7,
+"paksha": "K",
+"tithi": 15,
+"source": "panchang-2026:2026-11-09"
+}
+]

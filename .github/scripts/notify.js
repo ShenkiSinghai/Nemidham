@@ -300,6 +300,24 @@ function onChange() {
   return list.reduce(function (p, n) { return p.then(function () { return send(n); }); }, Promise.resolve());
 }
 
+/* today's Jain calendar items: js/jain-calendar.js (calculated) + the Sheet tab (a row with the same id, or date + name, changes it;
+   hidden = yes hides it; other rows are added) */
+function jainToday(rows) {
+  var out = [], J = null;
+  try { J = load(fs.readFileSync("js/jain-calendar.js", "utf8")); J = J && J.JAIN_PANCHANG; } catch (e) { J = null; }
+  (J && J.events || []).forEach(function (e) { if (e[0] === TODAY) out.push({ id: e[2], date: e[0], type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }); });
+  (rows || []).forEach(function (r) {
+    var id = clean(r.id), d = sheetDate(r.date), t = tx(r, "title"), nt = tx(r, "note"), hid = isYes(r.hidden);
+    var x = out.filter(function (c) { return (id && c.id === id) || (d && d === c.date && t.hi && (c.title.hi === t.hi || (t.en && c.title.en === t.en))); })[0]
+      || (d && /^(tithi|तिथि)/i.test(clean(r.type)) ? out.filter(function (c) { return c.date === d && c.type === "tithi"; })[0] : null);
+    if (!x && id && J) { (J.events || []).forEach(function (e) { if (e[2] === id && d === TODAY) x = { id: id, date: TODAY, type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }; }); if (x) out.push(x); }
+    if (x) { if (hid) x.hidden = true; if (d) x.date = d; if (t.hi) x.title = t; if (nt.hi) x.note = nt; return; }
+    if (d === TODAY && t.hi && !hid && !placeholder({ title: t })) out.push({ id: id, date: d, type: clean(r.type), title: t, note: nt });
+  });
+  /* order: kalyanak and parv first, then ashtami / chaturdashi, then vrat */
+  var rank = { kalyanak: 0, parv: 1, tithi: 2, vrat: 3 };
+  return out.filter(function (c) { return !c.hidden && c.date === TODAY; }).sort(function (a, b) { return (rank[a.type] == null ? 1 : rank[a.type]) - (rank[b.type] == null ? 1 : rank[b.type]); });
+}
 function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
 function famLine(g, l) { var n = g.names[l]; return CFG.bhaktamarNames && n && n.length ? (l === "en" ? "Punyarjak famil" + (n.length > 1 ? "ies" : "y") + ": " : "पुण्यार्जक परिवार: ") + n.join(l === "en" ? "; " : "; ") : ""; }
 /* is it reminder time now? From the set time until 3 hours later (GitHub's timer can run late); repeats are dropped by the fixed id.
@@ -335,13 +353,18 @@ function onSchedule(force) {
       });
     }
     if (CFG.onTheDay) dayJobs(TODAY, 0);
-    /* Jain calendar on the day (ashtami / chaturdashi / parv / kalyanak); skipped when a special karyakram of the same name is today */
-    jc.forEach(function (r) {
-      var d = sheetDate(r.date), t = tx(r, "title"), nt = tx(r, "note"); if (d !== TODAY || !t.hi || isYes(r.hidden) || placeholder({ title: t })) return;
-      if (evs.some(function (e) { return e.date === TODAY && (L(e.title, "hi") === t.hi || L(e.title, "en") === t.en); })) return;
-      jobs.push({ key: "rem-jc|" + TODAY + "|" + t.hi, page: "calendar.html", title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + t[l], 70); }),
-        text: both(function (l) { return short([niceDate(TODAY, l), nt[l]].filter(Boolean).join(" • "), 170); }) });
-    });
+    /* Jain calendar on the day (ashtami / chaturdashi / parv / kalyanak / vrat): the calculated calendar (js/jain-calendar.js)
+       with the Sheet tab "Jain Calendar" over it (same rules as the website); skipped when a special karyakram of the same name
+       is today. Several items on one day = one notification. */
+    if (CFG.onTheDay && CFG.jainCalendar) {
+      var today = jainToday(jc).filter(function (c) { return !evs.some(function (e) { return e.date === TODAY && (L(e.title, "hi") === c.title.hi || L(e.title, "en") === c.title.en); }); });
+      if (today.length) {
+        var first = today[0], more = today.slice(1);
+        jobs.push({ key: "rem-jc|" + TODAY + "|" + today.map(function (c) { return c.title.hi; }).join("~"), page: "calendar.html?date=" + TODAY,
+          title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + first.title[l], 70); }),
+          text: both(function (l) { return short([niceDate(TODAY, l)].concat(more.map(function (c) { return c.title[l]; })).concat(first.note[l] && !more.length ? [first.note[l]] : []).filter(Boolean).join(" • "), 170); }) });
+      }
+    }
     CFG.daysBefore.forEach(function (n) { dayJobs(addDays(TODAY, n), n); });
     if (CFG.monthStart && +TODAY.slice(8) === CFG.monthStartDay) {
       var month = evs.filter(function (e) { return e.date.slice(0, 7) === THIS_MONTH && e.date >= TODAY; }).map(function (e) { return { d: e.date, t: both(function (l) { return L(e.title, l); }) }; });

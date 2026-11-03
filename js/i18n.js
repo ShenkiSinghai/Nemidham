@@ -52,7 +52,7 @@ window.UI = {
 
     "p.yojana.h1": "योजनाएं", "p.yojana.lead": "मंदिर के आने वाले काम और उनमें आपका सहयोग।",
     "p.karyakram.h1": "कार्यक्रम", "p.karyakram.lead": "पूजा, प्रवचन और उत्सव।",
-    "p.calendar.h1": "जैन कैलेंडर", "p.calendar.lead": "तिथि, कल्याणक और पर्व।",
+    "p.calendar.h1": "जैन कैलेंडर", "p.calendar.lead": "हर दिन की तिथि, कल्याणक, पर्व, व्रत और पंचक।",
     "p.announcements.h1": "सूचनाएं", "p.announcements.lead": "मंदिर की सभी सूचनाएं, नई से पुरानी।",
     "p.gallery.h1": "गैलरी", "p.gallery.lead": "मंदिर की तस्वीरें और वीडियो, एल्बम के रूप में।",
     "p.about.h1": "मंदिर के बारे में", "p.about.lead": "मंदिर का परिचय और भगवान नेमिनाथ।",
@@ -63,7 +63,7 @@ window.UI = {
     "p.404.btn": "होम पेज पर जाएँ",
 
     "tab.upcoming": "आने वाले", "tab.past": "बीते हुए", "tabs.aria": "देखने के लिए चुनें",
-    "cal.kalyanak": "कल्याणक", "cal.parv": "पर्व", "cal.tithi": "तिथि", "cal.other": "अन्य",
+    "cal.kalyanak": "कल्याणक", "cal.parv": "पर्व", "cal.tithi": "तिथि", "cal.other": "अन्य", "cal.vrat": "व्रत", "cal.sel": "चुना हुआ दिन", "cal.tithi_end": "{t} {when}", "cal.kshaya": "क्षय तिथि: {t} भी इसी दिन है।", "cal.vriddhi": "तिथि वृद्धि: यही तिथि कल भी थी।", "cal.nak": "नक्षत्र", "cal.sunrise": "सूर्योदय", "cal.sunset": "सूर्यास्त", "cal.no_tithi": "इस तारीख़ की तिथि अभी उपलब्ध नहीं है।", "cal.panchak_on": "पंचक: {a} से {b} तक", "cal.none_day": "इस दिन कोई पर्व या कल्याणक नहीं।", "cal.coming": "आने वाले पर्व और कल्याणक", "cal.parvtithi": "इस महीने की अष्टमी और चतुर्दशी", "cal.panchak": "इस महीने का पंचक", "cal.panchak_what": "पंचक में चंद्रमा धनिष्ठा (तीसरे चरण) से रेवती नक्षत्र तक रहता है।", "cal.lg_pt": "अष्टमी / चतुर्दशी", "cal.note_calc": "तिथि {place} के सूर्योदय के अनुसार गणना से है। कभी-कभी छपे पंचांग से एक दिन का अंतर हो सकता है; मंदिर की सूचना को प्राथमिकता दें।",
     "cal.note": "तिथियाँ मंदिर द्वारा जोड़ी जाती हैं।",
 
     "g.back": "← सभी एल्बम", "g.photos": "{n} फोटो", "g.videos": "{n} वीडियो", "g.soon": "जल्द आ रहा है",
@@ -168,7 +168,7 @@ window.UI = {
 
     "p.yojana.h1": "Yojanayen", "p.yojana.lead": "Upcoming work at the mandir, and how you can help.",
     "p.karyakram.h1": "Karyakram", "p.karyakram.lead": "Pooja, pravachan and utsav at the mandir.",
-    "p.calendar.h1": "Jain Calendar", "p.calendar.lead": "Tithi, kalyanak and parv.",
+    "p.calendar.h1": "Jain Calendar", "p.calendar.lead": "Every day's tithi, kalyanak, parv, vrat and panchak.",
     "p.announcements.h1": "Announcements", "p.announcements.lead": "All announcements from the mandir, newest first.",
     "p.gallery.h1": "Gallery", "p.gallery.lead": "Photos and videos from the mandir, in albums.",
     "p.about.h1": "About the mandir", "p.about.lead": "The mandir and Bhagwan Neminath.",
@@ -179,7 +179,7 @@ window.UI = {
     "p.404.btn": "Go to the home page",
 
     "tab.upcoming": "Upcoming", "tab.past": "Past", "tabs.aria": "Choose what to show",
-    "cal.kalyanak": "Kalyanak", "cal.parv": "Parv", "cal.tithi": "Tithi", "cal.other": "Other",
+    "cal.kalyanak": "Kalyanak", "cal.parv": "Parv", "cal.tithi": "Tithi", "cal.other": "Other", "cal.vrat": "Vrat", "cal.sel": "Selected day", "cal.tithi_end": "{t} {when}", "cal.kshaya": "Kshaya tithi: {t} is also on this day.", "cal.vriddhi": "Tithi vriddhi: the same tithi as yesterday.", "cal.nak": "Nakshatra", "cal.sunrise": "Sunrise", "cal.sunset": "Sunset", "cal.no_tithi": "The tithi for this date is not available yet.", "cal.panchak_on": "Panchak: {a} to {b}", "cal.none_day": "No parv or kalyanak on this day.", "cal.coming": "Coming parv and kalyanak", "cal.parvtithi": "Ashtami and Chaturdashi this month", "cal.panchak": "Panchak this month", "cal.panchak_what": "Panchak is when the Moon is from Dhanishtha (3rd quarter) to Revati.", "cal.lg_pt": "Ashtami / Chaturdashi", "cal.note_calc": "Tithis are calculated for sunrise at {place}. A printed panchang may sometimes differ by a day; follow the mandir's announcement.",
     "cal.note": "Dates are added by the mandir.",
 
     "g.back": "← All albums", "g.photos": "{n} photos", "g.videos": "{n} videos", "g.soon": "Coming soon",

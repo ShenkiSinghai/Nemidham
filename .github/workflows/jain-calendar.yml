@@ -1,0 +1,34 @@
+# Jain calendar: makes js/jain-calendar.js again on the 1st of every month (so next year's calendar is always ready).
+# Also runs when the calendar rules change, and by hand: Actions → Jain Calendar → Run workflow. See README part 5.40.
+name: Jain Calendar
+on:
+  schedule:
+    - cron: "30 0 1 * *"
+  push:
+    branches: [main]
+    paths: [".github/jain-calendar/**"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: jain-calendar
+  cancel-in-progress: false
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Make the calendar
+        run: python3 .github/jain-calendar/generate.py
+      - name: Save it (only if something changed)
+        run: |
+          if git diff --quiet -- js/jain-calendar.js; then echo "No change."; exit 0; fi
+          git config user.name "Jain Calendar"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/jain-calendar.js
+          git commit -m "Jain calendar updated"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0; sleep 5; done
+          exit 1
