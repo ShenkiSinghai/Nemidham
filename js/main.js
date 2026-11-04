@@ -1050,7 +1050,7 @@
       legend + '<div class="jc-wd" aria-hidden="true">' + wd.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + '</div><div class="jc-days">' + cells + "</div>" +
       '<div class="jc-foot"><div class="jc-ctl"><label class="sr" for="jc-m">' + esc(t("cal.month")) + '</label><select id="jc-m" class="jc-sel">' + mopts + '</select><label class="sr" for="jc-y">' + esc(t("cal.year")) + '</label><select id="jc-y" class="jc-sel">' + yopts + '</select><button type="button" class="btn btn-line" id="jc-today">' + esc(t("daily.today")) + "</button></div></div></div>" +
       '<div class="jc-side">' + dayCard + upCard + ptCard + "</div>" + about +
-      '<p class="fine jc-note">' + esc(J ? t("cal.note_calc", { place: tplace }) : t("cal.note")) + "</p>";
+      (J ? "" : '<p class="fine jc-note">' + esc(t("cal.note")) + "</p>");
     if (calDrawn) $$(".card", host).forEach(function (c) { c.classList.add("in"); });   /* redrawn after a tap: no fade-in again */
     calDrawn = true;
     function go(iso, scroll) { calDay = iso; calMonth = iso.slice(0, 7); renderCalendar(); if (scroll) { var el = $(".jc-day", host); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); } }
