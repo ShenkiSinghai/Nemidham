@@ -2395,9 +2395,11 @@
       .then(function (j) {
         if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); if (spoken && aiState.open && aiState.talk) { var k = h.length - 1; setTimeout(function () { aiSpeak(String(j.answer), k, function () { if (aiState.talk) setTimeout(aiListen, 350); else mantraHold(false); }); }, 50); } else mantraHold(false); return; }
         mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0);
-        h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : j && j.error === "busy" ? "ai.busy" : "ai.err") });
+        /* a device opened with ?ai=test (the mandir's own testers) also sees why it failed, to send to whoever fixes it */
+        var why = aiTester() ? " [" + String((j && (j.why || j.error)) || "?").slice(0, 300) + (j && j.v ? " · v" + j.v : "") + "]" : "";
+        h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : j && j.error === "busy" ? "ai.busy" : "ai.err") + why });
       })
-      .catch(function () { h.push({ r: "a", x: 1, t: t("ai.err") }); mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0); })
+      .catch(function (er) { h.push({ r: "a", x: 1, t: t("ai.err") + (aiTester() ? " [" + (er && er.name === "AbortError" ? "45 सेकंड में जवाब नहीं आया (timeout)" : "वेब ऐप तक नहीं पहुँचा / जवाब JSON नहीं: " + String(er && er.message || er).slice(0, 120)) + "]" : "") }); mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0); })
       .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
   }
   /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
