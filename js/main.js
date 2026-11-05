@@ -2387,7 +2387,7 @@
     aiHush(spoken);
     var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiState.t0 = Date.now(); aiDraw(); aiSave();
     clearInterval(aiState.tick); aiState.tick = setInterval(function () { if (!aiState.busy) { clearInterval(aiState.tick); return; } var e = document.querySelector("#ai-log .ai-sec"); if (e) e.textContent = aiSecs(); }, 1000);
-    var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 45000) : 0;
+    var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 60000) : 0;
     /* only real questions and answers go back as the conversation (not "could not answer" / microphone messages) */
     var body = JSON.stringify({ q: q.slice(0, 500), lang: lang, vid: aiVid(), history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) });
     fetch(c.url, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctl ? ctl.signal : undefined })
@@ -2399,7 +2399,7 @@
         var why = aiTester() ? " [" + String((j && (j.why || j.error)) || "?").slice(0, 300) + (j && j.v ? " · v" + j.v : "") + "]" : "";
         h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : j && j.error === "busy" ? "ai.busy" : "ai.err") + why });
       })
-      .catch(function (er) { h.push({ r: "a", x: 1, t: t("ai.err") + (aiTester() ? " [" + (er && er.name === "AbortError" ? "45 सेकंड में जवाब नहीं आया (timeout)" : "वेब ऐप तक नहीं पहुँचा / जवाब JSON नहीं: " + String(er && er.message || er).slice(0, 120)) + "]" : "") }); mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0); })
+      .catch(function (er) { h.push({ r: "a", x: 1, t: t("ai.err") + (aiTester() ? " [" + (er && er.name === "AbortError" ? "60 सेकंड में जवाब नहीं आया (timeout)" : "वेब ऐप तक नहीं पहुँचा / जवाब JSON नहीं: " + String(er && er.message || er).slice(0, 120)) + "]" : "") }); mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0); })
       .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
   }
   /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
