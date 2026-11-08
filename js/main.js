@@ -2390,7 +2390,7 @@
     var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiState.t0 = Date.now(); aiDraw(); aiSave();
     clearInterval(aiState.tick); aiState.tick = setInterval(function () { if (!aiState.busy) { clearInterval(aiState.tick); return; } var e = document.querySelector("#ai-log .ai-sec"); if (e) e.textContent = aiSecs(); }, 1000);
     /* only real questions and answers go back as the conversation (not "could not answer" / microphone messages) */
-    var base = { q: q.slice(0, 500), lang: lang, vid: aiVid(), dev: aiDev(), pg: location.pathname.split("/").pop() || "index.html", history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) };
+    var base = { q: q.slice(0, 500), lang: lang, vid: aiVid(), rid: Math.random().toString(36).slice(2, 10), dev: aiDev(), pg: location.pathname.split("/").pop() || "index.html", history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) };
     /* Google's AI is sometimes busy and slow: if there is no answer in 10 seconds (or the first try failed), a second, lighter try
        goes out at once, and whichever answer comes first is shown */
     var settled = false, out = 0, bad = null, hedged = false, tms = [], hedgeT = 0;
