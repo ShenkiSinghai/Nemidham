@@ -61,6 +61,9 @@ function send(n) {
     url: openUrl(SITE_URL + (n.page || "")), chrome_web_icon: SITE_URL + "images/icon-192.png", firefox_icon: SITE_URL + "images/icon-192.png",
     chrome_web_badge: SITE_URL + "images/notify-badge.png" };   /* small white mandir shape in the phone's top bar (instead of a bell) */
   var img = imageUrl(n.image); if (img) { body.chrome_web_image = img; }   /* large picture inside the notification */
+  /* every notification gets its own "topic": without it, a phone shows only the newest notification of the website and the earlier one
+     (sent a moment before, e.g. Bhaktamar then the Jain calendar) is replaced and never seen */
+  body.web_push_topic = "n" + uuidFor(n.key || (n.title.hi + "|" + n.text.hi)).replace(/-/g, "").slice(0, 24);
   if (n.key) body.idempotency_key = uuidFor(n.key);   /* OneSignal keeps it 30 days; the same id again = not sent again */
   console.log("Notification:", JSON.stringify({ title: body.headings, text: body.contents, url: body.url, image: body.chrome_web_image || "" }));
   if (DRY) return Promise.resolve();
