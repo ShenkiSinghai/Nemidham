@@ -941,7 +941,7 @@
     if (T && T.rows) {
       var r = T.rows[Math.round((parseDate(iso) - parseDate(T.d0)) / 864e5)];
       if (r) { var k = r[1] === 1, n = r[2] + (k ? 15 : 0); txt = jpMonthName(r[0], l) + " " + (l === "en" ? (k ? "Krishna" : "Shukla") : (k ? "कृष्ण" : "शुक्ल")) + " " + jpTithiName(n, l);
-        if (n === 8 || n === 14 || n === 23 || n === 29) ev.push(l === "en" ? "Parv tithi" : "पर्व तिथि");
+        if (n === 8 || n === 14 || n === 23 || n === 29) ev.push(l === "en" ? "Upvas / ekasana tithi" : "उपवास / एकासन की तिथि");
         ((T.ev || {})[iso] || []).forEach(function (e) { ev.push(l === "en" ? e[2] : e[1]); }); }
     }
     if (!txt) { var d = jpDay(iso); if (d) txt = d.full; }
@@ -2289,6 +2289,8 @@
     return aiState.hist;
   }
   function aiSave() { try { sessionStorage.setItem("nemi-ai-h", JSON.stringify(aiHist().slice(-20))); } catch (e) {} }
+  /* only a rough device line goes with the question (for the mandir's own chat log): system, browser, phone / computer */
+  function aiDev() { var u = navigator.userAgent || "", os = /Android/i.test(u) ? "Android" : /iPhone|iPad|iPod/i.test(u) ? "iOS" : /Windows/i.test(u) ? "Windows" : /Mac/i.test(u) ? "Mac" : /Linux/i.test(u) ? "Linux" : "?", br = /SamsungBrowser/i.test(u) ? "Samsung" : /Edg\//.test(u) ? "Edge" : /OPR\//.test(u) ? "Opera" : /Chrome|CriOS/i.test(u) ? "Chrome" : /Firefox|FxiOS/i.test(u) ? "Firefox" : /Safari/i.test(u) ? "Safari" : "?"; return os + " · " + br + " · " + (/Mobi|Android|iPhone/i.test(u) ? "mobile" : "desktop"); }
   function aiVid() { var v = lsGet("nemi-vid"); if (!v) { v = "v" + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); lsSet("nemi-vid", v); } return v; }
   /* plain text answer -> safe HTML (links of this website and https links become clickable) */
   /* a link of this website itself (not a look-alike such as owner.github.io.other.com or other.github.io/repo/):
@@ -2387,20 +2389,33 @@
     aiHush(spoken);
     var h = aiHist(); h.push({ r: "u", t: q.slice(0, 500) }); aiState.busy = true; aiState.t0 = Date.now(); aiDraw(); aiSave();
     clearInterval(aiState.tick); aiState.tick = setInterval(function () { if (!aiState.busy) { clearInterval(aiState.tick); return; } var e = document.querySelector("#ai-log .ai-sec"); if (e) e.textContent = aiSecs(); }, 1000);
-    var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 60000) : 0;
     /* only real questions and answers go back as the conversation (not "could not answer" / microphone messages) */
-    var body = JSON.stringify({ q: q.slice(0, 500), lang: lang, vid: aiVid(), history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) });
-    fetch(c.url, { method: "POST", body: body, headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctl ? ctl.signal : undefined })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); if (spoken && aiState.open && aiState.talk) { var k = h.length - 1; setTimeout(function () { aiSpeak(String(j.answer), k, function () { if (aiState.talk) setTimeout(aiListen, 350); else mantraHold(false); }); }, 50); } else mantraHold(false); return; }
+    var base = { q: q.slice(0, 500), lang: lang, vid: aiVid(), dev: aiDev(), pg: location.pathname.split("/").pop() || "index.html", history: h.slice(0, -1).filter(function (m) { return m && !m.x; }).slice(-6) };
+    /* Google's AI is sometimes busy and slow: if there is no answer in 10 seconds (or the first try failed), a second, lighter try
+       goes out at once, and whichever answer comes first is shown */
+    var settled = false, out = 0, bad = null, hedged = false, tms = [], hedgeT = 0;
+    function fin(j, er) {
+      settled = true; clearTimeout(hedgeT); tms.forEach(clearTimeout);
+      if (j && j.ok && j.answer) { h.push({ r: "a", t: String(j.answer), s: String(j.s || "") }); if (spoken && aiState.open && aiState.talk) { var k = h.length - 1; setTimeout(function () { aiSpeak(String(j.answer), k, function () { if (aiState.talk) setTimeout(aiListen, 350); else mantraHold(false); }); }, 50); } else mantraHold(false); }
+      else {
         mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0);
         /* a device opened with ?ai=test (the mandir's own testers) also sees why it failed, to send to whoever fixes it */
-        var why = aiTester() ? " [" + String((j && (j.why || j.error)) || "?").slice(0, 300) + (j && j.v ? " · v" + j.v : "") + "]" : "";
+        var why = aiTester() ? " [" + (er ? (er.name === "AbortError" ? "60 सेकंड में जवाब नहीं आया (timeout)" : "वेब ऐप तक नहीं पहुँचा / जवाब JSON नहीं: " + String(er.message || er).slice(0, 120)) : String((j && (j.why || j.error)) || "?").slice(0, 300) + (j && j.v ? " · v" + j.v : "")) + "]" : "";
         h.push({ r: "a", x: 1, t: t(j && j.error === "limit" ? "ai.limit" : j && j.error === "visitor_limit" ? "ai.vlimit" : j && j.error === "off" ? "ai.off" : j && j.error === "busy" ? "ai.busy" : "ai.err") + why });
-      })
-      .catch(function (er) { h.push({ r: "a", x: 1, t: t("ai.err") + (aiTester() ? " [" + (er && er.name === "AbortError" ? "60 सेकंड में जवाब नहीं आया (timeout)" : "वेब ऐप तक नहीं पहुँचा / जवाब JSON नहीं: " + String(er && er.message || er).slice(0, 120)) + "]" : "") }); mantraHold(false); if (aiState.talk) setTimeout(function () { aiTalkEnd(); }, 0); })
-      .then(function () { clearTimeout(tm); aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus(); });
+      }
+      aiState.busy = false; aiSave(); aiDraw(); var i = document.getElementById("ai-q"); if (i && aiState.open) i.focus();
+    }
+    function go(fast) {
+      out++; base.fast = fast ? 1 : 0;
+      var ctl = window.AbortController ? new AbortController() : null, tm = ctl ? setTimeout(function () { ctl.abort(); }, 60000) : 0; tms.push(tm);
+      fetch(c.url, { method: "POST", body: JSON.stringify(base), headers: { "Content-Type": "text/plain;charset=utf-8" }, signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (settled) return; if (j && j.ok && j.answer) fin(j); else if (j && /^(limit|visitor_limit|off|busy)$/.test(j.error)) fin(j); else bad = bad || j; })
+        .catch(function (er) { if (!settled) bad = bad || { _er: er }; })
+        .then(function () { out--; if (settled || out > 0) return; if (!hedged) { hedged = true; go(true); } else fin(bad && !bad._er ? bad : null, bad && bad._er); });
+    }
+    hedgeT = setTimeout(function () { if (!settled && !hedged) { hedged = true; go(true); } }, 10000);
+    go(false);
   }
   /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
      It always listens with "Hindi (India)" (hi-IN), on the Hindi and the English page alike: that listener also understands

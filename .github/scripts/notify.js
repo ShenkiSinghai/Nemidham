@@ -385,7 +385,7 @@ function onSchedule(force) {
         var first = today[0], more = today.slice(1);
         jobs.push({ key: "rem-jc|" + TODAY + "|" + today.map(function (c) { return c.title.hi; }).join("~"), page: "calendar.html?date=" + TODAY,
           title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + first.title[l], 70); }),
-          text: both(function (l) { return short([niceDate(TODAY, l)].concat(more.map(function (c) { return c.title[l]; })).concat(first.note[l] && !more.length ? [first.note[l]] : []).filter(Boolean).join(" • "), 170); }) });
+          text: both(function (l) { return short((more.length ? more.map(function (c) { return c.title[l]; }) : [niceDate(TODAY, l), first.note[l]]).filter(Boolean).join(" • "), 170); }) });   /* the title has the first item; the text the other items (no date in between), or the date + a note when there is only one */
       }
     }
     CFG.daysBefore.forEach(function (n) { dayJobs(addDays(TODAY, n), n); });
