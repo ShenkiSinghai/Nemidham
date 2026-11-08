@@ -37,6 +37,8 @@ function placeholder(x) {
 }
 function real(a) { return vis(a).filter(function (x) { return !placeholder(x); }); }
 function short(s, n) { s = String(s || "").replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+/* like short(), but keeps the line breaks */
+function shortLines(s, n) { s = String(s || "").split("\n").map(function (x) { return x.replace(/[ \t]+/g, " ").trim(); }).filter(Boolean).join("\n"); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
 function both(fn) { return { hi: fn("hi"), en: fn("en") }; }
 
 /* a fixed UUID made from the notification's own key, so OneSignal drops a repeat of the same notification */
@@ -367,7 +369,13 @@ function jainNotif(today) {
       return short(lines.join(" • "), 170); }) };
 }
 function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
-function famLine(g, l) { var n = g.names[l]; return CFG.bhaktamarNames && n && n.length ? (l === "en" ? "Punyarjak famil" + (n.length > 1 ? "ies" : "y") + ": " : "पुण्यार्जक परिवार: ") + n.join(l === "en" ? "; " : "; ") : ""; }
+/* the Bhaktamar families: one family inline; several families one under the other (1. ... 2. ...), like the cards on the website */
+function famLine(g, l) {
+  var n = g.names[l]; if (!(CFG.bhaktamarNames && n && n.length)) return "";
+  if (n.length === 1) return (l === "en" ? "Punyarjak family: " : "पुण्यार्जक परिवार: ") + n[0];
+  return (l === "en" ? "Punyarjak families:" : "पुण्यार्जक परिवार:") + "\n" + n.map(function (x, i) { return (i + 1) + ". " + x; }).join("\n");
+}
+function bhText(day, g, l) { var f = famLine(g, l); return shortLines(f ? niceDate(day, l) + (f.indexOf("\n") >= 0 ? "\n" : " • ") + f : niceDate(day, l), 260); }
 /* is it reminder time now? From the set time until 3 hours later (GitHub's timer can run late); repeats are dropped by the fixed id.
    The window stops at midnight (a late time like "23:30" only gets the runs before 12 at night), so "Today" never means the wrong day. */
 /* Reminder time = from the set time until the end of the day. GitHub's timer sometimes skips runs for hours,
@@ -397,7 +405,7 @@ function onSchedule(force) {
       bh.filter(function (g) { return g.date === day; }).forEach(function (g) {
         jobs.push({ key: "rem-bh|" + n + "|" + day, page: n === 0 ? "daily.html" : "karyakram.html",
           title: both(function (l) { return head(BH_TITLE[l], l); }),
-          text: both(function (l) { return short([niceDate(day, l), famLine(g, l)].filter(Boolean).join(" • "), 170); }) });
+          text: both(function (l) { return bhText(day, g, l); }) });
       });
     }
     if (CFG.onTheDay) dayJobs(TODAY, 0);
@@ -486,7 +494,7 @@ function sheetPoll() {
             jobs.push({ key: c.k, image: sheetImg(y.photos.split(/[,\n]/)[0]), page: "yojana.html", title: { hi: "नई योजना: " + y.title.hi, en: "New yojana: " + y.title.en }, text: both(function (l) { return short(L(y.short, l) || L(y.title, l), 170); }) });
           } else if (t === "bhaktamar") {
             if (AUTO.newBhaktamar === false || c.date < TODAY || (CFG.onlyThisMonth && c.date.slice(0, 7) !== THIS_MONTH)) return;
-            jobs.push({ key: c.k, page: "karyakram.html", title: BH_TITLE, text: both(function (l) { return short(niceDate(c.date, l) + " • " + (l === "en" ? "Punyarjak family: " : "पुण्यार्जक परिवार: ") + c.names[l], 170); }) });
+            jobs.push({ key: c.k, page: "karyakram.html", title: BH_TITLE, text: both(function (l) { return bhText(c.date, { names: { hi: [].concat(c.names.hi || []), en: [].concat(c.names.en || []) } }, l); }) });
           }
         });
       });
