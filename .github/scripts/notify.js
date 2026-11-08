@@ -303,12 +303,12 @@ function onChange() {
 }
 
 /* which kinds of Jain calendar items get a notification on the day (Website Settings: notify_jain_types).
-   Words: kalyanak, parv, ashtami, chaturdashi, vrat, rohini, panchak, other (Hindi words too). Empty = the default. */
+   Words: kalyanak, parv, ashtami, chaturdashi, vrat, rohini, other (Hindi words too; panchak never gets a notification). Empty = the default. */
 var JAIN_DEFAULT = ["kalyanak", "parv", "ashtami", "chaturdashi", "other"];
 function jainTypes(v) {
   var map = { "कल्याणक": "kalyanak", "पर्व": "parv", "अष्टमी": "ashtami", "चतुर्दशी": "chaturdashi", "व्रत": "vrat", "रोहिणी": "rohini", "पंचक": "panchak", "अन्य": "other", "सब": "all", all: "all" };
-  var out = String(v || "").toLowerCase().split(/[,\s]+/).map(function (w) { return map[w] || w; }).filter(function (w) { return /^(kalyanak|parv|ashtami|chaturdashi|vrat|rohini|panchak|other|all)$/.test(w); });
-  if (out.indexOf("all") >= 0) return ["kalyanak", "parv", "ashtami", "chaturdashi", "vrat", "rohini", "panchak", "other"];
+  var out = String(v || "").toLowerCase().split(/[,\s]+/).map(function (w) { return map[w] || w; }).filter(function (w) { return /^(kalyanak|parv|ashtami|chaturdashi|vrat|rohini|other|all)$/.test(w); });
+  if (out.indexOf("all") >= 0) return ["kalyanak", "parv", "ashtami", "chaturdashi", "vrat", "rohini", "other"];
   return out.length ? out : JAIN_DEFAULT;
 }
 function jainKind(c) {
