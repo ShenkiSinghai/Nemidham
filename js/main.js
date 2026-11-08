@@ -2414,7 +2414,7 @@
         .catch(function (er) { if (!settled) bad = bad || { _er: er }; })
         .then(function () { out--; if (settled || out > 0) return; if (!hedged) { hedged = true; go(true); } else fin(bad && !bad._er ? bad : null, bad && bad._er); });
     }
-    hedgeT = setTimeout(function () { if (!settled && !hedged) { hedged = true; go(true); } }, 10000);
+    hedgeT = setTimeout(function () { if (!settled && !hedged) { hedged = true; go(true); } }, 8000);
     go(false);
   }
   /* 🎤 ask by speaking: the browser's own speech-to-text (Chrome, Edge, Safari; free, nothing extra loads).
