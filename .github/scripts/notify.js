@@ -321,6 +321,7 @@ function jainKind(c) {
 function jainToday(rows) {
   var out = [], J = null;
   try { J = load(fs.readFileSync("js/jain-calendar.js", "utf8")); J = J && J.JAIN_PANCHANG; } catch (e) { J = null; }
+  JMONTH = function (l) { try { var c = J.days[Math.round((Date.parse(TODAY) - Date.parse(J.from)) / 864e5)][0], pre = Math.floor(c / 12); return (pre === 1 ? (l === "en" ? "Pratham " : "प्रथम ") : pre === 2 ? (l === "en" ? "Dwitiya " : "द्वितीय ") : "") + J.months[l][c % 12]; } catch (e) { return ""; } };
   (J && J.events || []).forEach(function (e) { if (e[0] === TODAY) out.push({ id: e[2], date: e[0], type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }); });
   (rows || []).forEach(function (r) {
     var id = clean(r.id), d = sheetDate(r.date), t = tx(r, "title"), nt = tx(r, "note"), hid = isYes(r.hidden);
@@ -340,6 +341,27 @@ function jainToday(rows) {
       note: { hi: hm(p[0].slice(11), "hi") + " से " + niceDate(p[1].slice(0, 10), "hi") + " " + hm(p[1].slice(11), "hi") + " तक", en: hm(p[0].slice(11), "en") + " till " + niceDate(p[1].slice(0, 10), "en") + " " + hm(p[1].slice(11), "en") } });
   });
   return out.filter(function (c) { return !c.hidden && c.date === TODAY && (c.type === "panchak" || CFG.jainTypes.indexOf(jainKind(c)) >= 0); }).sort(function (a, b) { return (rank[a.type] == null ? 1 : rank[a.type]) - (rank[b.type] == null ? 1 : rank[b.type]); });
+}
+/* the one notification of a day's Jain calendar items. Ashtami / chaturdashi alone: "Today: Kartik Krishna Chaturdashi" / "Today is Chaturdashi.".
+   With a kalyanak / parv: the title is the first kalyanak / parv, the text the other ones, and the tithi last ("Today is also Ashtami").
+   Only one item: its note, or the date. */
+var JMONTH = function () { return ""; };
+function jainNotif(today) {
+  var tith = today.filter(function (c) { return c.type === "tithi"; }), rest = today.filter(function (c) { return c.type !== "tithi"; });
+  function tw(c, l) { var w = c.title[l].split(" "); return w[w.length - 1]; }
+  var key = "rem-jc|" + TODAY + "|" + today.map(function (c) { return c.title.hi; }).join("~"), page = "calendar.html?date=" + TODAY;
+  if (!rest.length) {
+    return { key: key, page: page,
+      title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + [JMONTH(l), tith[0].title[l]].filter(Boolean).join(" "), 70); }),
+      text: both(function (l) { return short(l === "en" ? "Today is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + "." : "आज " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है।", 170); }) };
+  }
+  var first = rest[0];
+  return { key: key, page: page,
+    title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + first.title[l], 70); }),
+    text: both(function (l) {
+      var lines = rest.slice(1).map(function (c) { return c.title[l]; }).concat(tith.map(function (c) { return l === "en" ? "Today is also " + tw(c, l) : "आज " + tw(c, l) + " भी है"; }));
+      if (!lines.length) lines = [first.note[l] || niceDate(TODAY, l)];
+      return short(lines.join(" • "), 170); }) };
 }
 function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
 function famLine(g, l) { var n = g.names[l]; return CFG.bhaktamarNames && n && n.length ? (l === "en" ? "Punyarjak famil" + (n.length > 1 ? "ies" : "y") + ": " : "पुण्यार्जक परिवार: ") + n.join(l === "en" ? "; " : "; ") : ""; }
@@ -382,10 +404,7 @@ function onSchedule(force) {
     if (CFG.onTheDay && CFG.jainCalendar) {
       var today = jainToday(jc).filter(function (c) { return !evs.some(function (e) { return e.date === TODAY && (L(e.title, "hi") === c.title.hi || L(e.title, "en") === c.title.en); }); });
       if (today.length) {
-        var first = today[0], more = today.slice(1);
-        jobs.push({ key: "rem-jc|" + TODAY + "|" + today.map(function (c) { return c.title.hi; }).join("~"), page: "calendar.html?date=" + TODAY,
-          title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + first.title[l], 70); }),
-          text: both(function (l) { return short((more.length ? more.map(function (c) { return c.title[l]; }) : [niceDate(TODAY, l), first.note[l]]).filter(Boolean).join(" • "), 170); }) });   /* the title has the first item; the text the other items (no date in between), or the date + a note when there is only one */
+        jobs.push(jainNotif(today));
       }
     }
     CFG.daysBefore.forEach(function (n) { dayJobs(addDays(TODAY, n), n); });
