@@ -58,7 +58,7 @@ def make(lat, lon, y_from, y_to, krules, prules, place="", disp=None):
                 pk_hi, pk_en = ("शुक्ल", "Shukla") if t <= 15 else ("कृष्ण", "Krishna")
                 n = (t - 1) % 15
                 evs.append(ev(x["date"], "tithi", "t-%s-%d" % (x["date"], t), "%s %s" % (pk_hi, E.TITHI_HI[n]), "%s %s" % (pk_en, E.TITHI_EN[n]),
-                              "उपवास / एकासन की तिथि" + (" (क्षय तिथि, इसी दिन)" if t != x["tithi"] else ""), "Day for upvas / ekasana" + (" (kshaya: kept on this day)" if t != x["tithi"] else "")))
+                              ("क्षय तिथि, इसी दिन" if t != x["tithi"] else ""), ("Kshaya tithi: kept on this day" if t != x["tithi"] else "")))
         if E.NAK_EN[x["nak"]] == "Rohini":
             prev = next((y for y in days if y["date"] == (dt.date.fromisoformat(x["date"]) - dt.timedelta(days=1)).isoformat()), None)
             if not prev or E.NAK_EN[prev["nak"]] != "Rohini":

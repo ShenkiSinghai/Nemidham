@@ -941,7 +941,6 @@
     if (T && T.rows) {
       var r = T.rows[Math.round((parseDate(iso) - parseDate(T.d0)) / 864e5)];
       if (r) { var k = r[1] === 1, n = r[2] + (k ? 15 : 0); txt = jpMonthName(r[0], l) + " " + (l === "en" ? (k ? "Krishna" : "Shukla") : (k ? "कृष्ण" : "शुक्ल")) + " " + jpTithiName(n, l);
-        if (n === 8 || n === 14 || n === 23 || n === 29) ev.push(l === "en" ? "Upvas / ekasana tithi" : "उपवास / एकासन की तिथि");
         ((T.ev || {})[iso] || []).forEach(function (e) { ev.push(l === "en" ? e[2] : e[1]); }); }
     }
     if (!txt) { var d = jpDay(iso); if (d) txt = d.full; }
