@@ -139,7 +139,7 @@ window.SITE = {
   //     newYojana / newSandesh: a new yojana / a new announcement, as soon as you add it
   //     newBhaktamar: a new Bhaktamar name (current month, coming date) in the Bhaktamar tab of the Google Sheet
   //     (new rows in the Sheet tabs Karyakram / Suchnayein / Yojanayein / Bhaktamar are announced within ~15 minutes)
-  //     time: "06:30" = reminders go at this time (India time, 24-hour clock, e.g. "18:00" for 6 in the evening)
+  //     time: "07:30" = reminders go at this time (India time, 24-hour clock, e.g. "18:00" for 6 in the evening)
   //     onTheDay: reminder on the day of each karyakram and Bhaktamar path
   //     daysBefore: [7] = reminder 7 days before. [7, 1] = 7 days before and 1 day before. [] = none
   //     monthStart: list of the month's karyakram on monthStartDay (1 = the 1st of every month, up to 28)
@@ -148,7 +148,7 @@ window.SITE = {
   //     false for any of them = do not send that kind.
   notify: { appId: "85660e76-85ad-47b2-97de-a6390ce031cb", safariWebId: "web.onesignal.auto.5f8d50ad-7ec3-4f1c-a2de-134e8949294e", footerButton: true, askPopup: true, askAfterDays: 7, askDelaySeconds: 8,
     auto: { newKaryakram: true, newKaryakramOnlyThisMonth: true, newYojana: true, newSandesh: true, newBhaktamar: true,
-      time: "06:30", onTheDay: true, daysBefore: [7], monthStart: true, monthStartDay: 1,
+      time: "07:30", onTheDay: true, daysBefore: [7], monthStart: true, monthStartDay: 1,
       bhaktamar: true, bhaktamarNames: true, maxPerRun: 3 } },
 
   // When the site is opened as an installed app (from the home-screen icon), a short logo animation plays once. false = no animation.

@@ -243,7 +243,7 @@ function setup() {
   NC = (W.SITE && W.SITE.notify) || {}; AUTO = NC.auto || {}; APP_ID = String(NC.appId || "").trim();
   /* settings from SITE.notify.auto (js/data.js, or the Sheet's Website Settings tab), with safe defaults */
   CFG = {
-    time: /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(AUTO.time || "").trim()) ? String(AUTO.time).trim() : "06:30",
+    time: /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(AUTO.time || "").trim()) ? String(AUTO.time).trim() : "07:30",
     onTheDay: AUTO.onTheDay !== false && AUTO.dailyReminder !== false,
     daysBefore: (Array.isArray(AUTO.daysBefore) ? AUTO.daysBefore : AUTO.daysBefore == null ? [7] : [AUTO.daysBefore]).map(Number).filter(function (n, i, a) { return n > 0 && n < 100 && n % 1 === 0 && a.indexOf(n) === i; }),
     monthStart: AUTO.monthStart !== false,
