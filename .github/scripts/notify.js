@@ -375,7 +375,7 @@ function famLine(g, l) {
   if (n.length === 1) return (l === "en" ? "Punyarjak family: " : "पुण्यार्जक परिवार: ") + n[0];
   return (l === "en" ? "Punyarjak families:" : "पुण्यार्जक परिवार:") + "\n" + n.map(function (x, i) { return (i + 1) + ". " + x; }).join("\n");
 }
-function bhText(day, g, l) { var f = famLine(g, l); return shortLines(f ? niceDate(day, l) + (f.indexOf("\n") >= 0 ? "\n" : " • ") + f : niceDate(day, l), 260); }
+function bhText(day, g, l, onDay) { var f = famLine(g, l); if (onDay && f) return shortLines(f, 260); return shortLines(f ? niceDate(day, l) + (f.indexOf("\n") >= 0 ? "\n" : " • ") + f : niceDate(day, l), 260); }
 /* is it reminder time now? From the set time until 3 hours later (GitHub's timer can run late); repeats are dropped by the fixed id.
    The window stops at midnight (a late time like "23:30" only gets the runs before 12 at night), so "Today" never means the wrong day. */
 /* Reminder time = from the set time until the end of the day. GitHub's timer sometimes skips runs for hours,
@@ -395,17 +395,17 @@ function onSchedule(force) {
   var jcP = CFG.onTheDay && CFG.jainCalendar && W.SHEETS && W.SHEETS.calendar ? sheetRows(W.SHEETS.calendar) : Promise.resolve([]), jc = [];
   return allEvents().then(function (list) { evs = list; return jcP; }).then(function (rows) { jc = rows || []; return bhP; }).then(function (bh) {
     var jobs = [];
-    function evMeta(e, l) { return [niceDate(e.date, l), L(e.time, l), L(e.place, l)].filter(Boolean).join(", "); }
+    function evMeta(e, l, n) { return [n === 0 ? "" : niceDate(e.date, l), L(e.time, l), L(e.place, l)].filter(Boolean).join(", "); }   /* on the day the title already says "Today": no date line */
     function dayJobs(day, n) {   /* n = 0 on the day, else days before */
       function head(t, l) { return n === 0 ? (l === "en" ? "Today: " : "आज: ") + t : n === 1 ? (l === "en" ? "Tomorrow: " : "कल: ") + t : (l === "en" ? "In " + n + " days: " : n + " दिन बाद: ") + t; }
       evs.filter(function (e) { return e.date === day; }).forEach(function (e) {
         jobs.push({ key: "rem|" + n + "|" + day + "|" + L(e.title, "hi"), image: e.image, page: n === 0 ? "daily.html" : "karyakram.html",
-          title: both(function (l) { return short(head(L(e.title, l), l), 70); }), text: both(function (l) { return short(evMeta(e, l) + (L(e.text, l) ? " • " + L(e.text, l) : ""), 170); }) });
+          title: both(function (l) { return short(head(L(e.title, l), l), 70); }), text: both(function (l) { return shortLines([evMeta(e, l, n), L(e.text, l)].filter(Boolean).join("\n") || niceDate(e.date, l), 260); }) });
       });
       bh.filter(function (g) { return g.date === day; }).forEach(function (g) {
         jobs.push({ key: "rem-bh|" + n + "|" + day, page: n === 0 ? "daily.html" : "karyakram.html",
           title: both(function (l) { return head(BH_TITLE[l], l); }),
-          text: both(function (l) { return bhText(day, g, l); }) });
+          text: both(function (l) { return bhText(day, g, l, n === 0); }) });
       });
     }
     if (CFG.onTheDay) dayJobs(TODAY, 0);
