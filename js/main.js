@@ -1003,7 +1003,7 @@
       var iso = isoOf(y, m, d), pd = jpDay(iso), list = (byDate[iso] || []).slice().sort(function (a, c2) { return (a.type in ORDER ? ORDER[a.type] : 3) - (c2.type in ORDER ? ORDER[c2.type] : 3); }), kinds = {};
       list.forEach(function (c) { kinds[c.type || "other"] = 1; });
       if (pd && jm.indexOf(pd.month) < 0) jm.push(pd.month);
-      var parvT = pd && (pd.n === 8 || pd.n === 14 || pd.n === 23 || pd.n === 29 || kinds.tithi);
+      var parvT = pd && (((pd.n === 8 || pd.n === 14 || pd.n === 23 || pd.n === 29) && !pd.vr) || kinds.tithi);   /* a tithi that is at sunrise on two days is coloured on the first day only (the second day has it for a short time) */
       var short = "", long = "";
       if (pd) {
         if (pd.n === 15 || pd.n === 30) { short = lang === "en" ? (pd.n === 15 ? "Purnima" : "Amavas") : (pd.n === 15 ? "पूनम" : "अमावस"); long = pd.name; }
