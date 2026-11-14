@@ -52,7 +52,7 @@ def make(lat, lon, y_from, y_to, krules, prules, place="", disp=None):
     evs = []
     for x in days:
         if not inr(x["date"]): continue
-        ts = [x["tithi"]] + x.get("kshaya", [])
+        ts = ([] if x.get("vriddhi") else [x["tithi"]]) + x.get("kshaya", [])   # a tithi that is at sunrise on two days (vriddhi) is kept on its first day only, like the kalyanak
         for t in ts:
             if t in (8, 14, 23, 29):
                 pk_hi, pk_en = ("शुक्ल", "Shukla") if t <= 15 else ("कृष्ण", "Krishna")
