@@ -365,7 +365,7 @@ function jainNotif(today, day) {
   if (!rest.length) {
     return { key: key, page: page,
       title: both(function (l) { return short((l === "en" ? (tom ? "Tomorrow: " : "Today: ") : (tom ? "कल: " : "आज: ")) + [JMONTH(l), tith[0].title[l]].filter(Boolean).join(" "), 70); }),
-      text: both(function (l) { return short(tom ? (l === "en" ? "Tomorrow is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + ". Please prepare." : "कल " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है। कृपया तैयारी कर लें।") : (l === "en" ? "Today is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + "." : "आज " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है।"), 170); }) };
+      text: both(function (l) { return short(tom ? (l === "en" ? "Tomorrow is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + "." : "कल " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है।") : (l === "en" ? "Today is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + "." : "आज " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है।"), 170); }) };
   }
   var first = rest[0];
   return { key: key, page: page,
