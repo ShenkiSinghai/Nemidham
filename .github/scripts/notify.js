@@ -228,10 +228,12 @@ function applySheetSettings() {
     function flag(k) { var v = val(k); return v == null ? null : isYes(v) ? true : /^(no|n|nahi|nahin|false|0|नहीं|ना)$/i.test(v) ? false : null; }
     [["notify_new_karyakram", "newKaryakram"], ["notify_new_karyakram_only_this_month", "newKaryakramOnlyThisMonth"], ["notify_new_yojana", "newYojana"],
      ["notify_new_sandesh", "newSandesh"], ["notify_new_bhaktamar", "newBhaktamar"], ["notify_on_the_day", "onTheDay"], ["notify_month_start", "monthStart"],
-     ["notify_bhaktamar", "bhaktamar"], ["notify_bhaktamar_names", "bhaktamarNames"], ["notify_jain_calendar", "jainCalendar"]].forEach(function (x) { var f = flag(x[0]); if (f != null) a[x[1]] = f; });
+     ["notify_bhaktamar", "bhaktamar"], ["notify_bhaktamar_names", "bhaktamarNames"], ["notify_jain_calendar", "jainCalendar"], ["notify_evening", "evening"]].forEach(function (x) { var f = flag(x[0]); if (f != null) a[x[1]] = f; });
     var v;
     if ((v = val("notify_time")) != null) a.time = v.replace(".", ":");
     if ((v = val("notify_jain_types")) != null) a.jainTypes = v;
+    if ((v = val("notify_evening_time")) != null) a.eveningTime = v.replace(".", ":");
+    if ((v = val("notify_evening_types")) != null) a.eveningTypes = v;
     if ((v = val("notify_days_before")) != null) a.daysBefore = v.split(/[,\s]+/).filter(Boolean).map(Number);
     if ((v = val("notify_month_start_day")) != null) a.monthStartDay = +v;
     if ((v = val("notify_max_per_run")) != null) a.maxPerRun = +v;
@@ -252,6 +254,9 @@ function setup() {
     bhaktamarNames: AUTO.bhaktamarNames !== false,
     jainCalendar: AUTO.jainCalendar !== false,   /* on the day: items of the Jain calendar (which kinds: jainTypes) */
     jainTypes: jainTypes(AUTO.jainTypes),
+    evening: AUTO.evening !== false,   /* the evening reminder for tomorrow's Jain calendar items (ashtami / chaturdashi) */
+    eveningTime: /^([01]?\d|2[0-3]):[0-5]\d$/.test(String(AUTO.eveningTime || "").trim()) ? String(AUTO.eveningTime).trim() : "19:00",
+    eveningTypes: jainTypes(AUTO.eveningTypes || "ashtami, chaturdashi"),
     onlyThisMonth: AUTO.newKaryakramOnlyThisMonth !== false,
     maxPerRun: +AUTO.maxPerRun > 0 ? +AUTO.maxPerRun : 3
   };
@@ -323,49 +328,51 @@ function jainKind(c) {
 }
 /* today's Jain calendar items: js/jain-calendar.js (calculated) + the Sheet tab (a row with the same id, or date + name, changes it;
    hidden = yes hides it; other rows are added) */
-function jainToday(rows) {
+function jainToday(rows, day, types) {
+  day = day || TODAY; types = types || CFG.jainTypes;
   var out = [], J = null;
   try { J = load(fs.readFileSync("js/jain-calendar.js", "utf8")); J = J && J.JAIN_PANCHANG; } catch (e) { J = null; }
-  JMONTH = function (l) { try { var c = J.days[Math.round((Date.parse(TODAY) - Date.parse(J.from)) / 864e5)][0], pre = Math.floor(c / 12); return (pre === 1 ? (l === "en" ? "Pratham " : "प्रथम ") : pre === 2 ? (l === "en" ? "Dwitiya " : "द्वितीय ") : "") + J.months[l][c % 12]; } catch (e) { return ""; } };
-  (J && J.events || []).forEach(function (e) { if (e[0] === TODAY) out.push({ id: e[2], date: e[0], type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }); });
+  JMONTH = function (l) { try { var c = J.days[Math.round((Date.parse(day) - Date.parse(J.from)) / 864e5)][0], pre = Math.floor(c / 12); return (pre === 1 ? (l === "en" ? "Pratham " : "प्रथम ") : pre === 2 ? (l === "en" ? "Dwitiya " : "द्वितीय ") : "") + J.months[l][c % 12]; } catch (e) { return ""; } };
+  (J && J.events || []).forEach(function (e) { if (e[0] === day) out.push({ id: e[2], date: e[0], type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }); });
   (rows || []).forEach(function (r) {
     var id = clean(r.id), d = sheetDate(r.date), t = tx(r, "title"), nt = tx(r, "note"), hid = isYes(r.hidden);
     var x = out.filter(function (c) { return (id && c.id === id) || (d && d === c.date && t.hi && (c.title.hi === t.hi || (t.en && c.title.en === t.en))); })[0]
       || (d && /^(tithi|तिथि)/i.test(clean(r.type)) ? out.filter(function (c) { return c.date === d && c.type === "tithi"; })[0] : null);
-    if (!x && id && J) { (J.events || []).forEach(function (e) { if (e[2] === id && d === TODAY) x = { id: id, date: TODAY, type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }; }); if (x) out.push(x); }
+    if (!x && id && J) { (J.events || []).forEach(function (e) { if (e[2] === id && d === day) x = { id: id, date: day, type: e[1], title: { hi: e[3], en: e[4] }, note: { hi: e[5], en: e[6] } }; }); if (x) out.push(x); }
     if (x) { if (hid) x.hidden = true; if (d) x.date = d; if (t.hi) x.title = t; if (nt.hi) x.note = nt; return; }
-    if (d === TODAY && t.hi && !hid && !placeholder({ title: t })) out.push({ id: id, date: d, type: clean(r.type), title: t, note: nt });
+    if (d === day && t.hi && !hid && !placeholder({ title: t })) out.push({ id: id, date: d, type: clean(r.type), title: t, note: nt });
   });
   /* order: kalyanak and parv first, then ashtami / chaturdashi, then vrat */
   var rank = { kalyanak: 0, parv: 1, tithi: 2, vrat: 3, panchak: 4 };
   /* panchak starting today (only when "panchak" is chosen) */
-  if (CFG.jainTypes.indexOf("panchak") >= 0 && J && J.panchak) J.panchak.forEach(function (p) {
-    if (p[0].slice(0, 10) !== TODAY) return;
+  if (types.indexOf("panchak") >= 0 && J && J.panchak) J.panchak.forEach(function (p) {
+    if (p[0].slice(0, 10) !== day) return;
     function hm(x, l) { var h = +x.slice(0, 2), m = x.slice(3, 5); return l === "en" ? ((h % 12) || 12) + ":" + m + " " + (h < 12 ? "AM" : "PM") : (h < 4 ? "रात" : h < 12 ? "सुबह" : h < 16 ? "दोपहर" : h < 20 ? "शाम" : "रात") + " " + ((h % 12) || 12) + ":" + m; }
-    out.push({ id: "panchak-" + TODAY, date: TODAY, type: "panchak", title: { hi: "पंचक शुरू", en: "Panchak begins" },
+    out.push({ id: "panchak-" + day, date: day, type: "panchak", title: { hi: "पंचक शुरू", en: "Panchak begins" },
       note: { hi: hm(p[0].slice(11), "hi") + " से " + niceDate(p[1].slice(0, 10), "hi") + " " + hm(p[1].slice(11), "hi") + " तक", en: hm(p[0].slice(11), "en") + " till " + niceDate(p[1].slice(0, 10), "en") + " " + hm(p[1].slice(11), "en") } });
   });
-  return out.filter(function (c) { return !c.hidden && c.date === TODAY && (c.type === "panchak" || CFG.jainTypes.indexOf(jainKind(c)) >= 0); }).sort(function (a, b) { return (rank[a.type] == null ? 1 : rank[a.type]) - (rank[b.type] == null ? 1 : rank[b.type]); });
+  return out.filter(function (c) { return !c.hidden && c.date === day && (c.type === "panchak" || types.indexOf(jainKind(c)) >= 0); }).sort(function (a, b) { return (rank[a.type] == null ? 1 : rank[a.type]) - (rank[b.type] == null ? 1 : rank[b.type]); });
 }
 /* the one notification of a day's Jain calendar items. Ashtami / chaturdashi alone: "Today: Kartik Krishna Chaturdashi" / "Today is Chaturdashi.".
    With a kalyanak / parv: the title is the first kalyanak / parv, the text the other ones, and the tithi last ("Today is also Ashtami").
    Only one item: its note, or the date. */
 var JMONTH = function () { return ""; };
-function jainNotif(today) {
+function jainNotif(today, day) {
+  var tom = !!day && day !== TODAY; day = day || TODAY;
   var tith = today.filter(function (c) { return c.type === "tithi"; }), rest = today.filter(function (c) { return c.type !== "tithi"; });
   function tw(c, l) { var w = c.title[l].split(" "); return w[w.length - 1]; }
-  var key = "rem-jc|" + TODAY + "|" + today.map(function (c) { return c.title.hi; }).join("~"), page = "calendar.html?date=" + TODAY;
+  var key = (tom ? "rem-jc-eve|" : "rem-jc|") + day + "|" + today.map(function (c) { return c.title.hi; }).join("~"), page = "calendar.html?date=" + day;
   if (!rest.length) {
     return { key: key, page: page,
-      title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + [JMONTH(l), tith[0].title[l]].filter(Boolean).join(" "), 70); }),
-      text: both(function (l) { return short(l === "en" ? "Today is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + "." : "आज " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है।", 170); }) };
+      title: both(function (l) { return short((l === "en" ? (tom ? "Tomorrow: " : "Today: ") : (tom ? "कल: " : "आज: ")) + [JMONTH(l), tith[0].title[l]].filter(Boolean).join(" "), 70); }),
+      text: both(function (l) { return short(tom ? (l === "en" ? "Tomorrow is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + ". Please prepare." : "कल " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है। कृपया तैयारी कर लें।") : (l === "en" ? "Today is " + tith.map(function (c) { return tw(c, l); }).join(" and ") + "." : "आज " + tith.map(function (c) { return tw(c, l); }).join(" और ") + " है।"), 170); }) };
   }
   var first = rest[0];
   return { key: key, page: page,
-    title: both(function (l) { return short((l === "en" ? "Today: " : "आज: ") + first.title[l], 70); }),
+    title: both(function (l) { return short((l === "en" ? (tom ? "Tomorrow: " : "Today: ") : (tom ? "कल: " : "आज: ")) + first.title[l], 70); }),
     text: both(function (l) {
-      var lines = rest.slice(1).map(function (c) { return c.title[l]; }).concat(tith.map(function (c) { return l === "en" ? "Today is also " + tw(c, l) : "आज " + tw(c, l) + " भी है"; }));
-      if (!lines.length) lines = [first.note[l] || niceDate(TODAY, l)];
+      var lines = rest.slice(1).map(function (c) { return c.title[l]; }).concat(tith.map(function (c) { return tom ? (l === "en" ? "Tomorrow is also " + tw(c, l) : "कल " + tw(c, l) + " भी है") : l === "en" ? "Today is also " + tw(c, l) : "आज " + tw(c, l) + " भी है"; }));
+      if (!lines.length) lines = [first.note[l] || niceDate(day, l)];
       return short(lines.join(" • "), 170); }) };
 }
 function addDays(iso, n) { var d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
@@ -387,6 +394,25 @@ function reminderTime() {
 }
 function remDone() { var st = readState() || {}; return st._remDone === TODAY; }
 function markRemDone() { var st = readState() || {}; if (st._remDone !== TODAY) { st._remDone = TODAY; writeState(st); } }
+/* evening reminder: from the set time (default 19:00, Website Settings notify_evening_time) the Jain calendar items of TOMORROW
+   (default ashtami and chaturdashi: notify_evening_types) get one "Tomorrow: ..." notification, so people can prepare. Once a day. */
+function eveningTime() {
+  var p = CFG.eveningTime.split(":"), target = +p[0] * 60 + +p[1], nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();
+  return nowMin >= target && nowMin < 23 * 60 + 30;
+}
+function eveDone() { var st = readState() || {}; return st._eveDone === TODAY; }
+function markEveDone() { var st = readState() || {}; if (st._eveDone !== TODAY) { st._eveDone = TODAY; writeState(st); } }
+function onEvening() {
+  if (!CFG.evening || !CFG.jainCalendar || !eveningTime()) return Promise.resolve();
+  if (eveDone()) { console.log("Tonight's reminder was already done."); return Promise.resolve(); }
+  var tmr = addDays(TODAY, 1), evs = [];
+  var jcP = W.SHEETS && W.SHEETS.calendar ? sheetRows(W.SHEETS.calendar) : Promise.resolve([]);
+  return allEvents().then(function (list) { evs = list; return jcP; }).then(function (rows) {
+    var items = jainToday(rows || [], tmr, CFG.eveningTypes).filter(function (c) { return !evs.some(function (e) { return e.date === tmr && (L(e.title, "hi") === c.title.hi || L(e.title, "en") === c.title.en); }); });
+    if (!items.length) { console.log("Nothing to remind about for tomorrow."); markEveDone(); return; }
+    return send(jainNotif(items, tmr)).then(function () { if (!process.exitCode) markEveDone(); });
+  });
+}
 function onSchedule(force) {
   if (!force && !reminderTime()) { console.log("Not reminder time (set time " + CFG.time + " India time, until 11 at night). Nothing sent."); return Promise.resolve(); }
   if (!force && remDone()) { console.log("Today's reminders were already sent."); return Promise.resolve(); }
@@ -460,7 +486,7 @@ function sheetPoll() {
   if (!tabs.some(function (t) { return SH[t]; })) return Promise.resolve();
   if ((W.SITE || {}).bhaktamarKaryakram === false) tabs = tabs.filter(function (t) { return t !== "bhaktamar"; });
   return Promise.all(tabs.map(function (t) { return sheetRows(SH[t]); })).then(function (res) {
-    var prev = readState() || {}, next = { _remDone: prev._remDone }, jobs = [];
+    var prev = readState() || {}, next = { _remDone: prev._remDone, _eveDone: prev._eveDone }, jobs = [];
     tabs.forEach(function (t, i) {
       var rows = res[i];
       if (rows == null || (!rows.length && prev[t] && prev[t].length)) { if (prev[t]) next[t] = prev[t]; return; }   /* could not read (or Google gave an empty tab for a moment): keep what we had */
@@ -516,5 +542,5 @@ function onHand() {
   return send({ page: page, image: process.env.IN_IMAGE || "", title: { hi: t, en: t }, text: { hi: m, en: m } });
 }
 
-applySheetSettings().then(function () { if (!setup()) return; return (EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : process.env.IN_MODE === "timer" ? onSchedule().then(sheetPoll) : onHand()) : Promise.resolve()); })
+applySheetSettings().then(function () { if (!setup()) return; return (EVENT === "push" ? onChange() : EVENT === "schedule" ? onSchedule().then(onEvening).then(sheetPoll) : EVENT === "workflow_dispatch" ? (process.env.IN_MODE === "today" ? onSchedule(true) : process.env.IN_MODE === "timer" ? onSchedule().then(onEvening).then(sheetPoll) : onHand()) : Promise.resolve()); })
   .catch(function (e) { console.log("Error:", e && e.message); process.exitCode = 1; });
