@@ -975,7 +975,7 @@
     return all.concat(merged);
   }
   function calShort(c, abbr) {   /* words inside a calendar box: kalyanak keeps its type ("... जन्म कल्याणक", or "... जन्म क." when short) */
-    var x = L(c.title).replace(/^(भगवान|Bhagwan)\s+/, "").replace(/\s*\((कार्तिक|फाल्गुन|आषाढ़|माघ|चैत्र|भाद्रपद|Kartik|Phalgun|Ashadh|Magh|Chaitra|Bhadrapad)\)/, "").replace(/\s+\((मोक्ष कल्याणक|Moksh Kalyanak)\)$/, "").replace(/\s+(स्वामी|Swami)\b/, "").replace(/\s*\((आदिनाथ|Adinath)\)/, "");
+    var x = L(c.title).replace(/^(भगवान|Bhagwan)\s+/, function (w) { return abbr ? "" : /^भ/.test(w) ? "भ. " : "Bh. "; }).replace(/\s*\((कार्तिक|फाल्गुन|आषाढ़|माघ|चैत्र|भाद्रपद|Kartik|Phalgun|Ashadh|Magh|Chaitra|Bhadrapad)\)/, "").replace(/\s+\((मोक्ष कल्याणक|Moksh Kalyanak)\)$/, "").replace(/\s+(स्वामी|Swami)\b/, "").replace(/\s*\((आदिनाथ|Adinath)\)/, "");
     if (abbr) x = x.replace(/\s*कल्याणक$/, " क.").replace(/\s*Kalyanak$/, " K.").replace(/\s*(प्रारंभ)$/, "").replace(/\s*begins$/, "");
     return x;
   }
