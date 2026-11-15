@@ -887,6 +887,8 @@ html.ai-open .ai-btn { display: none; }
 @keyframes aiPulse { 50% { box-shadow: 0 0 0 6px rgba(179, 38, 30, .25); } }
 @media (prefers-reduced-motion: reduce) { .ai-form .ai-mic.on { animation: none; } }
 .ai-note { margin: 0; padding: 0 12px 10px; font-size: .74rem; line-height: 1.4; color: var(--muted); }
+/* the two floating buttons (mantra, Nemi Mitra) sit over the bottom of the page: keep room under the last footer line so it can be read and tapped */
+@media (max-width: 900px) { footer.site { padding-bottom: 5.2rem; } }
 @media (max-width: 560px) {
   .ai-btn { right: 10px; bottom: 10px; padding: 8px 13px; font-size: .84rem; }
   .ai-panel { right: 0; left: 0; bottom: 0; width: 100%; height: min(78vh, calc(100vh - 60px)); border-radius: 18px 18px 0 0; }

@@ -27,6 +27,9 @@ PARV = [
  P(K,"S",8,"ashtahnika-kartik","अष्टाह्निका पर्व (कार्तिक)","Ashtahnika Parv (Kartik)","parv",8),
  P(Mh,"S",5,"dashlakshan-magh","दशलक्षण व्रत (माघ)","Dashlakshan Vrat (Magh)","vrat",10),
  P(Mh,"S",13,"ratnatray-magh","रत्नत्रय व्रत (माघ)","Ratnatray Vrat (Magh)","vrat",3),
+ P(Asw,"S",15,"vidyasagar-janm","आचार्य श्री विद्यासागर जी महाराज जन्म दिवस (शरद पूर्णिमा)","Acharya Shri Vidyasagar Ji Maharaj Birth Day (Sharad Purnima)"),
+ P(A,"S",5,"vidyasagar-diksha","आचार्य श्री विद्यासागर जी महाराज दीक्षा दिवस","Acharya Shri Vidyasagar Ji Maharaj Diksha Day"),
+ P(Mh,"S",8,"vidyasagar-samadhi","आचार्य श्री विद्यासागर जी महाराज समाधि दिवस","Acharya Shri Vidyasagar Ji Maharaj Samadhi Day"),
  P(F,"S",8,"ashtahnika-phalgun","अष्टाह्निका पर्व (फाल्गुन)","Ashtahnika Parv (Phalgun)","parv",8),
 ]
 TIR = {"rishabh":("ऋषभदेव (आदिनाथ)","Rishabhdev (Adinath)"),"ajit":("अजितनाथ","Ajitnath"),"sambhav":("संभवनाथ","Sambhavnath"),"abhinandan":("अभिनंदननाथ","Abhinandannath"),
