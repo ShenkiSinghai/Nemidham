@@ -1060,3 +1060,6 @@ header.site.scrolled .jt-bar, header.site:has(.nav-toggle[aria-expanded="true"])
 @media (max-width: 979px) { .jc-c { min-height: 74px; } }
 @media (max-width: 700px) { .jc-c { min-height: 54px; padding: 4px 2px 3px; } .jc-cal { padding: 12px 8px; } }
 @media (max-width: 700px) { .jc-up .jc-item:nth-child(n+5) { display: none; } }
+
+/* Hindi (Devanagari) must not be letter-spaced: the extra space pulls the matras and joined letters apart (e.g. "हमसे जुड़ें" looked broken). The wide spacing is for the English letters only. */
+html[lang="hi"] body, html[lang="hi"] body * { letter-spacing: normal !important; }
