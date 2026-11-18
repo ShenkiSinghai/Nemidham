@@ -2217,6 +2217,7 @@
       if (!act) return;
       if (act === "later") { lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); closeAppGuide(); }
       else if (act === "close") closeAppGuide();
+      else if (act === "added") { lsSet("nemi-app-added", "1"); closeAppGuide(); refreshInstall(); }   /* "I have already added it" (a phone browser cannot tell by itself) */
       else if (act === "install") { if (offer) lsSet("nemi-app-snooze", String(Date.now() + snoozeMs())); doInstall(); }
       else if (act === "how") openAppGuide();
       else if (act === "n-yes") { closeAppGuide(); notifySubscribe(); }
@@ -2236,7 +2237,7 @@
   function openOffer() {
     appBox('<img class="app-ic" src="images/icon-192.png" alt="" width="56" height="56"><h3 id="app-gh">' + esc(t("app.h")) + "</h3><p>" + esc(t("app.p")) +
       '</p><div class="app-acts"><button type="button" class="btn btn-line" data-act="install">' + esc(t("app.btn")) + '</button></div>' +
-      '<div class="app-acts app-sub"><button type="button" class="app-hide" data-act="later">' + esc(t("app.hide")) + '</button></div>', true);
+      '<div class="app-acts app-sub"><button type="button" class="app-hide" data-act="later">' + esc(t("app.hide")) + '</button><button type="button" class="app-hide" data-act="added">' + esc(t("app.done")) + '</button></div>', true);
   }
   function doInstall() {
     if (installEv) {
